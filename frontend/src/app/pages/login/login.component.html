@@ -1,0 +1,38 @@
+<div class="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+  <div class="w-full max-w-sm">
+    <div class="mb-10 flex flex-col items-center gap-3">
+      <img
+        src="logo.jpeg"
+        alt="Virtual Sistemas"
+        class="h-auto w-64 object-contain mix-blend-screen sm:w-72"
+        onerror="this.style.display='none'"
+      />
+      <p class="text-sm text-zinc-500">Painel de acessos de clientes e contas internas</p>
+    </div>
+
+    <form class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl shadow-black/20" (ngSubmit)="entrar()">
+      <label for="senha" class="mb-2 block text-sm font-medium text-zinc-300">Senha do painel</label>
+      <input
+        id="senha"
+        type="password"
+        autofocus
+        [(ngModel)]="senha"
+        name="senha"
+        placeholder="Digite a senha"
+        class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent-soft"
+      />
+
+      @if (erro()) {
+        <p class="mt-3 text-sm text-red-400">{{ erro() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="!senha() || carregando()"
+        class="mt-5 w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {{ carregando() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </div>
+</div>

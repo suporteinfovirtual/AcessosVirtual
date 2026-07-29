@@ -1,0 +1,123 @@
+<div class="min-h-screen bg-zinc-950">
+  <header class="sticky top-0 z-10 border-b border-zinc-900 bg-zinc-950/90 px-6 py-4 backdrop-blur">
+    <div class="mx-auto flex max-w-5xl items-center gap-3">
+      <img
+        src="logo.jpeg"
+        alt="Virtual Sistemas"
+        class="h-9 w-auto shrink-0 object-contain mix-blend-screen sm:h-10"
+        onerror="this.style.display='none'"
+      />
+      <span class="h-6 w-px shrink-0 bg-zinc-800"></span>
+      <p class="text-xs text-zinc-500">Painel de acessos de clientes</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-6 py-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="relative w-full sm:max-w-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+        <input
+          [(ngModel)]="busca"
+          type="text"
+          [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : 'Buscar por nome ou CNPJ…'"
+          class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+        />
+      </div>
+
+      @if (!mostrandoInternos()) {
+        <button
+          type="button"
+          class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+          (click)="abrirNovoCliente()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+          Novo cliente
+        </button>
+      }
+    </div>
+
+    <div class="mt-5 flex gap-1 border-b border-zinc-900">
+      @for (aba of abas; track aba.valor) {
+        <button
+          type="button"
+          class="relative px-4 py-2.5 text-sm font-medium transition"
+          [class.text-accent]="abaAtiva() === aba.valor"
+          [class.text-zinc-500]="abaAtiva() !== aba.valor"
+          (click)="abaAtiva.set(aba.valor)"
+        >
+          {{ aba.rotulo }}
+          @if (aba.valor !== 'internos') {
+            <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
+          }
+          @if (abaAtiva() === aba.valor) {
+            <span class="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent"></span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="mt-5">
+      @if (mostrandoInternos()) {
+        <app-internos-panel [busca]="busca()"></app-internos-panel>
+      } @else if (carregando()) {
+        <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+      } @else if (erro()) {
+        <p class="py-10 text-center text-sm text-red-400">{{ erro() }}</p>
+      } @else if (clientesFiltrados().length === 0) {
+        <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente encontrado nessa categoria.</p>
+      } @else {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          @for (cliente of clientesFiltrados(); track cliente.id) {
+            <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+              <button
+                type="button"
+                class="mb-3 block w-full text-left"
+                (click)="abrirEdicao(cliente)"
+                title="Editar cliente"
+              >
+                <p class="truncate text-sm font-medium text-zinc-100">{{ cliente.nome }}</p>
+                @if (cliente.cnpj) {
+                  <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
+                }
+              </button>
+
+              @let acesso = acessoDoTipo(cliente, abaAtiva());
+              @if (acesso) {
+                <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                  <app-copy-field rotulo="Identificador" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
+                  <app-copy-field rotulo="Usuário" [valor]="acesso.usuario"></app-copy-field>
+                  <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                  @if (acesso.link) {
+                    <a
+                      [href]="acesso.link"
+                      target="_blank"
+                      rel="noopener"
+                      class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                    >
+                      Abrir link
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                    </a>
+                  }
+                  @if (acesso.observacoes) {
+                    <p class="pt-1 text-xs text-zinc-500">{{ acesso.observacoes }}</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  @if (modalAberto()) {
+    <app-cliente-modal
+      [cliente]="clienteEmEdicao()"
+      [tipoInicial]="tipoInicialModal()"
+      (fechar)="fecharModal()"
+      (salvo)="aoSalvar()"
+    ></app-cliente-modal>
+  }
+</div>

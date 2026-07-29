@@ -1,0 +1,8 @@
+name = "painel-clientes"
+pages_build_output_dir = "./frontend/dist/frontend/browser"
+compatibility_date = "2026-07-29"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "painel-clientes-db"
+database_id = "SUBSTITUIR_PELO_ID_RETORNADO_NO_PASSO_2"

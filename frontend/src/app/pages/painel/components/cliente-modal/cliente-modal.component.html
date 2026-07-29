@@ -1,0 +1,158 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
+  <div
+    class="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-100">
+        {{ editando ? 'Editar cliente' : 'Novo cliente' }}
+      </h2>
+      <button type="button" class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" (click)="fechar.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form class="max-h-[70vh] overflow-y-auto px-6 py-5" (ngSubmit)="salvarCliente()">
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Nome*</label>
+          <input
+            [(ngModel)]="nome"
+            name="nome"
+            required
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">CNPJ</label>
+          <input
+            [(ngModel)]="cnpj"
+            name="cnpj"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Observações</label>
+          <textarea
+            [(ngModel)]="observacoes"
+            name="observacoes"
+            rows="2"
+            class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <h3 class="mb-2 text-sm font-semibold text-zinc-300">Acessos</h3>
+
+        <div class="space-y-2">
+          @for (tipo of tipos; track tipo.valor) {
+            <div class="rounded-lg border border-zinc-800 bg-zinc-950/60">
+              <button
+                type="button"
+                class="flex w-full items-center justify-between px-3 py-2.5 text-left"
+                (click)="alternarAcesso(tipo.valor)"
+              >
+                <span class="text-sm font-medium text-zinc-200">{{ tipo.rotulo }}</span>
+                <span
+                  class="flex h-5 w-9 items-center rounded-full transition"
+                  [class.bg-accent]="acessosPorTipo[tipo.valor].ativo"
+                  [class.bg-zinc-700]="!acessosPorTipo[tipo.valor].ativo"
+                >
+                  <span
+                    class="h-4 w-4 rounded-full bg-zinc-950 shadow transition"
+                    [class.translate-x-4]="acessosPorTipo[tipo.valor].ativo"
+                    [class.translate-x-0.5]="!acessosPorTipo[tipo.valor].ativo"
+                  ></span>
+                </span>
+              </button>
+
+              @if (acessosPorTipo[tipo.valor].ativo) {
+                <div class="grid grid-cols-2 gap-2 border-t border-zinc-800 p-3">
+                  <div class="col-span-2">
+                    <label class="mb-1 block text-xs text-zinc-500">Identificador (ID / CNPJ / e-mail)</label>
+                    <input
+                      [(ngModel)]="acessosPorTipo[tipo.valor].identificador"
+                      [name]="tipo.valor + '_identificador'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs text-zinc-500">Usuário</label>
+                    <input
+                      [(ngModel)]="acessosPorTipo[tipo.valor].usuario"
+                      [name]="tipo.valor + '_usuario'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs text-zinc-500">Senha</label>
+                    <input
+                      [(ngModel)]="acessosPorTipo[tipo.valor].senha"
+                      [name]="tipo.valor + '_senha'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div class="col-span-2">
+                    <label class="mb-1 block text-xs text-zinc-500">Link</label>
+                    <input
+                      [(ngModel)]="acessosPorTipo[tipo.valor].link"
+                      [name]="tipo.valor + '_link'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div class="col-span-2">
+                    <label class="mb-1 block text-xs text-zinc-500">Observações</label>
+                    <input
+                      [(ngModel)]="acessosPorTipo[tipo.valor].observacoes"
+                      [name]="tipo.valor + '_observacoes'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (erro()) {
+        <p class="mt-4 text-sm text-red-400">{{ erro() }}</p>
+      }
+
+      <div class="mt-6 flex items-center justify-between border-t border-zinc-800 pt-4">
+        @if (editando) {
+          <button
+            type="button"
+            [disabled]="excluindo()"
+            class="text-sm font-medium text-red-400 hover:text-red-300 disabled:opacity-50"
+            (click)="excluirCliente()"
+          >
+            {{ excluindo() ? 'Excluindo…' : 'Excluir cliente' }}
+          </button>
+        } @else {
+          <span></span>
+        }
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800"
+            (click)="fechar.emit()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="!nome().trim() || salvando()"
+            class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ salvando() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

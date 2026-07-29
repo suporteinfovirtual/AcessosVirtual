@@ -1,0 +1,51 @@
+<div>
+  @if (carregando()) {
+    <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+  } @else if (contasFiltradas().length === 0) {
+    <p class="py-10 text-center text-sm text-zinc-600">
+      {{ contas().length === 0 ? 'Nenhuma conta interna cadastrada ainda.' : 'Nenhuma conta interna encontrada.' }}
+    </p>
+  }
+
+  @if (contasFiltradas().length > 0) {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (conta of contasFiltradas(); track conta.id) {
+        <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+          <button
+            type="button"
+            class="mb-3 block w-full text-left"
+            (click)="abrirEdicao(conta)"
+            title="Editar conta interna"
+          >
+            <p class="truncate text-sm font-medium text-zinc-100">{{ conta.servico }}</p>
+          </button>
+
+          <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+            <app-copy-field rotulo="Usuário" [valor]="conta.usuario"></app-copy-field>
+            <app-copy-field rotulo="Senha" [valor]="conta.senha" [mascaravel]="true"></app-copy-field>
+            @if (conta.observacoes) {
+              <p class="pt-1 text-xs text-zinc-500">{{ conta.observacoes }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <button
+    type="button"
+    class="mt-5 flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-accent"
+    (click)="abrirNova()"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    Nova conta interna
+  </button>
+</div>
+
+@if (modalAberto()) {
+  <app-interno-modal
+    [conta]="contaEmEdicao()"
+    (fechar)="fecharModal()"
+    (salvo)="aoSalvar()"
+  ></app-interno-modal>
+}
