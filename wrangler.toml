@@ -1,4 +1,4 @@
-name = "painel-clientes"
+name = "acessosvirtual"
 pages_build_output_dir = "./frontend/dist/frontend/browser"
 compatibility_date = "2026-07-29"
 
