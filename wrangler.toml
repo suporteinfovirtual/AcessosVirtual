@@ -1,6 +1,11 @@
 name = "acessosvirtual"
-pages_build_output_dir = "./frontend/dist/frontend/browser"
 compatibility_date = "2026-07-29"
+main = "./dist/worker/index.js"
+
+[assets]
+directory = "./frontend/dist/frontend/browser"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 [[d1_databases]]
 binding = "DB"
