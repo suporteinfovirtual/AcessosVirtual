@@ -172,10 +172,12 @@
                     @if (abaAtiva() !== 'acesso_web') {
                       <app-copy-field rotulo="Identificador" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
                     }
-                    @if (abaAtiva() !== 'acesso_zeta') {
+                    @if (abaAtiva() !== 'acesso_zeta' && abaAtiva() !== 'acesso_web') {
                       <app-copy-field rotulo="Usuário" [valor]="acesso.usuario"></app-copy-field>
                     }
-                    <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                    @if (abaAtiva() !== 'acesso_web') {
+                      <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                    }
                     @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
                       <div class="mt-1 flex items-center justify-between gap-2">
                         @if (acesso.link) {
