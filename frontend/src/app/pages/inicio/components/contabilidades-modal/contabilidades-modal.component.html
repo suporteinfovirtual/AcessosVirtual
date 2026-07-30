@@ -25,7 +25,7 @@
                     [(ngModel)]="nomeEdicao"
                     name="nomeEdicao"
                     placeholder="Nome"
-                    class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100 outline-none focus:border-accent"
+                    class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
                     (keyup.escape)="cancelarEdicao()"
                   />
                   <input
@@ -77,7 +77,7 @@
             [(ngModel)]="nomeNova"
             name="nomeNova"
             placeholder="Nome da contabilidade…"
-            class="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            class="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm uppercase text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
           />
           <input
             [(ngModel)]="emailNovo"

@@ -45,7 +45,7 @@ export class ContabilidadesModalComponent implements OnInit {
   }
 
   async criarContabilidade() {
-    const nome = this.nomeNova().trim();
+    const nome = this.nomeNova().trim().toUpperCase();
     if (!nome || this.criando()) return;
 
     this.criando.set(true);
@@ -77,7 +77,7 @@ export class ContabilidadesModalComponent implements OnInit {
 
   async salvarEdicao() {
     const id = this.idEmEdicao();
-    const nome = this.nomeEdicao().trim();
+    const nome = this.nomeEdicao().trim().toUpperCase();
     if (!id || !nome || this.salvandoEdicao()) return;
 
     this.salvandoEdicao.set(true);
