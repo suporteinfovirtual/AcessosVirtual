@@ -7,6 +7,14 @@ CREATE TABLE IF NOT EXISTS categorias (
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Contabilidades cadastradas (nome + e-mail), reutilizáveis entre clientes
+CREATE TABLE IF NOT EXISTS contabilidades (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL UNIQUE,
+  email TEXT,
+  criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS clientes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL,
@@ -30,8 +38,7 @@ CREATE TABLE IF NOT EXISTS acessos (
   senha TEXT,
   link TEXT,
   servidor TEXT, -- número do servidor (acesso web)
-  contabilidade TEXT, -- nome da contabilidade responsável (acesso web / acesso zeta)
-  email_contabilidade TEXT, -- e-mail de contato da contabilidade (acesso web / acesso zeta)
+  contabilidade_id INTEGER REFERENCES contabilidades(id) ON DELETE SET NULL, -- acesso web / acesso zeta
   observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );

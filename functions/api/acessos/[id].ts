@@ -12,8 +12,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     senha?: string;
     link?: string;
     servidor?: string;
-    contabilidade?: string;
-    email_contabilidade?: string;
+    contabilidade_id?: number | null;
     observacoes?: string;
   };
   try {
@@ -24,7 +23,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
 
   await env.DB
     .prepare(
-      'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, servidor = ?, contabilidade = ?, email_contabilidade = ?, observacoes = ? WHERE id = ?'
+      'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, servidor = ?, contabilidade_id = ?, observacoes = ? WHERE id = ?'
     )
     .bind(
       body.identificador || null,
@@ -32,8 +31,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.senha || null,
       body.link || null,
       body.servidor || null,
-      body.contabilidade || null,
-      body.email_contabilidade || null,
+      body.contabilidade_id || null,
       body.observacoes || null,
       params.id
     )

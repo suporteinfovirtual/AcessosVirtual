@@ -112,20 +112,22 @@
                   @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
                     <div>
                       <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
-                      <input
-                        [(ngModel)]="acessosPorTipo[tipo.valor].contabilidade"
-                        [name]="tipo.valor + '_contabilidade'"
-                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
-                      />
+                      <select
+                        [(ngModel)]="acessosPorTipo[tipo.valor].contabilidadeId"
+                        [name]="tipo.valor + '_contabilidadeId'"
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                      >
+                        <option [ngValue]="null">Sem contabilidade</option>
+                        @for (contabilidade of contabilidades(); track contabilidade.id) {
+                          <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
+                        }
+                      </select>
                     </div>
                     <div>
                       <label class="mb-1 block text-xs text-zinc-500">E-mail Contabilidade</label>
-                      <input
-                        [(ngModel)]="acessosPorTipo[tipo.valor].emailContabilidade"
-                        [name]="tipo.valor + '_emailContabilidade'"
-                        type="email"
-                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
-                      />
+                      <p class="w-full truncate rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-sm text-zinc-400">
+                        {{ emailContabilidade(tipo.valor) || '—' }}
+                      </p>
                     </div>
                   }
                   @if (tipo.valor === 'acesso_web') {

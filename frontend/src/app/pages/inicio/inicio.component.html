@@ -92,10 +92,18 @@
                 class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
               >
                 <option [ngValue]="null">Todas as contabilidades</option>
-                @for (contabilidade of contabilidadesDisponiveis(); track contabilidade) {
-                  <option [ngValue]="contabilidade">{{ contabilidade }}</option>
+                @for (contabilidade of contabilidades(); track contabilidade.id) {
+                  <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
                 }
               </select>
+              <button
+                type="button"
+                class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                (click)="abrirContabilidades()"
+                title="Gerenciar contabilidades"
+              >
+                Contabilidades
+              </button>
             }
             @if (abaAtiva() === 'acesso_zeta') {
               <select
@@ -189,13 +197,13 @@
                       <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
                     }
                     @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-                      @if (acesso.contabilidade) {
+                      @if (acesso.contabilidade_nome) {
                         <div class="min-w-0">
                           <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Contabilidade</span>
-                          <span class="block truncate text-sm text-zinc-200">{{ acesso.contabilidade }}</span>
+                          <span class="block truncate text-sm text-zinc-200">{{ acesso.contabilidade_nome }}</span>
                         </div>
                       }
-                      <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.email_contabilidade"></app-copy-field>
+                      <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.contabilidade_email"></app-copy-field>
                     }
                     @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
                       <div class="mt-1 flex items-center justify-between gap-2">
@@ -249,5 +257,12 @@
       (fechar)="categoriasModalAberto.set(false)"
       (alterado)="aoAlterarCategorias()"
     ></app-categorias-modal>
+  }
+
+  @if (contabilidadesModalAberto()) {
+    <app-contabilidades-modal
+      (fechar)="contabilidadesModalAberto.set(false)"
+      (alterado)="aoAlterarContabilidades()"
+    ></app-contabilidades-modal>
   }
 </div>

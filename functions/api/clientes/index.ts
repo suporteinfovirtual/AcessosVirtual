@@ -9,8 +9,7 @@ interface AcessoInput {
   senha?: string;
   link?: string;
   servidor?: string;
-  contabilidade?: string;
-  email_contabilidade?: string;
+  contabilidade_id?: number | null;
   observacoes?: string;
 }
 
@@ -44,7 +43,12 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
     return new Response(JSON.stringify([]), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  const { results: acessos } = await env.DB.prepare('SELECT * FROM acessos').all();
+  const { results: acessos } = await env.DB
+    .prepare(
+      `SELECT acessos.*, contabilidades.nome AS contabilidade_nome, contabilidades.email AS contabilidade_email
+       FROM acessos LEFT JOIN contabilidades ON contabilidades.id = acessos.contabilidade_id`
+    )
+    .all();
 
   const clientesComAcessos = clientes.map((cliente: any) => ({
     ...cliente,
@@ -89,7 +93,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       if (!acesso.tipo) continue;
       await env.DB
         .prepare(
-          'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade, email_contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade_id, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )
         .bind(
           clienteId,
@@ -99,8 +103,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
           acesso.senha || null,
           acesso.link || null,
           acesso.servidor || null,
-          acesso.contabilidade || null,
-          acesso.email_contabilidade || null,
+          acesso.contabilidade_id || null,
           acesso.observacoes || null
         )
         .run();

@@ -1,15 +1,17 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Categoria, Cliente, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
+import { Categoria, Cliente, Contabilidade, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
 import { ClientesService } from '../../core/clientes.service';
 import { CategoriasService } from '../../core/categorias.service';
+import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
 import { LinkModalComponent } from './components/link-modal/link-modal.component';
 import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.component';
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
+import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 
 type Aba = TipoAcesso | 'internos';
 
@@ -22,12 +24,14 @@ type Aba = TipoAcesso | 'internos';
     ClienteModalComponent,
     InternosPanelComponent,
     CategoriasModalComponent,
+    ContabilidadesModalComponent,
   ],
   templateUrl: './inicio.component.html',
 })
 export class InicioComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private categoriasService = inject(CategoriasService);
+  private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
   private destroyRef = inject(DestroyRef);
 
@@ -42,6 +46,7 @@ export class InicioComponent implements OnInit {
 
   clientes = signal<Cliente[]>([]);
   categorias = signal<Categoria[]>([]);
+  contabilidades = signal<Contabilidade[]>([]);
   carregandoClientes = signal(true);
   erro = signal('');
 
@@ -49,11 +54,12 @@ export class InicioComponent implements OnInit {
   abaAtiva = signal<Aba>('anydesk');
   categoriaFiltro = signal<number | null>(null);
   servidorFiltro = signal<string | null>(null);
-  contabilidadeFiltro = signal<string | null>(null);
+  contabilidadeFiltro = signal<number | null>(null);
 
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
   categoriasModalAberto = signal(false);
+  contabilidadesModalAberto = signal(false);
 
   senhaDoDia = signal(this.calcularSenhaDoDia());
 
@@ -77,7 +83,7 @@ export class InicioComponent implements OnInit {
         (c) =>
           (tipo !== 'acesso_web' && tipo !== 'acesso_zeta') ||
           !contabilidade ||
-          c.acessos?.some((a) => a.tipo === tipo && a.contabilidade === contabilidade)
+          c.acessos?.some((a) => a.tipo === tipo && a.contabilidade_id === contabilidade)
       );
   });
 
@@ -89,19 +95,6 @@ export class InicioComponent implements OnInit {
       }
     }
     return Array.from(servidores).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-  });
-
-  contabilidadesDisponiveis = computed(() => {
-    const tipo = this.abaAtiva();
-    if (tipo !== 'acesso_web' && tipo !== 'acesso_zeta') return [];
-
-    const contabilidades = new Set<string>();
-    for (const cliente of this.clientes()) {
-      for (const acesso of cliente.acessos || []) {
-        if (acesso.tipo === tipo && acesso.contabilidade) contabilidades.add(acesso.contabilidade);
-      }
-    }
-    return Array.from(contabilidades).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   });
 
   contagemPorTipo = computed(() => {
@@ -118,6 +111,7 @@ export class InicioComponent implements OnInit {
     this.carregarLinks();
     this.carregarClientes();
     this.carregarCategorias();
+    this.carregarContabilidades();
     this.agendarAtualizacaoSenhaDoDia();
   }
 
@@ -179,6 +173,20 @@ export class InicioComponent implements OnInit {
 
   async aoAlterarCategorias() {
     await this.carregarCategorias();
+    await this.carregarClientes();
+  }
+
+  async carregarContabilidades() {
+    const contabilidades = await firstValueFrom(this.contabilidadesService.listar());
+    this.contabilidades.set(contabilidades);
+  }
+
+  abrirContabilidades() {
+    this.contabilidadesModalAberto.set(true);
+  }
+
+  async aoAlterarContabilidades() {
+    await this.carregarContabilidades();
     await this.carregarClientes();
   }
 

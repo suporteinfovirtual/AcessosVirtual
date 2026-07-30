@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Categoria, Cliente, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
+import { Acesso, Categoria, Cliente, Contabilidade, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
+import { ContabilidadesService } from '../../../../core/contabilidades.service';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -13,8 +14,7 @@ interface CampoAcesso {
   senha: string;
   link: string;
   servidor: string;
-  contabilidade: string;
-  emailContabilidade: string;
+  contabilidadeId: number | null;
   observacoes: string;
 }
 
@@ -26,6 +26,7 @@ interface CampoAcesso {
 export class ClienteModalComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private categoriasService = inject(CategoriasService);
+  private contabilidadesService = inject(ContabilidadesService);
 
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
@@ -39,6 +40,7 @@ export class ClienteModalComponent implements OnInit {
   observacoes = signal('');
   categoriaId = signal<number | null>(null);
   categorias = signal<Categoria[]>([]);
+  contabilidades = signal<Contabilidade[]>([]);
 
   acessosPorTipo: Record<TipoAcesso, CampoAcesso> = this.acessosVazios();
 
@@ -56,8 +58,14 @@ export class ClienteModalComponent implements OnInit {
     return tipo ? this.tipos.filter((t) => t.valor === tipo) : this.tipos;
   }
 
+  emailContabilidade(tipo: TipoAcesso): string | null {
+    const id = this.acessosPorTipo[tipo].contabilidadeId;
+    return this.contabilidades().find((c) => c.id === id)?.email || null;
+  }
+
   ngOnInit() {
     firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
+    firstValueFrom(this.contabilidadesService.listar()).then((contabilidades) => this.contabilidades.set(contabilidades));
 
     const cliente = this.cliente();
     if (cliente) {
@@ -75,8 +83,7 @@ export class ClienteModalComponent implements OnInit {
           senha: acesso.senha || '',
           link: acesso.link || '',
           servidor: acesso.servidor || '',
-          contabilidade: acesso.contabilidade || '',
-          emailContabilidade: acesso.email_contabilidade || '',
+          contabilidadeId: acesso.contabilidade_id || null,
           observacoes: acesso.observacoes || '',
         };
       }
@@ -93,8 +100,7 @@ export class ClienteModalComponent implements OnInit {
       senha: '',
       link: '',
       servidor: '',
-      contabilidade: '',
-      emailContabilidade: '',
+      contabilidadeId: null,
       observacoes: '',
     });
     return { anydesk: vazio(), acesso_web: vazio(), acesso_zeta: vazio() };
@@ -146,8 +152,7 @@ export class ClienteModalComponent implements OnInit {
       senha: campo.senha.trim() || null,
       link: campo.link.trim() || null,
       servidor: campo.servidor.trim() || null,
-      contabilidade: campo.contabilidade.trim().toUpperCase() || null,
-      email_contabilidade: campo.emailContabilidade.trim().toLowerCase() || null,
+      contabilidade_id: campo.contabilidadeId,
       observacoes: campo.observacoes.trim() || null,
     };
   }

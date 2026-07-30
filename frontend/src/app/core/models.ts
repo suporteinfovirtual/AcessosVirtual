@@ -9,8 +9,9 @@ export interface Acesso {
   senha?: string | null;
   link?: string | null;
   servidor?: string | null;
-  contabilidade?: string | null;
-  email_contabilidade?: string | null;
+  contabilidade_id?: number | null;
+  contabilidade_nome?: string | null;
+  contabilidade_email?: string | null;
   observacoes?: string | null;
   criado_em?: string;
 }
@@ -29,6 +30,13 @@ export interface Cliente {
 export interface Categoria {
   id?: number;
   nome: string;
+  criado_em?: string;
+}
+
+export interface Contabilidade {
+  id?: number;
+  nome: string;
+  email?: string | null;
   criado_em?: string;
 }
 
