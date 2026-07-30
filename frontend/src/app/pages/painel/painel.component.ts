@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Categoria, Cliente, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
@@ -19,6 +19,7 @@ type Aba = TipoAcesso | 'internos';
 export class PainelComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private categoriasService = inject(CategoriasService);
+  private destroyRef = inject(DestroyRef);
 
   readonly abas: { valor: Aba; rotulo: string }[] = [...TIPOS_ACESSO, { valor: 'internos', rotulo: 'Contas Internas' }];
 
@@ -65,6 +66,7 @@ export class PainelComponent implements OnInit {
   ngOnInit() {
     this.carregar();
     this.carregarCategorias();
+    this.agendarAtualizacaoSenhaDoDia();
   }
 
   async carregar() {
@@ -126,5 +128,16 @@ export class PainelComponent implements OnInit {
     const mes = hoje.getMonth() + 1;
     const ano = hoje.getFullYear() % 100;
     return String(dia * mes * ano * 3);
+  }
+
+  // recalcula sozinho à meia-noite, mesmo com a aba aberta, e se reagenda pro dia seguinte
+  private agendarAtualizacaoSenhaDoDia() {
+    const agora = new Date();
+    const proximaMeiaNoite = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1, 0, 0, 2);
+    const timeoutId = setTimeout(() => {
+      this.senhaDoDia.set(this.calcularSenhaDoDia());
+      this.agendarAtualizacaoSenhaDoDia();
+    }, proximaMeiaNoite.getTime() - agora.getTime());
+    this.destroyRef.onDestroy(() => clearTimeout(timeoutId));
   }
 }
