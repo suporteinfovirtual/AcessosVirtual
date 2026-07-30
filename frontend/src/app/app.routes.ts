@@ -9,9 +9,5 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./pages/inicio/inicio.component').then((m) => m.InicioComponent),
   },
-  {
-    path: 'painel',
-    loadComponent: () => import('./pages/painel/painel.component').then((m) => m.PainelComponent),
-  },
   { path: '**', redirectTo: '' },
 ];
