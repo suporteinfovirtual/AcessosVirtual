@@ -67,24 +67,9 @@
         <div class="space-y-2">
           @for (tipo of tiposExibidos; track tipo.valor) {
             <div class="rounded-lg border border-zinc-800 bg-zinc-950/60">
-              <button
-                type="button"
-                class="flex w-full items-center justify-between px-3 py-2.5 text-left"
-                (click)="alternarAcesso(tipo.valor)"
-              >
+              <div class="px-3 py-2.5">
                 <span class="text-sm font-medium text-zinc-200">{{ tipo.rotulo }}</span>
-                <span
-                  class="flex h-5 w-9 items-center rounded-full transition"
-                  [class.bg-accent]="acessosPorTipo[tipo.valor].ativo"
-                  [class.bg-zinc-700]="!acessosPorTipo[tipo.valor].ativo"
-                >
-                  <span
-                    class="h-4 w-4 rounded-full bg-zinc-950 shadow transition"
-                    [class.translate-x-4]="acessosPorTipo[tipo.valor].ativo"
-                    [class.translate-x-0.5]="!acessosPorTipo[tipo.valor].ativo"
-                  ></span>
-                </span>
-              </button>
+              </div>
 
               @if (acessosPorTipo[tipo.valor].ativo) {
                 <div class="grid grid-cols-2 gap-2 border-t border-zinc-800 p-3">

@@ -77,7 +77,7 @@ export class ClienteModalComponent implements OnInit {
         };
       }
     } else if (this.tipoInicial()) {
-      this.alternarAcesso(this.tipoInicial()!);
+      this.acessosPorTipo[this.tipoInicial()!].ativo = true;
     }
   }
 
@@ -87,10 +87,6 @@ export class ClienteModalComponent implements OnInit {
       acesso_web: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', observacoes: '' },
       acesso_zeta: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', observacoes: '' },
     };
-  }
-
-  alternarAcesso(tipo: TipoAcesso) {
-    this.acessosPorTipo[tipo].ativo = !this.acessosPorTipo[tipo].ativo;
   }
 
   async salvarCliente() {
