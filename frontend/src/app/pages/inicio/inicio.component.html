@@ -1,0 +1,75 @@
+<div class="min-h-screen bg-zinc-950">
+  <header class="sticky top-0 z-10 border-b border-zinc-900 bg-zinc-950/90 px-6 py-4 backdrop-blur">
+    <div class="mx-auto flex max-w-5xl items-center gap-3">
+      <img
+        src="logo.jpeg"
+        alt="Virtual Sistemas"
+        class="h-9 w-auto shrink-0 object-contain mix-blend-screen sm:h-10"
+        onerror="this.style.display='none'"
+      />
+      <span class="h-6 w-px shrink-0 bg-zinc-800"></span>
+      <p class="text-xs text-zinc-500">Início</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-6 py-8">
+    <a
+      routerLink="/painel"
+      class="flex items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 p-5 transition hover:border-accent/60"
+    >
+      <div>
+        <p class="text-base font-semibold text-zinc-100">Painel de acessos de clientes</p>
+        <p class="mt-0.5 text-sm text-zinc-500">AnyDesk, Acesso Web, Acesso Zeta e contas internas</p>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5 shrink-0 text-accent"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+    </a>
+
+    <div class="mt-8 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-zinc-300">Meus links</h2>
+      <button
+        type="button"
+        class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+        (click)="abrirNovo()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Novo link
+      </button>
+    </div>
+
+    <div class="mt-4">
+      @if (carregando()) {
+        <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+      } @else if (links().length === 0) {
+        <p class="py-10 text-center text-sm text-zinc-600">Nenhum link cadastrado ainda.</p>
+      } @else {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          @for (link of links(); track link.id) {
+            <div class="group relative rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+              <button
+                type="button"
+                class="absolute right-3 top-3 rounded p-1 text-zinc-600 opacity-0 hover:bg-zinc-800 hover:text-zinc-300 group-hover:opacity-100"
+                (click)="abrirEdicao(link)"
+                title="Editar link"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z"/></svg>
+              </button>
+
+              <a [href]="link.url" target="_blank" rel="noopener" class="block pr-6">
+                <p class="truncate text-sm font-medium text-zinc-100">{{ link.titulo }}</p>
+                <p class="mt-1 truncate text-xs text-zinc-500">{{ link.url }}</p>
+              </a>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  @if (modalAberto()) {
+    <app-link-modal
+      [link]="linkEmEdicao()"
+      (fechar)="fecharModal()"
+      (salvo)="aoSalvar()"
+    ></app-link-modal>
+  }
+</div>

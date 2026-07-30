@@ -39,6 +39,13 @@ export interface ContaInterna {
   criado_em?: string;
 }
 
+export interface LinkPessoal {
+  id?: number;
+  titulo: string;
+  url: string;
+  criado_em?: string;
+}
+
 export const TIPOS_ACESSO: { valor: TipoAcesso; rotulo: string }[] = [
   { valor: 'anydesk', rotulo: 'AnyDesk' },
   { valor: 'acesso_web', rotulo: 'Acesso Web' },

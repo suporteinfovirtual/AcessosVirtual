@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Categoria, Cliente, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
 import { ClientesService } from '../../core/clientes.service';
@@ -13,7 +14,7 @@ type Aba = TipoAcesso | 'internos';
 
 @Component({
   selector: 'app-painel',
-  imports: [FormsModule, CopyFieldComponent, ClienteModalComponent, InternosPanelComponent, CategoriasModalComponent],
+  imports: [FormsModule, RouterLink, CopyFieldComponent, ClienteModalComponent, InternosPanelComponent, CategoriasModalComponent],
   templateUrl: './painel.component.html',
 })
 export class PainelComponent implements OnInit {
