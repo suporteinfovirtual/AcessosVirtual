@@ -8,6 +8,7 @@ export interface Acesso {
   usuario?: string | null;
   senha?: string | null;
   link?: string | null;
+  servidor?: string | null;
   observacoes?: string | null;
   criado_em?: string;
 }

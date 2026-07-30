@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS acessos (
   usuario TEXT,
   senha TEXT,
   link TEXT,
+  servidor TEXT, -- número do servidor (acesso web)
   observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );

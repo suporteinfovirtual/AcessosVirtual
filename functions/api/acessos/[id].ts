@@ -6,7 +6,14 @@ interface Env {
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
-  let body: { identificador?: string; usuario?: string; senha?: string; link?: string; observacoes?: string };
+  let body: {
+    identificador?: string;
+    usuario?: string;
+    senha?: string;
+    link?: string;
+    servidor?: string;
+    observacoes?: string;
+  };
   try {
     body = await request.json();
   } catch {
@@ -15,13 +22,14 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
 
   await env.DB
     .prepare(
-      'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, observacoes = ? WHERE id = ?'
+      'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, servidor = ?, observacoes = ? WHERE id = ?'
     )
     .bind(
       body.identificador || null,
       body.usuario || null,
       body.senha || null,
       body.link || null,
+      body.servidor || null,
       body.observacoes || null,
       params.id
     )
