@@ -113,7 +113,7 @@
                 (click)="abrirEdicao(cliente)"
                 title="Editar cliente"
               >
-                <p class="truncate text-sm font-medium text-zinc-100">{{ cliente.nome }}</p>
+                <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
                 @if (cliente.cnpj) {
                   <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
                 }
