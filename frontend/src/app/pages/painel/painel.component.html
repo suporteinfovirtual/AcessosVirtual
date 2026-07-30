@@ -28,6 +28,17 @@
 
       @if (!mostrandoInternos()) {
         <div class="flex items-center gap-2">
+          @if (abaAtiva() === 'acesso_web') {
+            <select
+              [(ngModel)]="servidorFiltro"
+              class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            >
+              <option [ngValue]="null">Todos os servidores</option>
+              @for (servidor of servidoresDisponiveis(); track servidor) {
+                <option [ngValue]="servidor">Servidor {{ servidor }}</option>
+              }
+            </select>
+          }
           <select
             [(ngModel)]="categoriaFiltro"
             class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
@@ -65,7 +76,7 @@
             class="relative px-4 py-2.5 text-sm font-medium transition"
             [class.text-accent]="abaAtiva() === aba.valor"
             [class.text-zinc-500]="abaAtiva() !== aba.valor"
-            (click)="abaAtiva.set(aba.valor)"
+            (click)="selecionarAba(aba.valor)"
           >
             {{ aba.rotulo }}
             @if (aba.valor !== 'internos') {

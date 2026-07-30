@@ -31,6 +31,7 @@ export class PainelComponent implements OnInit {
   busca = signal('');
   abaAtiva = signal<Aba>('anydesk');
   categoriaFiltro = signal<number | null>(null);
+  servidorFiltro = signal<string | null>(null);
 
   modalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
@@ -45,12 +46,24 @@ export class PainelComponent implements OnInit {
     const termo = this.busca().trim().toLowerCase();
     const tipo = this.abaAtiva();
     const categoriaId = this.categoriaFiltro();
+    const servidor = this.servidorFiltro();
     if (tipo === 'internos') return [];
 
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))
       .filter((c) => !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo))
-      .filter((c) => !categoriaId || c.categoria_id === categoriaId);
+      .filter((c) => !categoriaId || c.categoria_id === categoriaId)
+      .filter((c) => tipo !== 'acesso_web' || !servidor || c.acessos?.some((a) => a.tipo === 'acesso_web' && a.servidor === servidor));
+  });
+
+  servidoresDisponiveis = computed(() => {
+    const servidores = new Set<string>();
+    for (const cliente of this.clientes()) {
+      for (const acesso of cliente.acessos || []) {
+        if (acesso.tipo === 'acesso_web' && acesso.servidor) servidores.add(acesso.servidor);
+      }
+    }
+    return Array.from(servidores).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   });
 
   contagemPorTipo = computed(() => {
@@ -94,6 +107,11 @@ export class PainelComponent implements OnInit {
   async aoAlterarCategorias() {
     await this.carregarCategorias();
     await this.carregar();
+  }
+
+  selecionarAba(valor: Aba) {
+    this.abaAtiva.set(valor);
+    if (valor !== 'acesso_web') this.servidorFiltro.set(null);
   }
 
   acessoDoTipo(cliente: Cliente, tipo: Aba) {
