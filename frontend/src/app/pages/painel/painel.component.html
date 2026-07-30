@@ -27,14 +27,33 @@
       </div>
 
       @if (!mostrandoInternos()) {
-        <button
-          type="button"
-          class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
-          (click)="abrirNovoCliente()"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-          Novo cliente
-        </button>
+        <div class="flex items-center gap-2">
+          <select
+            [(ngModel)]="categoriaFiltro"
+            class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          >
+            <option [ngValue]="null">Todas as categorias</option>
+            @for (categoria of categorias(); track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+            (click)="abrirCategorias()"
+            title="Gerenciar categorias"
+          >
+            Categorias
+          </button>
+          <button
+            type="button"
+            class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+            (click)="abrirNovoCliente()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            Novo cliente
+          </button>
+        </div>
       }
     </div>
 
@@ -81,6 +100,9 @@
                 @if (cliente.cnpj) {
                   <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
                 }
+                @if (cliente.categoria_nome) {
+                  <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
+                }
               </button>
 
               @let acesso = acessoDoTipo(cliente, abaAtiva());
@@ -119,5 +141,12 @@
       (fechar)="fecharModal()"
       (salvo)="aoSalvar()"
     ></app-cliente-modal>
+  }
+
+  @if (categoriasModalAberto()) {
+    <app-categorias-modal
+      (fechar)="categoriasModalAberto.set(false)"
+      (alterado)="aoAlterarCategorias()"
+    ></app-categorias-modal>
   }
 </div>

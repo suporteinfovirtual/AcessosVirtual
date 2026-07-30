@@ -17,8 +17,16 @@ export interface Cliente {
   nome: string;
   cnpj?: string | null;
   observacoes?: string | null;
+  categoria_id?: number | null;
+  categoria_nome?: string | null;
   criado_em?: string;
   acessos?: Acesso[];
+}
+
+export interface Categoria {
+  id?: number;
+  nome: string;
+  criado_em?: string;
 }
 
 export interface ContaInterna {

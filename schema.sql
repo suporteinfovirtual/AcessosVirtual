@@ -1,15 +1,24 @@
 -- Schema do painel interno (Cloudflare D1 / SQLite)
 
+-- Categorias livres pra agrupar clientes (ex: "Gula Mania", "Facção", "PDV")
+CREATE TABLE IF NOT EXISTS categorias (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL UNIQUE,
+  criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS clientes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL,
   cnpj TEXT,
   observacoes TEXT,
+  categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_clientes_nome ON clientes(nome);
 CREATE INDEX IF NOT EXISTS idx_clientes_cnpj ON clientes(cnpj);
+CREATE INDEX IF NOT EXISTS idx_clientes_categoria ON clientes(categoria_id);
 
 -- Cada cliente pode ter vários acessos, um por sistema (anydesk / acesso_web / acesso_zeta)
 CREATE TABLE IF NOT EXISTS acessos (

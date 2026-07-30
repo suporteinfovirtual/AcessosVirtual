@@ -11,15 +11,29 @@ interface AcessoInput {
   observacoes?: string;
 }
 
-// GET /api/clientes?busca=texto  -> lista clientes (com os acessos de cada um), filtrando por nome ou cnpj
+// GET /api/clientes?busca=texto&categoria_id=1  -> lista clientes (com os acessos de cada um), filtrando por nome, cnpj e/ou categoria
 export async function onRequestGet(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
   const url = new URL(request.url);
   const busca = url.searchParams.get('busca')?.trim();
+  const categoriaId = url.searchParams.get('categoria_id')?.trim();
 
-  const clientesQuery = busca
-    ? env.DB.prepare('SELECT * FROM clientes WHERE nome LIKE ?1 OR cnpj LIKE ?1 ORDER BY nome').bind(`%${busca}%`)
-    : env.DB.prepare('SELECT * FROM clientes ORDER BY nome');
+  const condicoes: string[] = [];
+  const binds: unknown[] = [];
+
+  if (busca) {
+    condicoes.push('(clientes.nome LIKE ? OR clientes.cnpj LIKE ?)');
+    binds.push(`%${busca}%`, `%${busca}%`);
+  }
+  if (categoriaId) {
+    condicoes.push('clientes.categoria_id = ?');
+    binds.push(categoriaId);
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+  const clientesQuery = env.DB.prepare(
+    `SELECT clientes.*, categorias.nome AS categoria_nome FROM clientes LEFT JOIN categorias ON categorias.id = clientes.categoria_id ${where} ORDER BY clientes.nome`
+  ).bind(...binds);
 
   const { results: clientes } = await clientesQuery.all();
 
@@ -43,7 +57,13 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
 export async function onRequestPost(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
 
-  let body: { nome?: string; cnpj?: string; observacoes?: string; acessos?: AcessoInput[] };
+  let body: {
+    nome?: string;
+    cnpj?: string;
+    observacoes?: string;
+    categoria_id?: number | null;
+    acessos?: AcessoInput[];
+  };
   try {
     body = await request.json();
   } catch {
@@ -55,8 +75,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
   }
 
   const resultadoCliente = await env.DB
-    .prepare('INSERT INTO clientes (nome, cnpj, observacoes) VALUES (?, ?, ?)')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null)
+    .prepare('INSERT INTO clientes (nome, cnpj, observacoes, categoria_id) VALUES (?, ?, ?, ?)')
+    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null, body.categoria_id || null)
     .run();
 
   const clienteId = resultadoCliente.meta.last_row_id;

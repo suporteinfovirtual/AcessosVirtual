@@ -6,7 +6,12 @@ interface Env {
 export async function onRequestGet(context: EventContext<Env, { id: string }, unknown>) {
   const { env, params } = context;
 
-  const cliente = await env.DB.prepare('SELECT * FROM clientes WHERE id = ?').bind(params.id).first();
+  const cliente = await env.DB
+    .prepare(
+      'SELECT clientes.*, categorias.nome AS categoria_nome FROM clientes LEFT JOIN categorias ON categorias.id = clientes.categoria_id WHERE clientes.id = ?'
+    )
+    .bind(params.id)
+    .first();
   if (!cliente) {
     return new Response(JSON.stringify({ erro: 'Cliente não encontrado' }), { status: 404 });
   }
@@ -25,7 +30,7 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
-  let body: { nome?: string; cnpj?: string; observacoes?: string };
+  let body: { nome?: string; cnpj?: string; observacoes?: string; categoria_id?: number | null };
   try {
     body = await request.json();
   } catch {
@@ -37,8 +42,8 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   }
 
   await env.DB
-    .prepare('UPDATE clientes SET nome = ?, cnpj = ?, observacoes = ? WHERE id = ?')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null, params.id)
+    .prepare('UPDATE clientes SET nome = ?, cnpj = ?, observacoes = ?, categoria_id = ? WHERE id = ?')
+    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null, body.categoria_id || null, params.id)
     .run();
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });

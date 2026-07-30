@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Cliente, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
+import { Acesso, Categoria, Cliente, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
+import { CategoriasService } from '../../../../core/categorias.service';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -21,6 +22,7 @@ interface CampoAcesso {
 })
 export class ClienteModalComponent implements OnInit {
   private clientesService = inject(ClientesService);
+  private categoriasService = inject(CategoriasService);
 
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
@@ -32,6 +34,8 @@ export class ClienteModalComponent implements OnInit {
   nome = signal('');
   cnpj = signal('');
   observacoes = signal('');
+  categoriaId = signal<number | null>(null);
+  categorias = signal<Categoria[]>([]);
 
   acessosPorTipo: Record<TipoAcesso, CampoAcesso> = this.acessosVazios();
 
@@ -44,11 +48,14 @@ export class ClienteModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
+
     const cliente = this.cliente();
     if (cliente) {
       this.nome.set(cliente.nome);
       this.cnpj.set(cliente.cnpj || '');
       this.observacoes.set(cliente.observacoes || '');
+      this.categoriaId.set(cliente.categoria_id || null);
 
       for (const acesso of cliente.acessos || []) {
         this.acessosPorTipo[acesso.tipo] = {
@@ -88,6 +95,7 @@ export class ClienteModalComponent implements OnInit {
       nome: this.nome().trim(),
       cnpj: this.cnpj().trim() || null,
       observacoes: this.observacoes().trim() || null,
+      categoria_id: this.categoriaId(),
     };
 
     try {
