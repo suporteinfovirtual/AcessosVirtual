@@ -189,7 +189,12 @@
                       <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
                     }
                     @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-                      <app-copy-field rotulo="Contabilidade" [valor]="acesso.contabilidade"></app-copy-field>
+                      @if (acesso.contabilidade) {
+                        <div class="min-w-0">
+                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Contabilidade</span>
+                          <span class="block truncate text-sm text-zinc-200">{{ acesso.contabilidade }}</span>
+                        </div>
+                      }
                       <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.email_contabilidade"></app-copy-field>
                     }
                     @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
