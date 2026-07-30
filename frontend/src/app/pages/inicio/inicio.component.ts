@@ -49,6 +49,7 @@ export class InicioComponent implements OnInit {
   abaAtiva = signal<Aba>('anydesk');
   categoriaFiltro = signal<number | null>(null);
   servidorFiltro = signal<string | null>(null);
+  contabilidadeFiltro = signal<string | null>(null);
 
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
@@ -64,13 +65,20 @@ export class InicioComponent implements OnInit {
     const tipo = this.abaAtiva();
     const categoriaId = this.categoriaFiltro();
     const servidor = this.servidorFiltro();
+    const contabilidade = this.contabilidadeFiltro();
     if (tipo === 'internos') return [];
 
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))
       .filter((c) => !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo))
       .filter((c) => tipo !== 'acesso_zeta' || !categoriaId || c.categoria_id === categoriaId)
-      .filter((c) => tipo !== 'acesso_web' || !servidor || c.acessos?.some((a) => a.tipo === 'acesso_web' && a.servidor === servidor));
+      .filter((c) => tipo !== 'acesso_web' || !servidor || c.acessos?.some((a) => a.tipo === 'acesso_web' && a.servidor === servidor))
+      .filter(
+        (c) =>
+          (tipo !== 'acesso_web' && tipo !== 'acesso_zeta') ||
+          !contabilidade ||
+          c.acessos?.some((a) => a.tipo === tipo && a.contabilidade === contabilidade)
+      );
   });
 
   servidoresDisponiveis = computed(() => {
@@ -81,6 +89,19 @@ export class InicioComponent implements OnInit {
       }
     }
     return Array.from(servidores).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  });
+
+  contabilidadesDisponiveis = computed(() => {
+    const tipo = this.abaAtiva();
+    if (tipo !== 'acesso_web' && tipo !== 'acesso_zeta') return [];
+
+    const contabilidades = new Set<string>();
+    for (const cliente of this.clientes()) {
+      for (const acesso of cliente.acessos || []) {
+        if (acesso.tipo === tipo && acesso.contabilidade) contabilidades.add(acesso.contabilidade);
+      }
+    }
+    return Array.from(contabilidades).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   });
 
   contagemPorTipo = computed(() => {
@@ -165,6 +186,7 @@ export class InicioComponent implements OnInit {
     this.abaAtiva.set(valor);
     if (valor !== 'acesso_web') this.servidorFiltro.set(null);
     if (valor !== 'acesso_zeta') this.categoriaFiltro.set(null);
+    if (valor !== 'acesso_web' && valor !== 'acesso_zeta') this.contabilidadeFiltro.set(null);
   }
 
   acessoDoTipo(cliente: Cliente, tipo: Aba) {

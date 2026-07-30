@@ -87,6 +87,17 @@
                 }
               </select>
             }
+            @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
+              <select
+                [(ngModel)]="contabilidadeFiltro"
+                class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+              >
+                <option [ngValue]="null">Todas as contabilidades</option>
+                @for (contabilidade of contabilidadesDisponiveis(); track contabilidade) {
+                  <option [ngValue]="contabilidade">{{ contabilidade }}</option>
+                }
+              </select>
+            }
             @if (abaAtiva() === 'acesso_zeta') {
               <select
                 [(ngModel)]="categoriaFiltro"
@@ -177,6 +188,9 @@
                     }
                     @if (abaAtiva() !== 'acesso_web') {
                       <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                    }
+                    @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
+                      <app-copy-field rotulo="Contabilidade" [valor]="acesso.contabilidade"></app-copy-field>
                     }
                     @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
                       <div class="mt-1 flex items-center justify-between gap-2">

@@ -13,6 +13,7 @@ interface CampoAcesso {
   senha: string;
   link: string;
   servidor: string;
+  contabilidade: string;
   observacoes: string;
 }
 
@@ -73,6 +74,7 @@ export class ClienteModalComponent implements OnInit {
           senha: acesso.senha || '',
           link: acesso.link || '',
           servidor: acesso.servidor || '',
+          contabilidade: acesso.contabilidade || '',
           observacoes: acesso.observacoes || '',
         };
       }
@@ -83,9 +85,9 @@ export class ClienteModalComponent implements OnInit {
 
   private acessosVazios(): Record<TipoAcesso, CampoAcesso> {
     return {
-      anydesk: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', observacoes: '' },
-      acesso_web: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', observacoes: '' },
-      acesso_zeta: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', observacoes: '' },
+      anydesk: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
+      acesso_web: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
+      acesso_zeta: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
     };
   }
 
@@ -135,6 +137,7 @@ export class ClienteModalComponent implements OnInit {
       senha: campo.senha.trim() || null,
       link: campo.link.trim() || null,
       servidor: campo.servidor.trim() || null,
+      contabilidade: campo.contabilidade.trim() || null,
       observacoes: campo.observacoes.trim() || null,
     };
   }

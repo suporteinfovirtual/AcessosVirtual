@@ -9,6 +9,7 @@ export interface Acesso {
   senha?: string | null;
   link?: string | null;
   servidor?: string | null;
+  contabilidade?: string | null;
   observacoes?: string | null;
   criado_em?: string;
 }
