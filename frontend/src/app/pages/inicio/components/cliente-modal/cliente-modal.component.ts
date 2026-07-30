@@ -48,9 +48,8 @@ export class ClienteModalComponent implements OnInit {
     return !!this.cliente()?.id;
   }
 
-  // ao cadastrar um cliente novo, só mostra o tipo de acesso da aba em que o usuário estava
+  // só mostra o tipo de acesso da aba em que o usuário estava, tanto ao cadastrar quanto ao editar
   get tiposExibidos() {
-    if (this.editando) return this.tipos;
     const tipo = this.tipoInicial();
     return tipo ? this.tipos.filter((t) => t.valor === tipo) : this.tipos;
   }
