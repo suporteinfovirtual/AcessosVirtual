@@ -87,23 +87,25 @@
                 }
               </select>
             }
-            <select
-              [(ngModel)]="categoriaFiltro"
-              class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-            >
-              <option [ngValue]="null">Todas as categorias</option>
-              @for (categoria of categorias(); track categoria.id) {
-                <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-              }
-            </select>
-            <button
-              type="button"
-              class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-              (click)="abrirCategorias()"
-              title="Gerenciar categorias"
-            >
-              Categorias
-            </button>
+            @if (abaAtiva() === 'acesso_zeta') {
+              <select
+                [(ngModel)]="categoriaFiltro"
+                class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+              >
+                <option [ngValue]="null">Todas as categorias</option>
+                @for (categoria of categorias(); track categoria.id) {
+                  <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+                }
+              </select>
+              <button
+                type="button"
+                class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                (click)="abrirCategorias()"
+                title="Gerenciar categorias"
+              >
+                Categorias
+              </button>
+            }
             <button
               type="button"
               class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
@@ -159,7 +161,7 @@
                   @if (cliente.cnpj) {
                     <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
                   }
-                  @if (cliente.categoria_nome) {
+                  @if (abaAtiva() === 'acesso_zeta' && cliente.categoria_nome) {
                     <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
                   }
                 </button>

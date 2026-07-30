@@ -69,7 +69,7 @@ export class InicioComponent implements OnInit {
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))
       .filter((c) => !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo))
-      .filter((c) => !categoriaId || c.categoria_id === categoriaId)
+      .filter((c) => tipo !== 'acesso_zeta' || !categoriaId || c.categoria_id === categoriaId)
       .filter((c) => tipo !== 'acesso_web' || !servidor || c.acessos?.some((a) => a.tipo === 'acesso_web' && a.servidor === servidor));
   });
 
@@ -164,6 +164,7 @@ export class InicioComponent implements OnInit {
   selecionarAba(valor: Aba) {
     this.abaAtiva.set(valor);
     if (valor !== 'acesso_web') this.servidorFiltro.set(null);
+    if (valor !== 'acesso_zeta') this.categoriaFiltro.set(null);
   }
 
   acessoDoTipo(cliente: Cliente, tipo: Aba) {
