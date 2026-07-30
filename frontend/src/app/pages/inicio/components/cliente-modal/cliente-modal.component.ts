@@ -48,6 +48,13 @@ export class ClienteModalComponent implements OnInit {
     return !!this.cliente()?.id;
   }
 
+  // ao cadastrar um cliente novo, só mostra o tipo de acesso da aba em que o usuário estava
+  get tiposExibidos() {
+    if (this.editando) return this.tipos;
+    const tipo = this.tipoInicial();
+    return tipo ? this.tipos.filter((t) => t.valor === tipo) : this.tipos;
+  }
+
   ngOnInit() {
     firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
 
