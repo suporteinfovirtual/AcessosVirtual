@@ -137,7 +137,7 @@ export class ClienteModalComponent implements OnInit {
       senha: campo.senha.trim() || null,
       link: campo.link.trim() || null,
       servidor: campo.servidor.trim() || null,
-      contabilidade: campo.contabilidade.trim() || null,
+      contabilidade: campo.contabilidade.trim().toUpperCase() || null,
       observacoes: campo.observacoes.trim() || null,
     };
   }
