@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS acessos (
   link TEXT,
   servidor TEXT, -- número do servidor (acesso web)
   contabilidade TEXT, -- nome da contabilidade responsável (acesso web / acesso zeta)
+  email_contabilidade TEXT, -- e-mail de contato da contabilidade (acesso web / acesso zeta)
   observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );

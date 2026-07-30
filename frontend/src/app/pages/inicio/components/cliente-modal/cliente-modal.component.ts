@@ -14,6 +14,7 @@ interface CampoAcesso {
   link: string;
   servidor: string;
   contabilidade: string;
+  emailContabilidade: string;
   observacoes: string;
 }
 
@@ -75,6 +76,7 @@ export class ClienteModalComponent implements OnInit {
           link: acesso.link || '',
           servidor: acesso.servidor || '',
           contabilidade: acesso.contabilidade || '',
+          emailContabilidade: acesso.email_contabilidade || '',
           observacoes: acesso.observacoes || '',
         };
       }
@@ -84,11 +86,18 @@ export class ClienteModalComponent implements OnInit {
   }
 
   private acessosVazios(): Record<TipoAcesso, CampoAcesso> {
-    return {
-      anydesk: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
-      acesso_web: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
-      acesso_zeta: { ativo: false, identificador: '', usuario: '', senha: '', link: '', servidor: '', contabilidade: '', observacoes: '' },
-    };
+    const vazio = () => ({
+      ativo: false,
+      identificador: '',
+      usuario: '',
+      senha: '',
+      link: '',
+      servidor: '',
+      contabilidade: '',
+      emailContabilidade: '',
+      observacoes: '',
+    });
+    return { anydesk: vazio(), acesso_web: vazio(), acesso_zeta: vazio() };
   }
 
   async salvarCliente() {
@@ -138,6 +147,7 @@ export class ClienteModalComponent implements OnInit {
       link: campo.link.trim() || null,
       servidor: campo.servidor.trim() || null,
       contabilidade: campo.contabilidade.trim().toUpperCase() || null,
+      email_contabilidade: campo.emailContabilidade.trim().toLowerCase() || null,
       observacoes: campo.observacoes.trim() || null,
     };
   }

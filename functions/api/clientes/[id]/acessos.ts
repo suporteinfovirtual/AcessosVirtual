@@ -14,6 +14,7 @@ export async function onRequestPost(context: EventContext<Env, { id: string }, u
     link?: string;
     servidor?: string;
     contabilidade?: string;
+    email_contabilidade?: string;
     observacoes?: string;
   };
   try {
@@ -28,7 +29,7 @@ export async function onRequestPost(context: EventContext<Env, { id: string }, u
 
   const resultado = await env.DB
     .prepare(
-      'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade, email_contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
     .bind(
       params.id,
@@ -39,6 +40,7 @@ export async function onRequestPost(context: EventContext<Env, { id: string }, u
       body.link || null,
       body.servidor || null,
       body.contabilidade || null,
+      body.email_contabilidade || null,
       body.observacoes || null
     )
     .run();

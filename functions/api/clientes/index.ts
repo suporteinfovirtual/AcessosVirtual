@@ -10,6 +10,7 @@ interface AcessoInput {
   link?: string;
   servidor?: string;
   contabilidade?: string;
+  email_contabilidade?: string;
   observacoes?: string;
 }
 
@@ -88,7 +89,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       if (!acesso.tipo) continue;
       await env.DB
         .prepare(
-          'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade, email_contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )
         .bind(
           clienteId,
@@ -99,6 +100,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
           acesso.link || null,
           acesso.servidor || null,
           acesso.contabilidade || null,
+          acesso.email_contabilidade || null,
           acesso.observacoes || null
         )
         .run();

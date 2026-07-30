@@ -109,6 +109,25 @@
                       />
                     </div>
                   }
+                  @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
+                    <div>
+                      <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
+                      <input
+                        [(ngModel)]="acessosPorTipo[tipo.valor].contabilidade"
+                        [name]="tipo.valor + '_contabilidade'"
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
+                      />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs text-zinc-500">E-mail Contabilidade</label>
+                      <input
+                        [(ngModel)]="acessosPorTipo[tipo.valor].emailContabilidade"
+                        [name]="tipo.valor + '_emailContabilidade'"
+                        type="email"
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                      />
+                    </div>
+                  }
                   @if (tipo.valor === 'acesso_web') {
                     <div>
                       <label class="mb-1 block text-xs text-zinc-500">Servidor</label>
@@ -117,16 +136,6 @@
                         [name]="tipo.valor + '_servidor'"
                         placeholder="Ex: 1"
                         class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
-                      />
-                    </div>
-                  }
-                  @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
-                    <div [class.col-span-2]="tipo.valor === 'acesso_zeta'">
-                      <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
-                      <input
-                        [(ngModel)]="acessosPorTipo[tipo.valor].contabilidade"
-                        [name]="tipo.valor + '_contabilidade'"
-                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
                       />
                     </div>
                   }

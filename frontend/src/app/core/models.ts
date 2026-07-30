@@ -10,6 +10,7 @@ export interface Acesso {
   link?: string | null;
   servidor?: string | null;
   contabilidade?: string | null;
+  email_contabilidade?: string | null;
   observacoes?: string | null;
   criado_em?: string;
 }

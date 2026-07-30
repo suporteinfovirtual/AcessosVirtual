@@ -190,6 +190,7 @@
                     }
                     @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
                       <app-copy-field rotulo="Contabilidade" [valor]="acesso.contabilidade"></app-copy-field>
+                      <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.email_contabilidade"></app-copy-field>
                     }
                     @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
                       <div class="mt-1 flex items-center justify-between gap-2">
