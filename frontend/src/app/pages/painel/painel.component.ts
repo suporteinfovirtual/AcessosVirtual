@@ -35,6 +35,8 @@ export class PainelComponent implements OnInit {
   clienteEmEdicao = signal<Cliente | null>(null);
   categoriasModalAberto = signal(false);
 
+  senhaDoDia = signal(this.calcularSenhaDoDia());
+
   mostrandoInternos = computed(() => this.abaAtiva() === 'internos');
   tipoInicialModal = computed<TipoAcesso | null>(() => (this.mostrandoInternos() ? null : (this.abaAtiva() as TipoAcesso)));
 
@@ -115,5 +117,14 @@ export class PainelComponent implements OnInit {
   async aoSalvar() {
     this.fecharModal();
     await this.carregar();
+  }
+
+  // mesma fórmula do projeto "senha-do-dia": dia x mês x (ano % 100) x 3
+  private calcularSenhaDoDia(): string {
+    const hoje = new Date();
+    const dia = hoje.getDate();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear() % 100;
+    return String(dia * mes * ano * 3);
   }
 }
