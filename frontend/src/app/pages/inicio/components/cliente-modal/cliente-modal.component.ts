@@ -88,7 +88,11 @@ export class ClienteModalComponent implements OnInit {
         };
       }
     } else if (this.tipoInicial()) {
-      this.acessosPorTipo[this.tipoInicial()!].ativo = true;
+      const tipo = this.tipoInicial()!;
+      this.acessosPorTipo[tipo].ativo = true;
+      if (tipo === 'acesso_web') {
+        this.acessosPorTipo[tipo].link = 'https://canal.intelidata.inf.br/acesso/';
+      }
     }
   }
 
