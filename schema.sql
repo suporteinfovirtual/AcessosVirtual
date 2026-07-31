@@ -46,6 +46,17 @@ CREATE TABLE IF NOT EXISTS acessos (
 CREATE INDEX IF NOT EXISTS idx_acessos_cliente ON acessos(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_acessos_tipo ON acessos(tipo);
 
+-- Certificado digital (.pfx) de cada cliente, com validade extraída no upload
+CREATE TABLE IF NOT EXISTS certificados (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL UNIQUE REFERENCES clientes(id) ON DELETE CASCADE,
+  nome_arquivo TEXT NOT NULL,
+  arquivo BLOB NOT NULL,
+  senha TEXT,
+  validade TEXT,
+  atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Contas e serviços internos da própria empresa (e-mail, backup, licenças) - não ligados a um cliente
 CREATE TABLE IF NOT EXISTS contas_internas (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

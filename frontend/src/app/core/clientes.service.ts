@@ -39,4 +39,13 @@ export class ClientesService {
   removerAcesso(acessoId: number): Observable<{ ok: true }> {
     return this.http.delete<{ ok: true }>(`/api/acessos/${acessoId}`);
   }
+
+  enviarCertificado(clienteId: number, arquivo: File, senha: string, validade: string | null): Observable<{ ok: true }> {
+    const form = new FormData();
+    form.append('arquivo', arquivo, arquivo.name);
+    form.append('nome_arquivo', arquivo.name);
+    form.append('senha', senha);
+    if (validade) form.append('validade', validade);
+    return this.http.post<{ ok: true }>(`/api/clientes/${clienteId}/certificado`, form);
+  }
 }

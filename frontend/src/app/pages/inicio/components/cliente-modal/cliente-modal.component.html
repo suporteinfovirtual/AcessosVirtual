@@ -61,6 +61,87 @@
         </div>
       </div>
 
+      @if (editando) {
+        <div class="mt-6">
+          <h3 class="mb-2 text-sm font-semibold text-zinc-300">Certificado Digital</h3>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+            @if (certificado() && !formCertificadoAberto()) {
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm text-zinc-200">{{ certificado()!.nome_arquivo }}</p>
+                  @if (certificado()!.validade) {
+                    <p
+                      class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                      [class.bg-red-500/15]="statusCertificado() === 'vencido'"
+                      [class.text-red-400]="statusCertificado() === 'vencido'"
+                      [class.bg-yellow-500/15]="statusCertificado() === 'alerta'"
+                      [class.text-yellow-400]="statusCertificado() === 'alerta'"
+                      [class.text-zinc-500]="!statusCertificado()"
+                    >
+                      Validade: {{ certificado()!.validade | date: 'dd/MM/yyyy' }}
+                    </p>
+                  }
+                </div>
+                <div class="flex shrink-0 items-center gap-3 text-xs font-medium">
+                  <a [href]="'/api/clientes/' + cliente()!.id + '/certificado'" target="_blank" class="text-accent hover:text-accent-hover">
+                    Baixar
+                  </a>
+                  <button type="button" class="text-zinc-400 hover:text-zinc-200" (click)="abrirFormCertificado()">
+                    Alterar
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (!certificado() && !formCertificadoAberto()) {
+              <button type="button" class="text-sm font-medium text-accent hover:text-accent-hover" (click)="abrirFormCertificado()">
+                + Adicionar certificado digital
+              </button>
+            }
+
+            @if (formCertificadoAberto()) {
+              <div class="space-y-2">
+                <div>
+                  <label class="mb-1 block text-xs text-zinc-500">Arquivo (.pfx)</label>
+                  <input
+                    type="file"
+                    accept=".pfx,.p12"
+                    (change)="aoSelecionarArquivoCertificado($event)"
+                    class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs text-zinc-500">Senha do certificado</label>
+                  <input
+                    type="password"
+                    [ngModel]="senhaCertificado()"
+                    (ngModelChange)="senhaCertificado.set($event)"
+                    name="senha_certificado"
+                    class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                  />
+                </div>
+                @if (erroCertificado()) {
+                  <p class="text-xs text-red-400">{{ erroCertificado() }}</p>
+                }
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    [disabled]="!arquivoCertificado() || !senhaCertificado() || enviandoCertificado()"
+                    class="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+                    (click)="enviarCertificado()"
+                  >
+                    {{ enviandoCertificado() ? 'Enviando…' : 'Enviar certificado' }}
+                  </button>
+                  <button type="button" class="rounded-md px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800" (click)="cancelarFormCertificado()">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <div class="mt-6">
         <h3 class="mb-2 text-sm font-semibold text-zinc-300">Acessos</h3>
 

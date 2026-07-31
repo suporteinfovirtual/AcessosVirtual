@@ -202,6 +202,15 @@ export class InicioComponent implements OnInit {
     return cliente.acessos?.find((a) => a.tipo === tipo);
   }
 
+  statusCertificado(cliente: Cliente): 'vencido' | 'alerta' | null {
+    const validade = cliente.certificado?.validade;
+    if (!validade) return null;
+    const dias = (new Date(validade).getTime() - Date.now()) / 86_400_000;
+    if (dias < 0) return 'vencido';
+    if (dias <= 30) return 'alerta';
+    return null;
+  }
+
   // o userscript de auto-login do zweb lê zw_e/zw_p do hash da URL para preencher o formulário sozinho
   linkAutoLogin(acesso: Acesso): string {
     const link = acesso.link || '';

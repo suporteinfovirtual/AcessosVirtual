@@ -1,10 +1,12 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Categoria, Cliente, Contabilidade, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
+import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
+import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -20,7 +22,7 @@ interface CampoAcesso {
 
 @Component({
   selector: 'app-cliente-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './cliente-modal.component.html',
 })
 export class ClienteModalComponent implements OnInit {
@@ -48,6 +50,14 @@ export class ClienteModalComponent implements OnInit {
   excluindo = signal(false);
   erro = signal('');
 
+  // --- certificado digital ---
+  certificado = signal<CertificadoDigital | null>(null);
+  formCertificadoAberto = signal(false);
+  arquivoCertificado = signal<File | null>(null);
+  senhaCertificado = signal('');
+  enviandoCertificado = signal(false);
+  erroCertificado = signal('');
+
   get editando() {
     return !!this.cliente()?.id;
   }
@@ -73,6 +83,7 @@ export class ClienteModalComponent implements OnInit {
       this.cnpj.set(cliente.cnpj || '');
       this.observacoes.set(cliente.observacoes || '');
       this.categoriaId.set(cliente.categoria_id || null);
+      this.certificado.set(cliente.certificado || null);
 
       for (const acesso of cliente.acessos || []) {
         this.acessosPorTipo[acesso.tipo] = {
@@ -177,6 +188,55 @@ export class ClienteModalComponent implements OnInit {
       } else if (!campo.ativo && campo.id) {
         await firstValueFrom(this.clientesService.removerAcesso(campo.id));
       }
+    }
+  }
+
+  // --- certificado digital ---
+
+  abrirFormCertificado() {
+    this.arquivoCertificado.set(null);
+    this.senhaCertificado.set('');
+    this.erroCertificado.set('');
+    this.formCertificadoAberto.set(true);
+  }
+
+  cancelarFormCertificado() {
+    this.formCertificadoAberto.set(false);
+  }
+
+  aoSelecionarArquivoCertificado(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.arquivoCertificado.set(input.files?.[0] || null);
+  }
+
+  statusCertificado(): 'vencido' | 'alerta' | null {
+    const validade = this.certificado()?.validade;
+    if (!validade) return null;
+    const dias = (new Date(validade).getTime() - Date.now()) / 86_400_000;
+    if (dias < 0) return 'vencido';
+    if (dias <= 30) return 'alerta';
+    return null;
+  }
+
+  async enviarCertificado() {
+    const arquivo = this.arquivoCertificado();
+    const senha = this.senhaCertificado();
+    const clienteId = this.cliente()?.id;
+    if (!arquivo || !senha || !clienteId || this.enviandoCertificado()) return;
+
+    this.enviandoCertificado.set(true);
+    this.erroCertificado.set('');
+
+    try {
+      const validade = await lerValidadeCertificado(arquivo, senha);
+      const validadeIso = paraDataIso(validade);
+      await firstValueFrom(this.clientesService.enviarCertificado(clienteId, arquivo, senha, validadeIso));
+      this.certificado.set({ nome_arquivo: arquivo.name, validade: validadeIso });
+      this.formCertificadoAberto.set(false);
+    } catch (e) {
+      this.erroCertificado.set(e instanceof Error ? e.message : 'Não foi possível enviar o certificado.');
+    } finally {
+      this.enviandoCertificado.set(false);
     }
   }
 

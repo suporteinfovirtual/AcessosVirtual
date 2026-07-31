@@ -21,7 +21,12 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
     .bind(params.id)
     .all();
 
-  return new Response(JSON.stringify({ ...cliente, acessos }), {
+  const certificado = await env.DB
+    .prepare('SELECT nome_arquivo, validade, atualizado_em FROM certificados WHERE cliente_id = ?')
+    .bind(params.id)
+    .first();
+
+  return new Response(JSON.stringify({ ...cliente, acessos, certificado: certificado || null }), {
     headers: { 'Content-Type': 'application/json' },
   });
 }

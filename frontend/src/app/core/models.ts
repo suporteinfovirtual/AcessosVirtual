@@ -16,6 +16,12 @@ export interface Acesso {
   criado_em?: string;
 }
 
+export interface CertificadoDigital {
+  nome_arquivo: string;
+  validade?: string | null;
+  atualizado_em?: string;
+}
+
 export interface Cliente {
   id?: number;
   nome: string;
@@ -25,6 +31,7 @@ export interface Cliente {
   categoria_nome?: string | null;
   criado_em?: string;
   acessos?: Acesso[];
+  certificado?: CertificadoDigital | null;
 }
 
 export interface Categoria {

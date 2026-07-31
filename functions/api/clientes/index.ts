@@ -50,9 +50,14 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
     )
     .all();
 
+  const { results: certificados } = await env.DB
+    .prepare('SELECT cliente_id, nome_arquivo, validade, atualizado_em FROM certificados')
+    .all();
+
   const clientesComAcessos = clientes.map((cliente: any) => ({
     ...cliente,
     acessos: acessos.filter((a: any) => a.cliente_id === cliente.id),
+    certificado: certificados.find((c: any) => c.cliente_id === cliente.id) || null,
   }));
 
   return new Response(JSON.stringify(clientesComAcessos), {

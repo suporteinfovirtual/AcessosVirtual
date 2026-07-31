@@ -182,6 +182,17 @@
                   @if (abaAtiva() === 'acesso_zeta' && cliente.categoria_nome) {
                     <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
                   }
+                  @if (statusCertificado(cliente); as status) {
+                    <span
+                      class="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      [class.bg-red-500/15]="status === 'vencido'"
+                      [class.text-red-400]="status === 'vencido'"
+                      [class.bg-yellow-500/15]="status === 'alerta'"
+                      [class.text-yellow-400]="status === 'alerta'"
+                    >
+                      {{ status === 'vencido' ? 'Certificado vencido' : 'Certificado vence em breve' }}
+                    </span>
+                  }
                 </button>
 
                 @let acesso = acessoDoTipo(cliente, abaAtiva());
