@@ -78,7 +78,7 @@
             <div class="mt-3 space-y-2">
               @for (img of passo.imagens!; track img.id) {
                 <a [href]="'/api/imagens/' + img.id" target="_blank">
-                  <img [src]="'/api/imagens/' + img.id" alt="Print do passo {{ i + 1 }}" class="max-w-full rounded-lg border border-zinc-800" />
+                  <img [src]="'/api/imagens/' + img.id" alt="Print do passo {{ i + 1 }}" class="max-w-md rounded-lg border border-zinc-800" />
                 </a>
               }
             </div>
@@ -148,7 +148,7 @@
           <div class="mt-2 space-y-2">
             @for (img of passoEmEdicao()!.imagens!; track img.id) {
               <div class="relative">
-                <img [src]="'/api/imagens/' + img.id" alt="Print" class="max-w-full rounded-lg border border-zinc-700" />
+                <img [src]="'/api/imagens/' + img.id" alt="Print" class="max-w-md rounded-lg border border-zinc-700" />
                 <button
                   type="button"
                   class="absolute right-1.5 top-1.5 rounded-full bg-zinc-950/80 p-1 text-red-400 hover:text-red-300"
