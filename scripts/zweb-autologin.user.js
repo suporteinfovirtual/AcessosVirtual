@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zweb Auto-login (painel-clientes)
 // @namespace    painel-clientes
-// @version      1.0
+// @version      1.1
 // @description  Preenche e envia o login do zweb.com.br usando e-mail/senha vindos do link do painel de clientes
 // @match        https://zweb.com.br/*
 // @run-at       document-idle
@@ -52,6 +52,9 @@
     history.replaceState(null, '', location.pathname + location.search + semQuery);
   }
 
+  // o Chrome tem várias senhas salvas para esse domínio e às vezes preenche
+  // os campos sozinho (antes ou depois do nosso preenchimento), por isso
+  // reforçamos o valor certo repetidas vezes antes de clicar em Entrar
   function tentarLogin() {
     const credenciais = lerCredenciais();
     if (!credenciais) return false;
@@ -59,16 +62,21 @@
     const { email, senha } = encontrarCampos();
     if (!email || !senha) return false;
 
-    setNativeValue(email, credenciais.email);
-    setNativeValue(senha, credenciais.senha);
+    const forcarValores = () => {
+      if (email.value !== credenciais.email) setNativeValue(email, credenciais.email);
+      if (senha.value !== credenciais.senha) setNativeValue(senha, credenciais.senha);
+    };
 
-    const botao = encontrarBotaoEntrar();
-    if (botao) {
-      setTimeout(() => {
-        botao.click();
-        limparUrl();
-      }, 150);
-    }
+    forcarValores();
+    const reforco = setInterval(forcarValores, 150);
+
+    setTimeout(() => {
+      clearInterval(reforco);
+      forcarValores();
+      const botao = encontrarBotaoEntrar();
+      if (botao) botao.click();
+      limparUrl();
+    }, 1000);
 
     return true;
   }
