@@ -1,9 +1,9 @@
-<div class="min-h-screen bg-zinc-950">
-  <header class="sticky top-0 z-10 border-b border-zinc-900 bg-zinc-950/90 px-6 py-4 backdrop-blur">
-    <div class="mx-auto flex max-w-5xl items-center gap-3">
+<div class="min-h-screen bg-zinc-950 lg:flex">
+  <aside class="border-b border-zinc-900 bg-zinc-950/90 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
+    <div class="px-4 py-4">
       <button
         type="button"
-        class="shrink-0 rounded"
+        class="rounded"
         title="Voltar ao painel"
         (click)="mostrandoClientesSistemas.set(false)"
       >
@@ -14,253 +14,259 @@
           onerror="this.style.display='none'"
         />
       </button>
-      <span class="h-6 w-px shrink-0 bg-zinc-800"></span>
-      <p class="text-xs text-zinc-500">Painel de acessos de clientes</p>
+    </div>
+
+    <nav class="flex flex-col gap-0.5 px-3 pb-4">
+      @for (aba of abas; track aba.valor) {
+        <button
+          type="button"
+          class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
+          [class.text-accent]="!mostrandoClientesSistemas() && abaAtiva() === aba.valor"
+          [class.text-zinc-500]="mostrandoClientesSistemas() || abaAtiva() !== aba.valor"
+          (click)="mostrandoClientesSistemas.set(false); selecionarAba(aba.valor)"
+        >
+          @if (!mostrandoClientesSistemas() && abaAtiva() === aba.valor) {
+            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
+          }
+          <span>{{ aba.rotulo }}</span>
+          @if (aba.valor !== 'internos' && aba.valor !== 'manuais') {
+            <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
+          }
+        </button>
+      }
 
       <button
         type="button"
-        class="rounded-lg border border-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+        class="mt-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+        [class.text-accent]="mostrandoClientesSistemas()"
         (click)="mostrandoClientesSistemas.set(true)"
       >
         Clientes
       </button>
+    </nav>
 
-      <div class="ml-auto w-56 shrink-0 rounded-lg border border-accent/30 bg-accent/5 px-3 py-1.5">
-        <app-copy-field rotulo="Senha do dia" [valor]="senhaDoDia()" [mono]="true"></app-copy-field>
+    <div class="border-t border-zinc-900 px-4 py-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Meus links</h2>
+        <button
+          type="button"
+          class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
+          (click)="abrirNovoLink()"
+          title="Novo link"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        </button>
       </div>
-    </div>
-  </header>
 
-  <main class="mx-auto max-w-5xl px-6 py-6">
-    @if (mostrandoClientesSistemas()) {
-      <app-clientes-sistemas (voltar)="mostrandoClientesSistemas.set(false)"></app-clientes-sistemas>
-    } @else {
-    <div class="flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-zinc-300">Meus links</h2>
-      <button
-        type="button"
-        class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
-        (click)="abrirNovoLink()"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-        Novo link
-      </button>
-    </div>
-
-    <div class="mt-3">
-      @if (carregandoLinks()) {
-        <p class="py-6 text-center text-sm text-zinc-600">Carregando…</p>
-      } @else if (links().length === 0) {
-        <p class="py-6 text-center text-sm text-zinc-600">Nenhum link cadastrado ainda.</p>
-      } @else {
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-2 flex flex-col gap-0.5">
+        @if (carregandoLinks()) {
+          <p class="px-1 py-2 text-xs text-zinc-600">Carregando…</p>
+        } @else if (links().length === 0) {
+          <p class="px-1 py-2 text-xs text-zinc-600">Nenhum link cadastrado ainda.</p>
+        } @else {
           @for (link of links(); track link.id) {
-            <a
-              [href]="link.url"
-              target="_blank"
-              rel="noopener"
-              class="group relative block cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-accent/60"
-            >
+            <div class="group flex items-center rounded-lg pl-1 pr-0.5 hover:bg-zinc-900">
+              <a
+                [href]="link.url"
+                target="_blank"
+                rel="noopener"
+                class="flex-1 truncate py-1.5 text-sm text-zinc-300 hover:text-accent"
+              >
+                {{ link.titulo }}
+              </a>
               <button
                 type="button"
-                class="absolute right-3 top-3 rounded p-1 text-zinc-600 opacity-0 hover:bg-zinc-800 hover:text-zinc-300 group-hover:opacity-100"
-                (click)="$event.preventDefault(); $event.stopPropagation(); abrirEdicaoLink(link)"
+                class="shrink-0 rounded p-1 text-zinc-600 opacity-0 hover:bg-zinc-800 hover:text-zinc-300 group-hover:opacity-100"
+                (click)="abrirEdicaoLink(link)"
                 title="Editar link"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z"/></svg>
               </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </aside>
 
-              <p class="truncate pr-6 text-sm font-medium text-zinc-100">{{ link.titulo }}</p>
-            </a>
+  <div class="min-w-0 flex-1">
+    <header class="sticky top-0 z-10 border-b border-zinc-900 bg-zinc-950/90 px-6 py-4 backdrop-blur">
+      <div class="flex items-center gap-3">
+        <p class="text-xs text-zinc-500">Painel de acessos de clientes</p>
+
+        <div class="ml-auto w-56 shrink-0 rounded-lg border border-accent/30 bg-accent/5 px-3 py-1.5">
+          <app-copy-field rotulo="Senha do dia" [valor]="senhaDoDia()" [mono]="true"></app-copy-field>
+        </div>
+      </div>
+    </header>
+
+    <main class="px-6 py-6">
+      @if (mostrandoClientesSistemas()) {
+        <app-clientes-sistemas (voltar)="mostrandoClientesSistemas.set(false)"></app-clientes-sistemas>
+      } @else {
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="relative w-full sm:max-w-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input
+              [(ngModel)]="busca"
+              type="text"
+              [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : 'Buscar por nome ou CNPJ…'"
+              class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+          </div>
+
+          @if (!mostrandoInternos() && !mostrandoManuais()) {
+            <div class="flex items-center gap-2">
+              @if (abaAtiva() === 'acesso_web') {
+                <select
+                  [(ngModel)]="servidorFiltro"
+                  class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+                >
+                  <option [ngValue]="null">Todos os servidores</option>
+                  @for (servidor of servidoresDisponiveis(); track servidor) {
+                    <option [ngValue]="servidor">Servidor {{ servidor }}</option>
+                  }
+                </select>
+              }
+              @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
+                <select
+                  [(ngModel)]="contabilidadeFiltro"
+                  class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+                >
+                  <option [ngValue]="null">Todas as contabilidades</option>
+                  @for (contabilidade of contabilidades(); track contabilidade.id) {
+                    <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                  (click)="abrirContabilidades()"
+                  title="Gerenciar contabilidades"
+                >
+                  Contabilidades
+                </button>
+              }
+              @if (abaAtiva() === 'acesso_zeta') {
+                <select
+                  [(ngModel)]="categoriaFiltro"
+                  class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+                >
+                  <option [ngValue]="null">Todas as categorias</option>
+                  @for (categoria of categorias(); track categoria.id) {
+                    <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                  (click)="abrirCategorias()"
+                  title="Gerenciar categorias"
+                >
+                  Categorias
+                </button>
+              }
+              <button
+                type="button"
+                class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+                (click)="abrirNovoCliente()"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Novo cliente
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="mt-5">
+          @if (mostrandoInternos()) {
+            <app-internos-panel [busca]="busca()"></app-internos-panel>
+          } @else if (mostrandoManuais()) {
+            <app-manuais-panel [busca]="busca()"></app-manuais-panel>
+          } @else if (carregandoClientes()) {
+            <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+          } @else if (erro()) {
+            <p class="py-10 text-center text-sm text-red-400">{{ erro() }}</p>
+          } @else if (clientesFiltrados().length === 0) {
+            <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente encontrado nessa categoria.</p>
+          } @else {
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              @for (cliente of clientesFiltrados(); track cliente.id) {
+                <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+                  <button
+                    type="button"
+                    class="mb-3 block w-full text-left"
+                    (click)="abrirEdicaoCliente(cliente)"
+                    title="Editar cliente"
+                  >
+                    <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
+                    @if (cliente.cnpj) {
+                      <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
+                    }
+                    @if (abaAtiva() === 'acesso_zeta' && cliente.categoria_nome) {
+                      <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
+                    }
+                    @if (statusCertificado(cliente); as status) {
+                      <span
+                        class="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium"
+                        [class.bg-red-500/15]="status === 'vencido'"
+                        [class.text-red-400]="status === 'vencido'"
+                        [class.bg-yellow-500/15]="status === 'alerta'"
+                        [class.text-yellow-400]="status === 'alerta'"
+                      >
+                        {{ status === 'vencido' ? 'Certificado vencido' : 'Certificado vence em breve' }}
+                      </span>
+                    }
+                  </button>
+
+                  @let acesso = acessoDoTipo(cliente, abaAtiva());
+                  @if (acesso) {
+                    <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                      @if (abaAtiva() === 'anydesk') {
+                        <app-copy-field rotulo="Código AnyDesk" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
+                        <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                      }
+                      @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
+                        @if (acesso.contabilidade_nome) {
+                          <div class="min-w-0">
+                            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Contabilidade</span>
+                            <span class="block truncate text-sm text-zinc-200">{{ acesso.contabilidade_nome }}</span>
+                          </div>
+                        }
+                        <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.contabilidade_email"></app-copy-field>
+                      }
+                      @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                          @if (acesso.link) {
+                            <a
+                              [href]="abaAtiva() === 'acesso_zeta' ? linkAutoLogin(acesso) : acesso.link"
+                              target="_blank"
+                              rel="noopener"
+                              class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                            >
+                              Abrir link
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                            </a>
+                          }
+                          @if (abaAtiva() === 'acesso_web' && acesso.servidor) {
+                            <span class="ml-auto shrink-0 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-xs font-medium text-zinc-300">
+                              Servidor {{ acesso.servidor }}
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           }
         </div>
       }
-    </div>
-
-    <div class="mt-8 border-t border-zinc-900 pt-6">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="relative w-full sm:max-w-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-          </svg>
-          <input
-            [(ngModel)]="busca"
-            type="text"
-            [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : 'Buscar por nome ou CNPJ…'"
-            class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-          />
-        </div>
-
-        @if (!mostrandoInternos() && !mostrandoManuais()) {
-          <div class="flex items-center gap-2">
-            @if (abaAtiva() === 'acesso_web') {
-              <select
-                [(ngModel)]="servidorFiltro"
-                class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-              >
-                <option [ngValue]="null">Todos os servidores</option>
-                @for (servidor of servidoresDisponiveis(); track servidor) {
-                  <option [ngValue]="servidor">Servidor {{ servidor }}</option>
-                }
-              </select>
-            }
-            @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-              <select
-                [(ngModel)]="contabilidadeFiltro"
-                class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-              >
-                <option [ngValue]="null">Todas as contabilidades</option>
-                @for (contabilidade of contabilidades(); track contabilidade.id) {
-                  <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
-                }
-              </select>
-              <button
-                type="button"
-                class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                (click)="abrirContabilidades()"
-                title="Gerenciar contabilidades"
-              >
-                Contabilidades
-              </button>
-            }
-            @if (abaAtiva() === 'acesso_zeta') {
-              <select
-                [(ngModel)]="categoriaFiltro"
-                class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-              >
-                <option [ngValue]="null">Todas as categorias</option>
-                @for (categoria of categorias(); track categoria.id) {
-                  <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-                }
-              </select>
-              <button
-                type="button"
-                class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                (click)="abrirCategorias()"
-                title="Gerenciar categorias"
-              >
-                Categorias
-              </button>
-            }
-            <button
-              type="button"
-              class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
-              (click)="abrirNovoCliente()"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-              Novo cliente
-            </button>
-          </div>
-        }
-      </div>
-
-      <div class="mt-5 flex gap-1 border-b border-zinc-900">
-        @for (aba of abas; track aba.valor) {
-          <button
-            type="button"
-            class="relative px-4 py-2.5 text-sm font-medium transition"
-            [class.text-accent]="abaAtiva() === aba.valor"
-            [class.text-zinc-500]="abaAtiva() !== aba.valor"
-            (click)="selecionarAba(aba.valor)"
-          >
-            {{ aba.rotulo }}
-            @if (aba.valor !== 'internos' && aba.valor !== 'manuais') {
-              <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
-            }
-            @if (abaAtiva() === aba.valor) {
-              <span class="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent"></span>
-            }
-          </button>
-        }
-      </div>
-
-      <div class="mt-5">
-        @if (mostrandoInternos()) {
-          <app-internos-panel [busca]="busca()"></app-internos-panel>
-        } @else if (mostrandoManuais()) {
-          <app-manuais-panel [busca]="busca()"></app-manuais-panel>
-        } @else if (carregandoClientes()) {
-          <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
-        } @else if (erro()) {
-          <p class="py-10 text-center text-sm text-red-400">{{ erro() }}</p>
-        } @else if (clientesFiltrados().length === 0) {
-          <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente encontrado nessa categoria.</p>
-        } @else {
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @for (cliente of clientesFiltrados(); track cliente.id) {
-              <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
-                <button
-                  type="button"
-                  class="mb-3 block w-full text-left"
-                  (click)="abrirEdicaoCliente(cliente)"
-                  title="Editar cliente"
-                >
-                  <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
-                  @if (cliente.cnpj) {
-                    <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
-                  }
-                  @if (abaAtiva() === 'acesso_zeta' && cliente.categoria_nome) {
-                    <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
-                  }
-                  @if (statusCertificado(cliente); as status) {
-                    <span
-                      class="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium"
-                      [class.bg-red-500/15]="status === 'vencido'"
-                      [class.text-red-400]="status === 'vencido'"
-                      [class.bg-yellow-500/15]="status === 'alerta'"
-                      [class.text-yellow-400]="status === 'alerta'"
-                    >
-                      {{ status === 'vencido' ? 'Certificado vencido' : 'Certificado vence em breve' }}
-                    </span>
-                  }
-                </button>
-
-                @let acesso = acessoDoTipo(cliente, abaAtiva());
-                @if (acesso) {
-                  <div class="space-y-1.5 border-t border-zinc-800 pt-3">
-                    @if (abaAtiva() === 'anydesk') {
-                      <app-copy-field rotulo="Código AnyDesk" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
-                      <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
-                    }
-                    @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-                      @if (acesso.contabilidade_nome) {
-                        <div class="min-w-0">
-                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Contabilidade</span>
-                          <span class="block truncate text-sm text-zinc-200">{{ acesso.contabilidade_nome }}</span>
-                        </div>
-                      }
-                      <app-copy-field rotulo="E-mail Contabilidade" [valor]="acesso.contabilidade_email"></app-copy-field>
-                    }
-                    @if (acesso.link || (abaAtiva() === 'acesso_web' && acesso.servidor)) {
-                      <div class="mt-1 flex items-center justify-between gap-2">
-                        @if (acesso.link) {
-                          <a
-                            [href]="abaAtiva() === 'acesso_zeta' ? linkAutoLogin(acesso) : acesso.link"
-                            target="_blank"
-                            rel="noopener"
-                            class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
-                          >
-                            Abrir link
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                          </a>
-                        }
-                        @if (abaAtiva() === 'acesso_web' && acesso.servidor) {
-                          <span class="ml-auto shrink-0 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-xs font-medium text-zinc-300">
-                            Servidor {{ acesso.servidor }}
-                          </span>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-    }
-  </main>
+    </main>
+  </div>
 
   @if (linkModalAberto()) {
     <app-link-modal
