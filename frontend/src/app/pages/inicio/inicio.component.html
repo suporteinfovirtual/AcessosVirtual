@@ -209,7 +209,7 @@
                       <div class="mt-1 flex items-center justify-between gap-2">
                         @if (acesso.link) {
                           <a
-                            [href]="acesso.link"
+                            [href]="abaAtiva() === 'acesso_zeta' ? linkAutoLogin(acesso) : acesso.link"
                             target="_blank"
                             rel="noopener"
                             class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"

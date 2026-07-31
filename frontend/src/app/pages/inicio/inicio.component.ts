@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Categoria, Cliente, Contabilidade, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
+import { Acesso, Categoria, Cliente, Contabilidade, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
 import { ClientesService } from '../../core/clientes.service';
 import { CategoriasService } from '../../core/categorias.service';
 import { ContabilidadesService } from '../../core/contabilidades.service';
@@ -200,6 +200,16 @@ export class InicioComponent implements OnInit {
   acessoDoTipo(cliente: Cliente, tipo: Aba) {
     if (tipo === 'internos') return undefined;
     return cliente.acessos?.find((a) => a.tipo === tipo);
+  }
+
+  // o userscript de auto-login do zweb lê zw_e/zw_p do hash da URL para preencher o formulário sozinho
+  linkAutoLogin(acesso: Acesso): string {
+    const link = acesso.link || '';
+    if (!link || !acesso.identificador || !acesso.senha) return link;
+    const [base, hash = ''] = link.split('#');
+    const caminho = hash.split('?')[0];
+    const params = new URLSearchParams({ zw_e: acesso.identificador, zw_p: acesso.senha }).toString();
+    return `${base}#${caminho}?${params}`;
   }
 
   abrirNovoCliente() {
