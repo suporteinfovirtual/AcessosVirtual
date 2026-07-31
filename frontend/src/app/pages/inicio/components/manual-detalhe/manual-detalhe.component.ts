@@ -98,11 +98,19 @@ export class ManualDetalheComponent implements OnInit {
     }
   }
 
-  async aoSelecionarImagem(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const arquivo = input.files?.[0];
-    input.value = '';
-    if (arquivo) await this.enviarImagem(arquivo);
+  // deixa arrastar e soltar uma ou mais imagens direto na caixa de texto do passo
+  aoArrastarSobre(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  async aoSoltarImagem(event: DragEvent) {
+    event.preventDefault();
+    const arquivos = event.dataTransfer?.files;
+    if (!arquivos) return;
+
+    for (const arquivo of Array.from(arquivos)) {
+      if (arquivo.type.startsWith('image/')) await this.enviarImagem(arquivo);
+    }
   }
 
   private async enviarImagem(arquivo: File) {
