@@ -1,0 +1,48 @@
+@if (manualAbertoId(); as id) {
+  <app-manual-detalhe [manualId]="id" (voltar)="voltarParaLista()" (removido)="voltarParaLista()"></app-manual-detalhe>
+} @else {
+  <div>
+    @if (carregando()) {
+      <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+    } @else if (manuaisFiltrados().length === 0) {
+      <p class="py-10 text-center text-sm text-zinc-600">
+        {{ manuais().length === 0 ? 'Nenhum manual cadastrado ainda.' : 'Nenhum manual encontrado.' }}
+      </p>
+    }
+
+    @if (manuaisFiltrados().length > 0) {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @for (manual of manuaisFiltrados(); track manual.id) {
+          <button
+            type="button"
+            class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-accent/50"
+            (click)="abrirManual(manual)"
+          >
+            <p class="truncate text-sm font-medium text-zinc-100">{{ manual.titulo }}</p>
+            @if (manual.descricao) {
+              <p class="mt-1 line-clamp-2 text-xs text-zinc-500">{{ manual.descricao }}</p>
+            }
+            <p class="mt-2 text-[11px] text-zinc-600">{{ manual.total_passos }} passo{{ manual.total_passos === 1 ? '' : 's' }}</p>
+          </button>
+        }
+      </div>
+    }
+
+    <button
+      type="button"
+      class="mt-5 flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-accent"
+      (click)="abrirNovo()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+      Novo manual
+    </button>
+  </div>
+
+  @if (modalAberto()) {
+    <app-manual-modal
+      [manual]="manualEmEdicao()"
+      (fechar)="fecharModal()"
+      (salvo)="aoSalvar()"
+    ></app-manual-modal>
+  }
+}

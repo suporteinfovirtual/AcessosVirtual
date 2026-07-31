@@ -12,8 +12,9 @@ import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
+import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
 
-type Aba = TipoAcesso | 'internos';
+type Aba = TipoAcesso | 'internos' | 'manuais';
 
 @Component({
   selector: 'app-inicio',
@@ -25,6 +26,7 @@ type Aba = TipoAcesso | 'internos';
     InternosPanelComponent,
     CategoriasModalComponent,
     ContabilidadesModalComponent,
+    ManuaisPanelComponent,
   ],
   templateUrl: './inicio.component.html',
 })
@@ -42,7 +44,11 @@ export class InicioComponent implements OnInit {
   linkEmEdicao = signal<LinkPessoal | null>(null);
 
   // --- painel de clientes ---
-  readonly abas: { valor: Aba; rotulo: string }[] = [...TIPOS_ACESSO, { valor: 'internos', rotulo: 'Contas Internas' }];
+  readonly abas: { valor: Aba; rotulo: string }[] = [
+    ...TIPOS_ACESSO,
+    { valor: 'manuais', rotulo: 'Manuais' },
+    { valor: 'internos', rotulo: 'Contas Internas' },
+  ];
 
   clientes = signal<Cliente[]>([]);
   categorias = signal<Categoria[]>([]);
@@ -64,7 +70,10 @@ export class InicioComponent implements OnInit {
   senhaDoDia = signal(this.calcularSenhaDoDia());
 
   mostrandoInternos = computed(() => this.abaAtiva() === 'internos');
-  tipoInicialModal = computed<TipoAcesso | null>(() => (this.mostrandoInternos() ? null : (this.abaAtiva() as TipoAcesso)));
+  mostrandoManuais = computed(() => this.abaAtiva() === 'manuais');
+  tipoInicialModal = computed<TipoAcesso | null>(() =>
+    this.mostrandoInternos() || this.mostrandoManuais() ? null : (this.abaAtiva() as TipoAcesso)
+  );
 
   clientesFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
@@ -72,7 +81,7 @@ export class InicioComponent implements OnInit {
     const categoriaId = this.categoriaFiltro();
     const servidor = this.servidorFiltro();
     const contabilidade = this.contabilidadeFiltro();
-    if (tipo === 'internos') return [];
+    if (tipo === 'internos' || tipo === 'manuais') return [];
 
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))

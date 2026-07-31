@@ -68,12 +68,12 @@
           <input
             [(ngModel)]="busca"
             type="text"
-            [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : 'Buscar por nome ou CNPJ…'"
+            [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : 'Buscar por nome ou CNPJ…'"
             class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
           />
         </div>
 
-        @if (!mostrandoInternos()) {
+        @if (!mostrandoInternos() && !mostrandoManuais()) {
           <div class="flex items-center gap-2">
             @if (abaAtiva() === 'acesso_web') {
               <select
@@ -146,7 +146,7 @@
             (click)="selecionarAba(aba.valor)"
           >
             {{ aba.rotulo }}
-            @if (aba.valor !== 'internos') {
+            @if (aba.valor !== 'internos' && aba.valor !== 'manuais') {
               <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
             }
             @if (abaAtiva() === aba.valor) {
@@ -159,6 +159,8 @@
       <div class="mt-5">
         @if (mostrandoInternos()) {
           <app-internos-panel [busca]="busca()"></app-internos-panel>
+        } @else if (mostrandoManuais()) {
+          <app-manuais-panel [busca]="busca()"></app-manuais-panel>
         } @else if (carregandoClientes()) {
           <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
         } @else if (erro()) {

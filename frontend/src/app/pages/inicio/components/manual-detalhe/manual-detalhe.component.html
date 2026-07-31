@@ -1,0 +1,184 @@
+<div>
+  <button
+    type="button"
+    class="mb-4 flex items-center gap-1 text-sm font-medium text-zinc-400 hover:text-zinc-200"
+    (click)="voltar.emit()"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+    Voltar aos manuais
+  </button>
+
+  @if (carregando()) {
+    <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+  } @else if (manual(); as m) {
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h2 class="text-lg font-semibold text-zinc-100">{{ m.titulo }}</h2>
+        @if (m.descricao) {
+          <p class="mt-1 text-sm text-zinc-500">{{ m.descricao }}</p>
+        }
+      </div>
+      <button
+        type="button"
+        class="shrink-0 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+        (click)="abrirEdicaoManual()"
+      >
+        Editar manual
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      @for (passo of m.passos; track passo.id; let i = $index; let total = $count) {
+        <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-sm font-semibold text-accent">Passo {{ i + 1 }}</p>
+            <div class="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                [disabled]="i === 0"
+                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
+                title="Mover pra cima"
+                (click)="moverPasso(passo, -1)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" /></svg>
+              </button>
+              <button
+                type="button"
+                [disabled]="i === total - 1"
+                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
+                title="Mover pra baixo"
+                (click)="moverPasso(passo, 1)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+              </button>
+              <button
+                type="button"
+                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                title="Editar passo"
+                (click)="abrirEdicaoPasso(passo)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" /></svg>
+              </button>
+              <button
+                type="button"
+                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-red-400"
+                title="Remover passo"
+                (click)="removerPasso(passo)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+              </button>
+            </div>
+          </div>
+
+          @if (passo.texto) {
+            <p class="mt-2 whitespace-pre-line text-sm text-zinc-300">{{ passo.texto }}</p>
+          }
+
+          @if (passo.tem_imagem) {
+            <img [src]="'/api/passos/' + passo.id + '/imagem'" alt="Print do passo {{ i + 1 }}" class="mt-3 max-w-full rounded-lg border border-zinc-800" />
+          }
+
+          @if (passo.arquivo_nome) {
+            <button
+              type="button"
+              class="mt-3 flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-hover"
+              (click)="baixarArquivoPasso(passo)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+              {{ passo.arquivo_nome }}
+            </button>
+          }
+        </div>
+      } @empty {
+        <p class="py-6 text-center text-sm text-zinc-600">Esse manual ainda não tem passos.</p>
+      }
+    </div>
+
+    @if (formPassoAberto()) {
+      <div class="mt-4 space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+        <div>
+          <label class="mb-1 block text-xs text-zinc-500">Passo a passo</label>
+          <textarea
+            [ngModel]="textoPasso()"
+            (ngModelChange)="textoPasso.set($event)"
+            name="texto_passo"
+            rows="4"
+            placeholder="Descreva esse passo…"
+            class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs text-zinc-500">Print (imagem)</label>
+            <input
+              type="file"
+              accept="image/*"
+              (change)="aoSelecionarImagem($event)"
+              class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+            />
+            @if (removerImagemPasso()) {
+              <p class="mt-1 text-[11px] text-zinc-500">A imagem atual será removida ao salvar.</p>
+            } @else if (passoEmEdicao()?.tem_imagem && !imagemPasso()) {
+              <p class="mt-1 text-[11px] text-zinc-500">
+                Já tem uma imagem.
+                <button type="button" class="text-red-400 hover:text-red-300" (click)="marcarRemoverImagem()">Remover</button>
+              </p>
+            }
+          </div>
+          <div>
+            <label class="mb-1 block text-xs text-zinc-500">Arquivo anexo</label>
+            <input
+              type="file"
+              (change)="aoSelecionarArquivo($event)"
+              class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+            />
+            @if (removerArquivoPasso()) {
+              <p class="mt-1 text-[11px] text-zinc-500">O arquivo atual será removido ao salvar.</p>
+            } @else if (passoEmEdicao()?.arquivo_nome && !arquivoPasso()) {
+              <p class="mt-1 truncate text-[11px] text-zinc-500">
+                Já tem "{{ passoEmEdicao()?.arquivo_nome }}".
+                <button type="button" class="text-red-400 hover:text-red-300" (click)="marcarRemoverArquivo()">Remover</button>
+              </p>
+            }
+          </div>
+        </div>
+
+        @if (erroPasso()) {
+          <p class="text-xs text-red-400">{{ erroPasso() }}</p>
+        }
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            [disabled]="salvandoPasso()"
+            class="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            (click)="salvarPasso()"
+          >
+            {{ salvandoPasso() ? 'Salvando…' : 'Salvar passo' }}
+          </button>
+          <button type="button" class="rounded-md px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800" (click)="cancelarPasso()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="mt-4 flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-accent"
+        (click)="abrirNovoPasso()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Adicionar passo
+      </button>
+    }
+  }
+</div>
+
+@if (modalManualAberto()) {
+  <app-manual-modal
+    [manual]="manual()"
+    (fechar)="fecharModalManual()"
+    (salvo)="aoSalvarManual()"
+  ></app-manual-modal>
+}
