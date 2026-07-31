@@ -101,9 +101,10 @@
           <textarea
             [ngModel]="textoPasso()"
             (ngModelChange)="textoPasso.set($event)"
+            (paste)="aoColarImagem($event)"
             name="texto_passo"
             rows="4"
-            placeholder="Descreva esse passo…"
+            placeholder="Descreva esse passo… (dá pra colar um print aqui com Ctrl+V)"
             class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
           ></textarea>
         </div>
@@ -111,6 +112,12 @@
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs text-zinc-500">Print (imagem)</label>
+            @if (imagemPreviewUrl()) {
+              <div class="mb-2 flex items-center gap-2">
+                <img [src]="imagemPreviewUrl()" alt="Prévia do print" class="h-16 w-16 rounded-md border border-zinc-700 object-cover" />
+                <button type="button" class="text-xs text-red-400 hover:text-red-300" (click)="marcarRemoverImagem()">Remover</button>
+              </div>
+            }
             <input
               type="file"
               accept="image/*"

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Manual, ManualPasso } from '../../../../core/models';
@@ -10,7 +10,7 @@ import { ManualModalComponent } from '../manual-modal/manual-modal.component';
   imports: [FormsModule, ManualModalComponent],
   templateUrl: './manual-detalhe.component.html',
 })
-export class ManualDetalheComponent implements OnInit {
+export class ManualDetalheComponent implements OnInit, OnDestroy {
   private manuaisService = inject(ManuaisService);
 
   manualId = input.required<number>();
@@ -26,6 +26,7 @@ export class ManualDetalheComponent implements OnInit {
   passoEmEdicaoId = signal<number | null>(null);
   textoPasso = signal('');
   imagemPasso = signal<File | null>(null);
+  imagemPreviewUrl = signal<string | null>(null);
   arquivoPasso = signal<File | null>(null);
   removerImagemPasso = signal(false);
   removerArquivoPasso = signal(false);
@@ -34,6 +35,10 @@ export class ManualDetalheComponent implements OnInit {
 
   ngOnInit() {
     this.carregar();
+  }
+
+  ngOnDestroy() {
+    this.limparPreviewImagem();
   }
 
   async carregar() {
@@ -49,7 +54,7 @@ export class ManualDetalheComponent implements OnInit {
   abrirNovoPasso() {
     this.passoEmEdicaoId.set(null);
     this.textoPasso.set('');
-    this.imagemPasso.set(null);
+    this.limparPreviewImagem();
     this.arquivoPasso.set(null);
     this.removerImagemPasso.set(false);
     this.removerArquivoPasso.set(false);
@@ -60,7 +65,7 @@ export class ManualDetalheComponent implements OnInit {
   abrirEdicaoPasso(passo: ManualPasso) {
     this.passoEmEdicaoId.set(passo.id!);
     this.textoPasso.set(passo.texto || '');
-    this.imagemPasso.set(null);
+    this.limparPreviewImagem();
     this.arquivoPasso.set(null);
     this.removerImagemPasso.set(false);
     this.removerArquivoPasso.set(false);
@@ -70,6 +75,7 @@ export class ManualDetalheComponent implements OnInit {
 
   cancelarPasso() {
     this.formPassoAberto.set(false);
+    this.limparPreviewImagem();
   }
 
   passoEmEdicao(): ManualPasso | null {
@@ -80,8 +86,38 @@ export class ManualDetalheComponent implements OnInit {
 
   aoSelecionarImagem(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.imagemPasso.set(input.files?.[0] || null);
+    this.definirImagemPasso(input.files?.[0] || null);
+  }
+
+  // deixa colar um print direto (Ctrl+V) no textarea, sem precisar escolher o arquivo de imagem
+  aoColarImagem(event: ClipboardEvent) {
+    const itens = event.clipboardData?.items;
+    if (!itens) return;
+
+    for (const item of itens) {
+      if (item.type.startsWith('image/')) {
+        const arquivo = item.getAsFile();
+        if (arquivo) {
+          event.preventDefault();
+          this.definirImagemPasso(arquivo);
+        }
+        break;
+      }
+    }
+  }
+
+  private definirImagemPasso(arquivo: File | null) {
+    this.limparPreviewImagem();
+    this.imagemPasso.set(arquivo);
     this.removerImagemPasso.set(false);
+    if (arquivo) this.imagemPreviewUrl.set(URL.createObjectURL(arquivo));
+  }
+
+  private limparPreviewImagem() {
+    const url = this.imagemPreviewUrl();
+    if (url) URL.revokeObjectURL(url);
+    this.imagemPreviewUrl.set(null);
+    this.imagemPasso.set(null);
   }
 
   aoSelecionarArquivo(event: Event) {
@@ -91,7 +127,7 @@ export class ManualDetalheComponent implements OnInit {
   }
 
   marcarRemoverImagem() {
-    this.imagemPasso.set(null);
+    this.limparPreviewImagem();
     this.removerImagemPasso.set(true);
   }
 
@@ -131,6 +167,7 @@ export class ManualDetalheComponent implements OnInit {
         await firstValueFrom(this.manuaisService.adicionarPasso(manual.id!, dados));
       }
       this.formPassoAberto.set(false);
+      this.limparPreviewImagem();
       await this.carregar();
     } catch {
       this.erroPasso.set('Não foi possível salvar o passo.');
