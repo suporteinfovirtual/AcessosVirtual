@@ -5,7 +5,7 @@
         type="button"
         class="rounded"
         title="Voltar ao painel"
-        (click)="mostrandoClientesSistemas.set(false)"
+        (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false)"
       >
         <img
           src="logo.jpeg"
@@ -21,11 +21,11 @@
         <button
           type="button"
           class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
-          [class.text-accent]="!mostrandoClientesSistemas() && abaAtiva() === aba.valor"
-          [class.text-zinc-500]="mostrandoClientesSistemas() || abaAtiva() !== aba.valor"
-          (click)="mostrandoClientesSistemas.set(false); selecionarAba(aba.valor)"
+          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
+          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
         >
-          @if (!mostrandoClientesSistemas() && abaAtiva() === aba.valor) {
+          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
           }
           <span>{{ aba.rotulo }}</span>
@@ -39,9 +39,18 @@
         type="button"
         class="mt-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
         [class.text-accent]="mostrandoClientesSistemas()"
-        (click)="mostrandoClientesSistemas.set(true)"
+        (click)="mostrandoEnviosContabilidade.set(false); mostrandoClientesSistemas.set(true)"
       >
         Clientes
+      </button>
+
+      <button
+        type="button"
+        class="mt-1 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+        [class.text-accent]="mostrandoEnviosContabilidade()"
+        (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(true)"
+      >
+        Envios contabilidade
       </button>
     </nav>
 
@@ -103,6 +112,8 @@
     <main class="px-6 py-6">
       @if (mostrandoClientesSistemas()) {
         <app-clientes-sistemas (voltar)="mostrandoClientesSistemas.set(false)"></app-clientes-sistemas>
+      } @else if (mostrandoEnviosContabilidade()) {
+        <app-envios-contabilidade-panel (voltar)="mostrandoEnviosContabilidade.set(false)"></app-envios-contabilidade-panel>
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="relative w-full sm:max-w-sm">

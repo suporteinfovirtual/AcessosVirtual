@@ -14,6 +14,7 @@ import { CategoriasModalComponent } from './components/categorias-modal/categori
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
 import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
+import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais';
 
@@ -29,6 +30,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais';
     ContabilidadesModalComponent,
     ManuaisPanelComponent,
     ClientesSistemasComponent,
+    EnviosContabilidadePanelComponent,
   ],
   templateUrl: './inicio.component.html',
 })
@@ -41,6 +43,9 @@ export class InicioComponent implements OnInit {
 
   // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
   mostrandoClientesSistemas = signal(false);
+
+  // --- área separada "Envios para a contabilidade" ---
+  mostrandoEnviosContabilidade = signal(false);
 
   // --- links pessoais ---
   links = signal<LinkPessoal[]>([]);
