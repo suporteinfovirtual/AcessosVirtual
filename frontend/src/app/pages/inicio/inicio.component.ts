@@ -13,6 +13,7 @@ import { InternosPanelComponent } from './components/internos-panel/internos-pan
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
+import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais';
 
@@ -27,6 +28,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais';
     CategoriasModalComponent,
     ContabilidadesModalComponent,
     ManuaisPanelComponent,
+    ClientesSistemasComponent,
   ],
   templateUrl: './inicio.component.html',
 })
@@ -36,6 +38,9 @@ export class InicioComponent implements OnInit {
   private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
   private destroyRef = inject(DestroyRef);
+
+  // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
+  mostrandoClientesSistemas = signal(false);
 
   // --- links pessoais ---
   links = signal<LinkPessoal[]>([]);

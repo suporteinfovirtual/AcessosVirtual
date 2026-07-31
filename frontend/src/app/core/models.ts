@@ -95,3 +95,24 @@ export const TIPOS_ACESSO: { valor: TipoAcesso; rotulo: string }[] = [
   { valor: 'acesso_web', rotulo: 'Acesso Web' },
   { valor: 'acesso_zeta', rotulo: 'Acesso Zeta' },
 ];
+
+export type Sistema = 'uniplus' | 'uniplus_web' | 'sgbr' | 'zeta';
+
+export interface ClienteSistema {
+  id?: number;
+  sistema: Sistema;
+  nome: string;
+  cnpj?: string | null;
+  licencas?: string | null;
+  enquadramento_fiscal?: string | null;
+  versao_build?: string | null;
+  observacoes?: string | null;
+  criado_em?: string;
+}
+
+export const SISTEMAS: { valor: Sistema; rotulo: string; temVersaoBuild: boolean }[] = [
+  { valor: 'uniplus', rotulo: 'Uniplus', temVersaoBuild: true },
+  { valor: 'uniplus_web', rotulo: 'Uniplus Web', temVersaoBuild: true },
+  { valor: 'sgbr', rotulo: 'SGBR', temVersaoBuild: false },
+  { valor: 'zeta', rotulo: 'Zeta', temVersaoBuild: false },
+];
