@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   cnpj TEXT,
   observacoes TEXT,
   categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
+  licencas TEXT, -- usado no Acesso Zeta / Clientes > Zeta
+  enquadramento_fiscal TEXT, -- usado no Acesso Zeta / Clientes > Zeta
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

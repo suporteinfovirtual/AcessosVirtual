@@ -42,6 +42,8 @@ export class ClienteModalComponent implements OnInit {
   cnpj = signal('');
   observacoes = signal('');
   categoriaId = signal<number | null>(null);
+  licencas = signal('');
+  enquadramentoFiscal = signal('');
   categorias = signal<Categoria[]>([]);
   contabilidades = signal<Contabilidade[]>([]);
 
@@ -84,6 +86,8 @@ export class ClienteModalComponent implements OnInit {
       this.cnpj.set(cliente.cnpj || '');
       this.observacoes.set(cliente.observacoes || '');
       this.categoriaId.set(cliente.categoria_id || null);
+      this.licencas.set(cliente.licencas || '');
+      this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.certificado.set(cliente.certificado || null);
 
       for (const acesso of cliente.acessos || []) {
@@ -137,6 +141,8 @@ export class ClienteModalComponent implements OnInit {
       cnpj: somenteDigitos(this.cnpj()) || null,
       observacoes: this.observacoes().trim() || null,
       categoria_id: this.categoriaId(),
+      licencas: this.licencas().trim() || null,
+      enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
     };
 
     try {

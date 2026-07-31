@@ -35,7 +35,14 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
-  let body: { nome?: string; cnpj?: string; observacoes?: string; categoria_id?: number | null };
+  let body: {
+    nome?: string;
+    cnpj?: string;
+    observacoes?: string;
+    categoria_id?: number | null;
+    licencas?: string;
+    enquadramento_fiscal?: string;
+  };
   try {
     body = await request.json();
   } catch {
@@ -47,8 +54,18 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   }
 
   await env.DB
-    .prepare('UPDATE clientes SET nome = ?, cnpj = ?, observacoes = ?, categoria_id = ? WHERE id = ?')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null, body.categoria_id || null, params.id)
+    .prepare(
+      'UPDATE clientes SET nome = ?, cnpj = ?, observacoes = ?, categoria_id = ?, licencas = ?, enquadramento_fiscal = ? WHERE id = ?'
+    )
+    .bind(
+      body.nome.trim(),
+      body.cnpj?.trim() || null,
+      body.observacoes?.trim() || null,
+      body.categoria_id || null,
+      body.licencas?.trim() || null,
+      body.enquadramento_fiscal?.trim() || null,
+      params.id
+    )
     .run();
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });

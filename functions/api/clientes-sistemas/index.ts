@@ -2,7 +2,8 @@ interface Env {
   DB: D1Database;
 }
 
-const SISTEMAS = ['uniplus', 'uniplus_web', 'sgbr', 'zeta'];
+// zeta não entra aqui - agora usa direto a tabela clientes/acessos (unificado com o Acesso Zeta)
+const SISTEMAS = ['uniplus', 'uniplus_web', 'sgbr'];
 
 // GET /api/clientes-sistemas?sistema=uniplus&busca=texto -> lista os clientes de um sistema
 export async function onRequestGet(context: EventContext<Env, string, unknown>) {

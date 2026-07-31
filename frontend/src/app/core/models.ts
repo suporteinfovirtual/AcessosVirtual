@@ -30,6 +30,8 @@ export interface Cliente {
   observacoes?: string | null;
   categoria_id?: number | null;
   categoria_nome?: string | null;
+  licencas?: string | null;
+  enquadramento_fiscal?: string | null;
   criado_em?: string;
   acessos?: Acesso[];
   certificado?: CertificadoDigital | null;

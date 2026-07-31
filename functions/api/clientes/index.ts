@@ -74,6 +74,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     cnpj?: string;
     observacoes?: string;
     categoria_id?: number | null;
+    licencas?: string;
+    enquadramento_fiscal?: string;
     acessos?: AcessoInput[];
   };
   try {
@@ -87,8 +89,17 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
   }
 
   const resultadoCliente = await env.DB
-    .prepare('INSERT INTO clientes (nome, cnpj, observacoes, categoria_id) VALUES (?, ?, ?, ?)')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.observacoes?.trim() || null, body.categoria_id || null)
+    .prepare(
+      'INSERT INTO clientes (nome, cnpj, observacoes, categoria_id, licencas, enquadramento_fiscal) VALUES (?, ?, ?, ?, ?, ?)'
+    )
+    .bind(
+      body.nome.trim(),
+      body.cnpj?.trim() || null,
+      body.observacoes?.trim() || null,
+      body.categoria_id || null,
+      body.licencas?.trim() || null,
+      body.enquadramento_fiscal?.trim() || null
+    )
     .run();
 
   const clienteId = resultadoCliente.meta.last_row_id;
