@@ -174,10 +174,12 @@ export class ManualDetalheComponent implements OnInit {
 
     try {
       if (passoId) {
+        // já existia - salva e fecha o formulário
         await firstValueFrom(this.manuaisService.atualizarPasso(passoId, dados));
+        this.formPassoAberto.set(false);
       } else {
+        // passo novo - continua no modo edição do passo recém-criado, pra já poder colar imagens nele
         const resultado = await firstValueFrom(this.manuaisService.adicionarPasso(manual.id!, dados));
-        // continua no modo edição do passo recém-criado, pra já poder colar imagens nele
         this.passoEmEdicaoId.set(resultado.id);
       }
       this.arquivoPasso.set(null);
