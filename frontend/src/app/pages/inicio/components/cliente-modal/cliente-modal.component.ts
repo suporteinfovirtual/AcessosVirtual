@@ -224,6 +224,25 @@ export class ClienteModalComponent implements OnInit {
     this.formCertificadoAberto.set(false);
   }
 
+  async baixarCertificado() {
+    const clienteId = this.cliente()?.id;
+    const nomeArquivo = this.certificado()?.nome_arquivo || 'certificado.pfx';
+    if (!clienteId) return;
+
+    this.erroCertificado.set('');
+    try {
+      const blob = await firstValueFrom(this.clientesService.baixarCertificado(clienteId));
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = nomeArquivo;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.erroCertificado.set('Não foi possível baixar o certificado.');
+    }
+  }
+
   aoSelecionarArquivoCertificado(event: Event) {
     const input = event.target as HTMLInputElement;
     this.arquivoCertificado.set(input.files?.[0] || null);

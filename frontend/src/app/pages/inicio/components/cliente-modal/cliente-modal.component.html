@@ -82,14 +82,17 @@
                 }
               </div>
               <div class="flex shrink-0 items-center gap-3 text-xs font-medium">
-                <a [href]="'/api/clientes/' + cliente()!.id + '/certificado'" target="_blank" class="text-accent hover:text-accent-hover">
+                <button type="button" class="text-accent hover:text-accent-hover" (click)="baixarCertificado()">
                   Baixar
-                </a>
+                </button>
                 <button type="button" class="text-zinc-400 hover:text-zinc-200" (click)="abrirFormCertificado()">
                   Alterar
                 </button>
               </div>
             </div>
+            @if (erroCertificado()) {
+              <p class="mt-2 text-xs text-red-400">{{ erroCertificado() }}</p>
+            }
           }
 
           @if (editando && !certificado() && !formCertificadoAberto()) {

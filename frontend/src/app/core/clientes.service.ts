@@ -48,4 +48,8 @@ export class ClientesService {
     if (validade) form.append('validade', validade);
     return this.http.post<{ ok: true }>(`/api/clientes/${clienteId}/certificado`, form);
   }
+
+  baixarCertificado(clienteId: number): Observable<Blob> {
+    return this.http.get(`/api/clientes/${clienteId}/certificado`, { responseType: 'blob' });
+  }
 }
