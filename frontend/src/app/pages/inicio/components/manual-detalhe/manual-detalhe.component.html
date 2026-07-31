@@ -28,28 +28,28 @@
     </div>
 
     <div class="space-y-4">
-      @for (passo of m.passos; track passo.id; let i = $index; let total = $count) {
+      @for (passo of m.passos; track passo.id; let i = $index) {
         <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
           <div class="flex items-start justify-between gap-3">
             <p class="text-sm font-semibold text-accent">Passo {{ i + 1 }}</p>
             <div class="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                [disabled]="i === 0"
-                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
-                title="Mover pra cima"
-                (click)="moverPasso(passo, -1)"
+                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                [title]="estaRecolhido(passo.id!) ? 'Mostrar passo' : 'Esconder passo'"
+                (click)="alternarRecolhido(passo.id!)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" /></svg>
-              </button>
-              <button
-                type="button"
-                [disabled]="i === total - 1"
-                class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
-                title="Mover pra baixo"
-                (click)="moverPasso(passo, 1)"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="h-4 w-4 transition-transform"
+                  [class.-rotate-90]="estaRecolhido(passo.id!)"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
               </button>
               <button
                 type="button"
@@ -70,29 +70,31 @@
             </div>
           </div>
 
-          @if (passo.texto) {
-            <p class="mt-2 whitespace-pre-line text-sm text-zinc-300">{{ passo.texto }}</p>
-          }
+          @if (!estaRecolhido(passo.id!)) {
+            @if (passo.texto) {
+              <p class="mt-2 whitespace-pre-line text-sm text-zinc-300">{{ passo.texto }}</p>
+            }
 
-          @if (passo.imagens?.length) {
-            <div class="mt-3 space-y-2">
-              @for (img of passo.imagens!; track img.id) {
-                <a [href]="'/api/imagens/' + img.id" target="_blank">
-                  <img [src]="'/api/imagens/' + img.id" alt="Print do passo {{ i + 1 }}" class="max-w-md rounded-lg border border-zinc-800" />
-                </a>
-              }
-            </div>
-          }
+            @if (passo.imagens?.length) {
+              <div class="mt-3 space-y-2">
+                @for (img of passo.imagens!; track img.id) {
+                  <a [href]="'/api/imagens/' + img.id" target="_blank">
+                    <img [src]="'/api/imagens/' + img.id" alt="Print do passo {{ i + 1 }}" class="max-w-md rounded-lg border border-zinc-800" />
+                  </a>
+                }
+              </div>
+            }
 
-          @if (passo.arquivo_nome) {
-            <button
-              type="button"
-              class="mt-3 flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-hover"
-              (click)="baixarArquivoPasso(passo)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-              {{ passo.arquivo_nome }}
-            </button>
+            @if (passo.arquivo_nome) {
+              <button
+                type="button"
+                class="mt-3 flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-hover"
+                (click)="baixarArquivoPasso(passo)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                {{ passo.arquivo_nome }}
+              </button>
+            }
           }
         </div>
 

@@ -20,6 +20,7 @@ export class ManualDetalheComponent implements OnInit {
 
   manual = signal<Manual | null>(null);
   carregando = signal(true);
+  passosRecolhidos = signal<Set<number>>(new Set());
 
   modalManualAberto = signal(false);
 
@@ -195,18 +196,15 @@ export class ManualDetalheComponent implements OnInit {
     await this.carregar();
   }
 
-  async moverPasso(passo: ManualPasso, direcao: -1 | 1) {
-    const passos = this.manual()?.passos;
-    if (!passos) return;
-    const index = passos.findIndex((p) => p.id === passo.id);
-    const alvo = passos[index + direcao];
-    if (!alvo || !passo.id || !alvo.id) return;
+  estaRecolhido(passoId: number): boolean {
+    return this.passosRecolhidos().has(passoId);
+  }
 
-    await Promise.all([
-      firstValueFrom(this.manuaisService.atualizarPasso(passo.id, { ordem: alvo.ordem, texto: passo.texto || '' })),
-      firstValueFrom(this.manuaisService.atualizarPasso(alvo.id, { ordem: passo.ordem, texto: alvo.texto || '' })),
-    ]);
-    await this.carregar();
+  alternarRecolhido(passoId: number) {
+    const atual = new Set(this.passosRecolhidos());
+    if (atual.has(passoId)) atual.delete(passoId);
+    else atual.add(passoId);
+    this.passosRecolhidos.set(atual);
   }
 
   abrirEdicaoManual() {
