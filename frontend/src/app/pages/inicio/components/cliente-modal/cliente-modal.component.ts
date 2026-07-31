@@ -7,6 +7,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
+import { somenteDigitos } from '../../../../core/texto.util';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -133,7 +134,7 @@ export class ClienteModalComponent implements OnInit {
 
     const dadosCliente = {
       nome: this.nome().trim(),
-      cnpj: this.cnpj().trim() || null,
+      cnpj: somenteDigitos(this.cnpj()) || null,
       observacoes: this.observacoes().trim() || null,
       categoria_id: this.categoriaId(),
     };

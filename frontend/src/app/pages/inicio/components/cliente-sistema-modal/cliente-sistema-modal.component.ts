@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteSistema, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
+import { somenteDigitos } from '../../../../core/texto.util';
 
 @Component({
   selector: 'app-cliente-sistema-modal',
@@ -56,7 +57,7 @@ export class ClienteSistemaModalComponent implements OnInit {
 
     const dados = {
       nome: this.nome().trim(),
-      cnpj: this.cnpj().trim() || null,
+      cnpj: somenteDigitos(this.cnpj()) || null,
       licencas: this.licencas().trim() || null,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       versao_build: this.temVersaoBuild ? this.versaoBuild().trim() || null : null,
