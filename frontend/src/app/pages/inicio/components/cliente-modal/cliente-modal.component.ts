@@ -129,6 +129,7 @@ export class ClienteModalComponent implements OnInit {
 
     this.salvando.set(true);
     this.erro.set('');
+    this.erroCertificado.set('');
 
     const dadosCliente = {
       nome: this.nome().trim(),
@@ -143,8 +144,27 @@ export class ClienteModalComponent implements OnInit {
         await firstValueFrom(this.clientesService.atualizar(clienteId, dadosCliente));
         await this.sincronizarAcessos(clienteId);
       } else {
+        // valida o certificado antes de criar o cliente, pra não deixar ele criado sem certificado se a senha estiver errada
+        const arquivo = this.arquivoCertificado();
+        const senha = this.senhaCertificado();
+        let validadeCertificado: string | null = null;
+        if (arquivo && senha) {
+          try {
+            validadeCertificado = paraDataIso(await lerValidadeCertificado(arquivo, senha));
+          } catch (e) {
+            this.erroCertificado.set(e instanceof Error ? e.message : 'Não foi possível ler o certificado.');
+            return;
+          }
+        }
+
         const acessosNovos = this.montarAcessosAtivos();
-        await firstValueFrom(this.clientesService.criar({ ...dadosCliente, acessos: acessosNovos } as Cliente));
+        const resultado = await firstValueFrom(
+          this.clientesService.criar({ ...dadosCliente, acessos: acessosNovos } as Cliente)
+        );
+
+        if (arquivo && senha && validadeCertificado) {
+          await firstValueFrom(this.clientesService.enviarCertificado(resultado.id, arquivo, senha, validadeCertificado));
+        }
       }
       this.salvo.emit();
     } catch {
