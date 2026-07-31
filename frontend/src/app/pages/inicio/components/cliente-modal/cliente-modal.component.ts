@@ -18,6 +18,7 @@ interface CampoAcesso {
   link: string;
   servidor: string;
   contabilidadeId: number | null;
+  enviarContabilidade: boolean;
   observacoes: string;
 }
 
@@ -100,6 +101,7 @@ export class ClienteModalComponent implements OnInit {
           link: acesso.link || '',
           servidor: acesso.servidor || '',
           contabilidadeId: acesso.contabilidade_id || null,
+          enviarContabilidade: !!acesso.enviar_contabilidade,
           observacoes: acesso.observacoes || '',
         };
       }
@@ -124,6 +126,7 @@ export class ClienteModalComponent implements OnInit {
       link: '',
       servidor: '',
       contabilidadeId: null,
+      enviarContabilidade: false,
       observacoes: '',
     });
     return { anydesk: vazio(), acesso_web: vazio(), acesso_zeta: vazio() };
@@ -198,6 +201,7 @@ export class ClienteModalComponent implements OnInit {
       link: campo.link.trim() || null,
       servidor: campo.servidor.trim() || null,
       contabilidade_id: campo.contabilidadeId,
+      enviar_contabilidade: campo.enviarContabilidade,
       observacoes: campo.observacoes.trim() || null,
     };
   }

@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS acessos (
   link TEXT,
   servidor TEXT, -- número do servidor (acesso web)
   contabilidade_id INTEGER REFERENCES contabilidades(id) ON DELETE SET NULL, -- acesso web / acesso zeta
+  enviar_contabilidade INTEGER NOT NULL DEFAULT 0, -- acesso web / acesso zeta
   observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );

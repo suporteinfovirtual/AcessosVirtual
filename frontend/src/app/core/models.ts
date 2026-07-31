@@ -12,6 +12,7 @@ export interface Acesso {
   contabilidade_id?: number | null;
   contabilidade_nome?: string | null;
   contabilidade_email?: string | null;
+  enviar_contabilidade?: boolean | number | null;
   observacoes?: string | null;
   criado_em?: string;
 }

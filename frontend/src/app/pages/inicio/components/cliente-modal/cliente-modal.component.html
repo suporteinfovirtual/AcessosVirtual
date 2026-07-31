@@ -243,6 +243,17 @@
                       />
                     </div>
                   }
+                  @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
+                    <label class="col-span-2 flex items-center gap-2 text-sm text-zinc-300">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="acessosPorTipo[tipo.valor].enviarContabilidade"
+                        [name]="tipo.valor + '_enviarContabilidade'"
+                        class="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-accent outline-none focus:ring-2 focus:ring-accent-soft"
+                      />
+                      Enviar para a contabilidade
+                    </label>
+                  }
                 </div>
               }
             </div>
