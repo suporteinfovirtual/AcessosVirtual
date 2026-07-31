@@ -74,8 +74,12 @@
             <p class="mt-2 whitespace-pre-line text-sm text-zinc-300">{{ passo.texto }}</p>
           }
 
-          @if (passo.tem_imagem) {
-            <img [src]="'/api/passos/' + passo.id + '/imagem'" alt="Print do passo {{ i + 1 }}" class="mt-3 max-w-full rounded-lg border border-zinc-800" />
+          @if (passo.imagens?.length) {
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (img of passo.imagens!; track img.id) {
+                <img [src]="'/api/imagens/' + img.id" alt="Print do passo {{ i + 1 }}" class="max-h-48 rounded-lg border border-zinc-800" />
+              }
+            </div>
           }
 
           @if (passo.arquivo_nome) {
@@ -129,27 +133,40 @@
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
-        <label class="mb-1 block text-xs text-zinc-500">Print (imagem)</label>
-        @if (imagemPreviewUrl()) {
-          <div class="mb-2 flex items-center gap-2">
-            <img [src]="imagemPreviewUrl()" alt="Prévia do print" class="h-16 w-16 rounded-md border border-zinc-700 object-cover" />
-            <button type="button" class="text-xs text-red-400 hover:text-red-300" (click)="marcarRemoverImagem()">Remover</button>
-          </div>
-        } @else if (passoEmEdicao()?.tem_imagem && !removerImagemPasso()) {
-          <div class="mb-2 flex items-center gap-2">
-            <img [src]="'/api/passos/' + passoEmEdicao()!.id + '/imagem'" alt="Print atual" class="h-16 w-16 rounded-md border border-zinc-700 object-cover" />
-            <button type="button" class="text-xs text-red-400 hover:text-red-300" (click)="marcarRemoverImagem()">Remover</button>
-          </div>
-        }
-        <input
-          type="file"
-          accept="image/*"
-          (change)="aoSelecionarImagem($event)"
-          class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
-        />
-        <p class="mt-1 text-[11px] text-zinc-500">Dá pra colar (Ctrl+V) um print direto aqui, em qualquer lugar deste formulário.</p>
-        @if (removerImagemPasso()) {
-          <p class="mt-1 text-[11px] text-zinc-500">A imagem atual será removida ao salvar.</p>
+        <label class="mb-1 block text-xs text-zinc-500">Imagens (prints)</label>
+        @if (!passoEmEdicaoId()) {
+          <p class="text-[11px] text-zinc-500">Salve o passo primeiro pra poder adicionar imagens.</p>
+        } @else {
+          @if (passoEmEdicao()?.imagens?.length) {
+            <div class="mb-2 flex flex-wrap gap-2">
+              @for (img of passoEmEdicao()!.imagens!; track img.id) {
+                <div class="relative">
+                  <img [src]="'/api/imagens/' + img.id" alt="Print" class="h-16 w-16 rounded-md border border-zinc-700 object-cover" />
+                  <button
+                    type="button"
+                    class="absolute -right-1.5 -top-1.5 rounded-full bg-zinc-950 p-0.5 text-red-400 hover:text-red-300"
+                    title="Remover imagem"
+                    (click)="removerImagemDoPasso(img.id)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+          <input
+            type="file"
+            accept="image/*"
+            (change)="aoSelecionarImagem($event)"
+            class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+          />
+          <p class="mt-1 text-[11px] text-zinc-500">Dá pra colar (Ctrl+V) quantos prints quiser, um de cada vez.</p>
+          @if (enviandoImagem()) {
+            <p class="mt-1 text-[11px] text-zinc-500">Enviando imagem…</p>
+          }
+          @if (erroImagem()) {
+            <p class="mt-1 text-[11px] text-red-400">{{ erroImagem() }}</p>
+          }
         }
       </div>
       <div>

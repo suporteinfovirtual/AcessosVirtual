@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, HostListener, OnInit, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -11,7 +11,7 @@ import { ManualModalComponent } from '../manual-modal/manual-modal.component';
   imports: [FormsModule, NgTemplateOutlet, ManualModalComponent],
   templateUrl: './manual-detalhe.component.html',
 })
-export class ManualDetalheComponent implements OnInit, OnDestroy {
+export class ManualDetalheComponent implements OnInit {
   private manuaisService = inject(ManuaisService);
 
   manualId = input.required<number>();
@@ -26,20 +26,16 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
   formPassoAberto = signal(false);
   passoEmEdicaoId = signal<number | null>(null);
   textoPasso = signal('');
-  imagemPasso = signal<File | null>(null);
-  imagemPreviewUrl = signal<string | null>(null);
   arquivoPasso = signal<File | null>(null);
-  removerImagemPasso = signal(false);
   removerArquivoPasso = signal(false);
   salvandoPasso = signal(false);
   erroPasso = signal('');
 
+  enviandoImagem = signal(false);
+  erroImagem = signal('');
+
   ngOnInit() {
     this.carregar();
-  }
-
-  ngOnDestroy() {
-    this.limparPreviewImagem();
   }
 
   async carregar() {
@@ -55,28 +51,25 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
   abrirNovoPasso() {
     this.passoEmEdicaoId.set(null);
     this.textoPasso.set('');
-    this.limparPreviewImagem();
     this.arquivoPasso.set(null);
-    this.removerImagemPasso.set(false);
     this.removerArquivoPasso.set(false);
     this.erroPasso.set('');
+    this.erroImagem.set('');
     this.formPassoAberto.set(true);
   }
 
   abrirEdicaoPasso(passo: ManualPasso) {
     this.passoEmEdicaoId.set(passo.id!);
     this.textoPasso.set(passo.texto || '');
-    this.limparPreviewImagem();
     this.arquivoPasso.set(null);
-    this.removerImagemPasso.set(false);
     this.removerArquivoPasso.set(false);
     this.erroPasso.set('');
+    this.erroImagem.set('');
     this.formPassoAberto.set(true);
   }
 
   cancelarPasso() {
     this.formPassoAberto.set(false);
-    this.limparPreviewImagem();
   }
 
   passoEmEdicao(): ManualPasso | null {
@@ -85,15 +78,9 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
     return this.manual()?.passos?.find((p) => p.id === id) || null;
   }
 
-  aoSelecionarImagem(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.definirImagemPasso(input.files?.[0] || null);
-  }
-
-  // deixa colar um print direto (Ctrl+V) em qualquer lugar enquanto o formulário do passo estiver aberto,
-  // não só com o cursor na caixa de texto
+  // colar (Ctrl+V) funciona em qualquer lugar enquanto o formulário do passo estiver aberto
   @HostListener('document:paste', ['$event'])
-  aoColarImagem(event: ClipboardEvent) {
+  async aoColarImagem(event: ClipboardEvent) {
     if (!this.formPassoAberto()) return;
 
     const itens = event.clipboardData?.items;
@@ -104,36 +91,49 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
         const arquivo = item.getAsFile();
         if (arquivo) {
           event.preventDefault();
-          this.definirImagemPasso(arquivo);
+          await this.enviarImagem(arquivo);
         }
         break;
       }
     }
   }
 
-  private definirImagemPasso(arquivo: File | null) {
-    this.limparPreviewImagem();
-    this.imagemPasso.set(arquivo);
-    this.removerImagemPasso.set(false);
-    if (arquivo) this.imagemPreviewUrl.set(URL.createObjectURL(arquivo));
+  async aoSelecionarImagem(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+    input.value = '';
+    if (arquivo) await this.enviarImagem(arquivo);
   }
 
-  private limparPreviewImagem() {
-    const url = this.imagemPreviewUrl();
-    if (url) URL.revokeObjectURL(url);
-    this.imagemPreviewUrl.set(null);
-    this.imagemPasso.set(null);
+  private async enviarImagem(arquivo: File) {
+    const passoId = this.passoEmEdicaoId();
+    if (!passoId) {
+      this.erroPasso.set('Salve o passo primeiro pra poder adicionar imagens.');
+      return;
+    }
+
+    this.enviandoImagem.set(true);
+    this.erroImagem.set('');
+    try {
+      await firstValueFrom(this.manuaisService.adicionarImagemPasso(passoId, arquivo));
+      await this.carregar();
+    } catch {
+      this.erroImagem.set('Não foi possível enviar a imagem.');
+    } finally {
+      this.enviandoImagem.set(false);
+    }
+  }
+
+  async removerImagemDoPasso(imagemId: number) {
+    if (!confirm('Remover essa imagem?')) return;
+    await firstValueFrom(this.manuaisService.removerImagemPasso(imagemId));
+    await this.carregar();
   }
 
   aoSelecionarArquivo(event: Event) {
     const input = event.target as HTMLInputElement;
     this.arquivoPasso.set(input.files?.[0] || null);
     this.removerArquivoPasso.set(false);
-  }
-
-  marcarRemoverImagem() {
-    this.limparPreviewImagem();
-    this.removerImagemPasso.set(true);
   }
 
   marcarRemoverArquivo() {
@@ -146,22 +146,20 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
     if (!manual || this.salvandoPasso()) return;
 
     const texto = this.textoPasso().trim();
-    if (!texto && !this.imagemPasso() && !this.arquivoPasso()) {
-      this.erroPasso.set('Escreva alguma coisa ou anexe um print/arquivo.');
+    const passoId = this.passoEmEdicaoId();
+    if (!texto && !this.arquivoPasso() && !passoId) {
+      this.erroPasso.set('Escreva alguma coisa ou anexe um arquivo.');
       return;
     }
 
     this.salvandoPasso.set(true);
     this.erroPasso.set('');
 
-    const passoId = this.passoEmEdicaoId();
     const ordemAtual = passoId ? manual.passos?.find((p) => p.id === passoId)?.ordem : undefined;
     const dados = {
       ordem: ordemAtual ?? (manual.passos?.length || 0) + 1,
       texto,
-      imagem: this.imagemPasso(),
       arquivo: this.arquivoPasso(),
-      removerImagem: this.removerImagemPasso(),
       removerArquivo: this.removerArquivoPasso(),
     };
 
@@ -169,10 +167,12 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
       if (passoId) {
         await firstValueFrom(this.manuaisService.atualizarPasso(passoId, dados));
       } else {
-        await firstValueFrom(this.manuaisService.adicionarPasso(manual.id!, dados));
+        const resultado = await firstValueFrom(this.manuaisService.adicionarPasso(manual.id!, dados));
+        // continua no modo edição do passo recém-criado, pra já poder colar imagens nele
+        this.passoEmEdicaoId.set(resultado.id);
       }
-      this.formPassoAberto.set(false);
-      this.limparPreviewImagem();
+      this.arquivoPasso.set(null);
+      this.removerArquivoPasso.set(false);
       await this.carregar();
     } catch {
       this.erroPasso.set('Não foi possível salvar o passo.');

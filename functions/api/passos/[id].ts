@@ -2,28 +2,20 @@ interface Env {
   DB: D1Database;
 }
 
-// PUT /api/passos/:id -> atualiza um passo (ordem/texto e opcionalmente substitui/remove imagem e arquivo)
-// multipart/form-data: ordem, texto, imagem (opcional), arquivo (opcional), remover_imagem ('1'), remover_arquivo ('1')
+// PUT /api/passos/:id -> atualiza um passo (ordem/texto e opcionalmente substitui/remove o arquivo)
+// multipart/form-data: ordem, texto, arquivo (opcional), remover_arquivo ('1')
+// (imagens são geridas à parte em /api/passos/:id/imagens e /api/imagens/:id)
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
   const form = await request.formData();
   const ordem = Number(form.get('ordem') || 0);
   const texto = form.get('texto')?.toString() || null;
-  const imagem = form.get('imagem');
   const arquivo = form.get('arquivo');
-  const removerImagem = form.get('remover_imagem') === '1';
   const removerArquivo = form.get('remover_arquivo') === '1';
 
   const campos = ['ordem = ?', 'texto = ?'];
   const binds: unknown[] = [ordem, texto];
-
-  if (imagem instanceof File && imagem.size > 0) {
-    campos.push('imagem = ?', 'imagem_nome = ?', 'imagem_tipo = ?');
-    binds.push(await imagem.arrayBuffer(), imagem.name, imagem.type || null);
-  } else if (removerImagem) {
-    campos.push('imagem = NULL', 'imagem_nome = NULL', 'imagem_tipo = NULL');
-  }
 
   if (arquivo instanceof File && arquivo.size > 0) {
     campos.push('arquivo = ?', 'arquivo_nome = ?');

@@ -6,9 +6,7 @@ import { Manual } from './models';
 interface DadosPasso {
   ordem: number;
   texto: string;
-  imagem?: File | null;
   arquivo?: File | null;
-  removerImagem?: boolean;
   removerArquivo?: boolean;
 }
 
@@ -52,13 +50,21 @@ export class ManuaisService {
     return this.http.get(`/api/passos/${passoId}/arquivo`, { responseType: 'blob' });
   }
 
+  adicionarImagemPasso(passoId: number, imagem: File): Observable<{ id: number }> {
+    const form = new FormData();
+    form.append('imagem', imagem, imagem.name);
+    return this.http.post<{ id: number }>(`/api/passos/${passoId}/imagens`, form);
+  }
+
+  removerImagemPasso(imagemId: number): Observable<{ ok: true }> {
+    return this.http.delete<{ ok: true }>(`/api/imagens/${imagemId}`);
+  }
+
   private formPasso(dados: DadosPasso): FormData {
     const form = new FormData();
     form.append('ordem', String(dados.ordem));
     form.append('texto', dados.texto || '');
-    if (dados.imagem) form.append('imagem', dados.imagem, dados.imagem.name);
     if (dados.arquivo) form.append('arquivo', dados.arquivo, dados.arquivo.name);
-    if (dados.removerImagem) form.append('remover_imagem', '1');
     if (dados.removerArquivo) form.append('remover_arquivo', '1');
     return form;
   }

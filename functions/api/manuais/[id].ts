@@ -12,15 +12,27 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
   }
 
   const { results: passos } = await env.DB
+    .prepare('SELECT id, manual_id, ordem, texto, arquivo_nome, criado_em FROM manual_passos WHERE manual_id = ? ORDER BY ordem')
+    .bind(params.id)
+    .all();
+
+  const { results: imagens } = await env.DB
     .prepare(
-      `SELECT id, manual_id, ordem, texto, imagem_nome, arquivo_nome, criado_em,
-              (imagem IS NOT NULL) AS tem_imagem
-       FROM manual_passos WHERE manual_id = ? ORDER BY ordem`
+      `SELECT manual_passo_imagens.id, manual_passo_imagens.passo_id, manual_passo_imagens.ordem, manual_passo_imagens.imagem_nome
+       FROM manual_passo_imagens
+       JOIN manual_passos ON manual_passos.id = manual_passo_imagens.passo_id
+       WHERE manual_passos.manual_id = ?
+       ORDER BY manual_passo_imagens.ordem`
     )
     .bind(params.id)
     .all();
 
-  return new Response(JSON.stringify({ ...manual, passos }), {
+  const passosComImagens = passos.map((passo: any) => ({
+    ...passo,
+    imagens: imagens.filter((img: any) => img.passo_id === passo.id),
+  }));
+
+  return new Response(JSON.stringify({ ...manual, passos: passosComImagens }), {
     headers: { 'Content-Type': 'application/json' },
   });
 }

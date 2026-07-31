@@ -64,13 +64,19 @@ export interface LinkPessoal {
   criado_em?: string;
 }
 
+export interface ManualPassoImagem {
+  id: number;
+  passo_id?: number;
+  ordem?: number;
+  imagem_nome?: string | null;
+}
+
 export interface ManualPasso {
   id?: number;
   manual_id?: number;
   ordem: number;
   texto?: string | null;
-  imagem_nome?: string | null;
-  tem_imagem?: boolean | number;
+  imagens?: ManualPassoImagem[];
   arquivo_nome?: string | null;
   criado_em?: string;
 }
