@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -90,8 +90,12 @@ export class ManualDetalheComponent implements OnInit, OnDestroy {
     this.definirImagemPasso(input.files?.[0] || null);
   }
 
-  // deixa colar um print direto (Ctrl+V) no textarea, sem precisar escolher o arquivo de imagem
+  // deixa colar um print direto (Ctrl+V) em qualquer lugar enquanto o formulário do passo estiver aberto,
+  // não só com o cursor na caixa de texto
+  @HostListener('document:paste', ['$event'])
   aoColarImagem(event: ClipboardEvent) {
+    if (!this.formPassoAberto()) return;
+
     const itens = event.clipboardData?.items;
     if (!itens) return;
 
