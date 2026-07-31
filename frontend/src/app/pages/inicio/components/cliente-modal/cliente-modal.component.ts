@@ -93,6 +93,9 @@ export class ClienteModalComponent implements OnInit {
       if (tipo === 'acesso_web') {
         this.acessosPorTipo[tipo].link = 'https://canal.intelidata.inf.br/acesso/';
       }
+      if (tipo === 'acesso_zeta') {
+        this.acessosPorTipo[tipo].link = 'https://zweb.com.br/#/sign-in';
+      }
     }
   }
 
