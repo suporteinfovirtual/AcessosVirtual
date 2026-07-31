@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, input, output, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Manual, ManualPasso } from '../../../../core/models';
@@ -7,7 +8,7 @@ import { ManualModalComponent } from '../manual-modal/manual-modal.component';
 
 @Component({
   selector: 'app-manual-detalhe',
-  imports: [FormsModule, ManualModalComponent],
+  imports: [FormsModule, NgTemplateOutlet, ManualModalComponent],
   templateUrl: './manual-detalhe.component.html',
 })
 export class ManualDetalheComponent implements OnInit, OnDestroy {
