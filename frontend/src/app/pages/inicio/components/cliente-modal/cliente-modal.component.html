@@ -75,7 +75,7 @@
                 <div class="grid grid-cols-2 gap-2 border-t border-zinc-800 p-3">
                   @if (tipo.valor !== 'acesso_web') {
                     <div class="col-span-2">
-                      <label class="mb-1 block text-xs text-zinc-500">{{ tipo.valor === 'anydesk' ? 'Código AnyDesk' : 'Identificador (ID / CNPJ / e-mail)' }}</label>
+                      <label class="mb-1 block text-xs text-zinc-500">{{ tipo.valor === 'anydesk' ? 'Código AnyDesk' : (tipo.valor === 'acesso_zeta' ? 'E-mail do Cliente' : 'Identificador (ID / CNPJ / e-mail)') }}</label>
                       <input
                         [(ngModel)]="acessosPorTipo[tipo.valor].identificador"
                         [name]="tipo.valor + '_identificador'"
