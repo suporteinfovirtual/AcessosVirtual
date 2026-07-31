@@ -187,13 +187,8 @@
                 @let acesso = acessoDoTipo(cliente, abaAtiva());
                 @if (acesso) {
                   <div class="space-y-1.5 border-t border-zinc-800 pt-3">
-                    @if (abaAtiva() !== 'acesso_web') {
-                      <app-copy-field [rotulo]="abaAtiva() === 'anydesk' ? 'Código AnyDesk' : (abaAtiva() === 'acesso_zeta' ? 'E-mail do Cliente' : 'Identificador')" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
-                    }
-                    @if (abaAtiva() !== 'acesso_zeta' && abaAtiva() !== 'acesso_web') {
-                      <app-copy-field rotulo="Usuário" [valor]="acesso.usuario"></app-copy-field>
-                    }
-                    @if (abaAtiva() !== 'acesso_web') {
+                    @if (abaAtiva() === 'anydesk') {
+                      <app-copy-field rotulo="Código AnyDesk" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
                       <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
                     }
                     @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
