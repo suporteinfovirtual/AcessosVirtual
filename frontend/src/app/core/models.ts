@@ -18,6 +18,7 @@ export interface Acesso {
 
 export interface CertificadoDigital {
   nome_arquivo: string;
+  senha?: string | null;
   validade?: string | null;
   atualizado_em?: string;
 }

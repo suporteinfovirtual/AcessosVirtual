@@ -80,6 +80,9 @@
                     Validade: {{ certificado()!.validade | date: 'dd/MM/yyyy' }}
                   </p>
                 }
+                @if (certificado()!.senha) {
+                  <p class="mt-1 text-xs text-zinc-400">Senha: {{ certificado()!.senha }}</p>
+                }
               </div>
               <div class="flex shrink-0 items-center gap-3 text-xs font-medium">
                 <button type="button" class="text-accent hover:text-accent-hover" (click)="baixarCertificado()">

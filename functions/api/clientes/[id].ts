@@ -22,7 +22,7 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
     .all();
 
   const certificado = await env.DB
-    .prepare('SELECT nome_arquivo, validade, atualizado_em FROM certificados WHERE cliente_id = ?')
+    .prepare('SELECT nome_arquivo, senha, validade, atualizado_em FROM certificados WHERE cliente_id = ?')
     .bind(params.id)
     .first();
 

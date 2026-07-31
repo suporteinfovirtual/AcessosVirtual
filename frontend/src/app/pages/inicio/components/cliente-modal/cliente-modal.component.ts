@@ -270,7 +270,7 @@ export class ClienteModalComponent implements OnInit {
       const validade = await lerValidadeCertificado(arquivo, senha);
       const validadeIso = paraDataIso(validade);
       await firstValueFrom(this.clientesService.enviarCertificado(clienteId, arquivo, senha, validadeIso));
-      this.certificado.set({ nome_arquivo: arquivo.name, validade: validadeIso });
+      this.certificado.set({ nome_arquivo: arquivo.name, senha, validade: validadeIso });
       this.formCertificadoAberto.set(false);
     } catch (e) {
       this.erroCertificado.set(e instanceof Error ? e.message : 'Não foi possível enviar o certificado.');
