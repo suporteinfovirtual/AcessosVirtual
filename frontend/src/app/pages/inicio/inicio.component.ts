@@ -54,8 +54,8 @@ export class InicioComponent implements OnInit {
   linkEmEdicao = signal<LinkPessoal | null>(null);
 
   // --- painel de clientes ---
-  readonly abas: { valor: Aba; rotulo: string }[] = [
-    ...TIPOS_ACESSO,
+  readonly abasAcessos: { valor: TipoAcesso; rotulo: string }[] = [...TIPOS_ACESSO];
+  readonly abasFerramentas: { valor: Aba; rotulo: string }[] = [
     { valor: 'manuais', rotulo: 'Manuais' },
     { valor: 'internos', rotulo: 'Contas Internas' },
   ];

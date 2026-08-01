@@ -18,7 +18,7 @@
 
     <nav class="flex flex-col gap-0.5 px-3 pb-4">
       <h2 class="px-1 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Acessos</h2>
-      @for (aba of abas; track aba.valor) {
+      @for (aba of abasAcessos; track aba.valor) {
         <button
           type="button"
           class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
@@ -40,6 +40,27 @@
               @case ('acesso_zeta') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4" /><path stroke-linecap="round" stroke-linejoin="round" d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 7l1 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 13l6 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 17l2 0" /></svg>
               }
+            }
+            {{ aba.rotulo }}
+          </span>
+          <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
+        </button>
+      }
+
+      <h2 class="mt-4 px-1 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Ferramentas</h2>
+      @for (aba of abasFerramentas; track aba.valor) {
+        <button
+          type="button"
+          class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
+          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
+          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
+        >
+          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
+            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
+          }
+          <span class="flex items-center gap-2">
+            @switch (aba.valor) {
               @case ('manuais') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 6l0 13" /></svg>
               }
@@ -49,9 +70,6 @@
             }
             {{ aba.rotulo }}
           </span>
-          @if (aba.valor !== 'internos' && aba.valor !== 'manuais') {
-            <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
-          }
         </button>
       }
     </nav>
