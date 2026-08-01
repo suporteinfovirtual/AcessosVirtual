@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, Cliente, Contabilidade, TIPOS_ACESSO } from '../../../../core/models';
@@ -20,7 +21,7 @@ const NOMES_MES = [
 
 @Component({
   selector: 'app-envios-contabilidade-panel',
-  imports: [FormsModule, CopyFieldComponent, ClienteModalComponent],
+  imports: [FormsModule, NgClass, CopyFieldComponent, ClienteModalComponent],
   templateUrl: './envios-contabilidade-panel.component.html',
 })
 export class EnviosContabilidadePanelComponent implements OnInit {

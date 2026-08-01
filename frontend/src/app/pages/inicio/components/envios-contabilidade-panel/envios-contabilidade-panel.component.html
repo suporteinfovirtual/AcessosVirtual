@@ -3,83 +3,84 @@
 
   <div class="mt-5 flex flex-col gap-6 lg:flex-row lg:items-start">
     <div class="w-full shrink-0 lg:w-72">
-      <div class="relative">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-        </svg>
-        <input
-          [(ngModel)]="buscaContabilidade"
-          type="text"
-          placeholder="Buscar contabilidade…"
-          class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-        />
-      </div>
-
-      @if (!formNovaAberto()) {
-        <button
-          type="button"
-          class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-400 transition hover:border-accent/50 hover:text-accent"
-          (click)="abrirFormNova()"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-          Nova contabilidade
-        </button>
-      } @else {
-        <div class="mt-3 flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3">
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
           <input
-            [(ngModel)]="nomeNova"
+            [(ngModel)]="buscaContabilidade"
             type="text"
-            placeholder="Nome da contabilidade…"
-            class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
+            placeholder="Buscar contabilidade…"
+            class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
           />
-          <input
-            [(ngModel)]="emailNova"
-            type="email"
-            placeholder="E-mail…"
-            class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
-          />
-          @if (erroNova()) {
-            <p class="text-xs text-red-400">{{ erroNova() }}</p>
-          }
-          <div class="flex justify-end gap-3">
-            <button type="button" class="text-xs font-medium text-zinc-500 hover:text-zinc-300" (click)="cancelarFormNova()">
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="text-xs font-medium text-accent hover:text-accent-hover"
-              [disabled]="!nomeNova().trim() || criando()"
-              (click)="criarContabilidade()"
-            >
-              {{ criando() ? 'Criando…' : 'Criar' }}
-            </button>
-          </div>
         </div>
-      }
 
-      <div class="mt-3 flex flex-col gap-0.5">
-        @if (carregando()) {
-          <p class="px-3 py-2 text-sm text-zinc-600">Carregando…</p>
-        } @else if (contabilidadesFiltradas().length === 0) {
-          <p class="px-3 py-2 text-sm text-zinc-600">
-            {{ contabilidadesComEnvio().length === 0 ? 'Nenhum cliente marcado para envio à contabilidade ainda.' : 'Nenhuma contabilidade encontrada.' }}
-          </p>
+        @if (!formNovaAberto()) {
+          <button
+            type="button"
+            class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-400 transition hover:border-accent/50 hover:text-accent"
+            (click)="abrirFormNova()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            Nova contabilidade
+          </button>
         } @else {
-          @for (contabilidade of contabilidadesFiltradas(); track contabilidade.id) {
-            <button
-              type="button"
-              class="flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition"
-              [class.bg-accent-soft]="contabilidadeSelecionadaId() === contabilidade.id"
-              [class.text-accent]="contabilidadeSelecionadaId() === contabilidade.id"
-              [class.text-zinc-300]="contabilidadeSelecionadaId() !== contabilidade.id"
-              [class.hover:bg-zinc-900]="contabilidadeSelecionadaId() !== contabilidade.id"
-              (click)="selecionarContabilidade(contabilidade.id!)"
-            >
-              <span class="truncate">{{ contabilidade.nome }}</span>
-              <span class="ml-2 shrink-0 text-xs font-normal text-zinc-500">{{ totalPorContabilidade().get(contabilidade.id!) || 0 }}</span>
-            </button>
-          }
+          <div class="mt-3 flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
+            <input
+              [(ngModel)]="nomeNova"
+              type="text"
+              placeholder="Nome da contabilidade…"
+              class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-sm uppercase text-zinc-100 outline-none focus:border-accent"
+            />
+            <input
+              [(ngModel)]="emailNova"
+              type="email"
+              placeholder="E-mail…"
+              class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+            />
+            @if (erroNova()) {
+              <p class="text-xs text-red-400">{{ erroNova() }}</p>
+            }
+            <div class="flex justify-end gap-3">
+              <button type="button" class="text-xs font-medium text-zinc-500 hover:text-zinc-300" (click)="cancelarFormNova()">
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="text-xs font-medium text-accent hover:text-accent-hover"
+                [disabled]="!nomeNova().trim() || criando()"
+                (click)="criarContabilidade()"
+              >
+                {{ criando() ? 'Criando…' : 'Criar' }}
+              </button>
+            </div>
+          </div>
         }
+
+        <div class="mt-3 flex flex-col gap-0.5">
+          @if (carregando()) {
+            <p class="px-3 py-2 text-sm text-zinc-600">Carregando…</p>
+          } @else if (contabilidadesFiltradas().length === 0) {
+            <p class="px-3 py-2 text-sm text-zinc-600">
+              {{ contabilidadesComEnvio().length === 0 ? 'Nenhum cliente marcado para envio à contabilidade ainda.' : 'Nenhuma contabilidade encontrada.' }}
+            </p>
+          } @else {
+            @for (contabilidade of contabilidadesFiltradas(); track contabilidade.id) {
+              <button
+                type="button"
+                class="flex items-center justify-between rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition"
+                [ngClass]="contabilidadeSelecionadaId() === contabilidade.id
+                  ? 'border-accent/40 bg-accent-soft text-accent'
+                  : 'border-transparent text-zinc-300 hover:border-zinc-800 hover:bg-zinc-900'"
+                (click)="selecionarContabilidade(contabilidade.id!)"
+              >
+                <span class="truncate">{{ contabilidade.nome }}</span>
+                <span class="ml-2 shrink-0 text-xs font-normal text-zinc-500">{{ totalPorContabilidade().get(contabilidade.id!) || 0 }}</span>
+              </button>
+            }
+          }
+        </div>
       </div>
     </div>
 
@@ -90,123 +91,130 @@
         </div>
       } @else {
         @let contabilidade = contabilidadeSelecionada()!;
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div class="min-w-0">
-            <h3 class="truncate text-base font-semibold text-zinc-100">{{ contabilidade.nome }}</h3>
-            @if (contabilidade.email) {
-              <div class="mt-1.5 max-w-xs">
-                <app-copy-field rotulo="E-mail Contabilidade" [valor]="contabilidade.email"></app-copy-field>
-              </div>
+        <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5">
+          <h3 class="truncate text-base font-semibold text-zinc-100">{{ contabilidade.nome }}</h3>
+          @if (contabilidade.email) {
+            <div class="mt-1.5 max-w-xs">
+              <app-copy-field rotulo="E-mail Contabilidade" [valor]="contabilidade.email"></app-copy-field>
+            </div>
+          }
+
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/60 px-1 py-1">
+              <button
+                type="button"
+                class="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
+                title="Mês anterior"
+                (click)="mesAnterior()"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+              </button>
+              <span class="min-w-[9rem] text-center text-sm font-medium text-zinc-300">{{ rotuloMes() }}</span>
+              <button
+                type="button"
+                class="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
+                title="Próximo mês"
+                (click)="proximoMes()"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+              </button>
+            </div>
+            @if (carregandoStatusMes()) {
+              <span class="text-xs text-zinc-600">Carregando status…</span>
             }
           </div>
 
-          <div class="relative w-full sm:max-w-xs">
+          <div class="relative mt-3">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input
               [(ngModel)]="buscaCliente"
               type="text"
-              placeholder="Buscar por nome ou CNPJ…"
+              placeholder="Filtrar por nome ou CNPJ…"
               class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
             />
           </div>
         </div>
 
-        <div class="mt-5 flex items-center gap-3">
-          <div class="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/60 px-1 py-1">
-            <button
-              type="button"
-              class="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
-              title="Mês anterior"
-              (click)="mesAnterior()"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
-            </button>
-            <span class="min-w-[9rem] text-center text-sm font-medium text-zinc-300">{{ rotuloMes() }}</span>
-            <button
-              type="button"
-              class="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
-              title="Próximo mês"
-              (click)="proximoMes()"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
-            </button>
-          </div>
-          @if (carregandoStatusMes()) {
-            <span class="text-xs text-zinc-600">Carregando status…</span>
-          }
-        </div>
-
-        <div class="mt-3">
-          @if (enviosDaContabilidade().length === 0) {
-            <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente vinculado ainda.</p>
-          } @else {
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              @for (envio of enviosDaContabilidade(); track envio.acesso.id) {
-                <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
-                  <div class="mb-3 flex items-start justify-between gap-2">
-                    <button type="button" class="min-w-0 flex-1 text-left" (click)="abrirEdicaoCliente(envio.cliente)" title="Editar cliente">
-                      <div class="flex items-center gap-2">
-                        <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ envio.cliente.nome }}</p>
-                        <span class="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300">{{ rotuloTipo(envio.acesso.tipo) }}</span>
-                      </div>
-                      @if (envio.cliente.cnpj) {
-                        <p class="truncate text-xs text-zinc-500">{{ envio.cliente.cnpj }}</p>
-                      }
-                    </button>
-
-                    <button
-                      type="button"
-                      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition"
-                      [class.border-emerald-500/50]="enviadoNoMes(envio.acesso.id!)"
-                      [class.bg-emerald-500/15]="enviadoNoMes(envio.acesso.id!)"
-                      [class.text-emerald-400]="enviadoNoMes(envio.acesso.id!)"
-                      [class.border-zinc-700]="!enviadoNoMes(envio.acesso.id!)"
-                      [class.text-zinc-700]="!enviadoNoMes(envio.acesso.id!)"
-                      [class.hover:border-zinc-600]="!enviadoNoMes(envio.acesso.id!)"
-                      [title]="(enviadoNoMes(envio.acesso.id!) ? 'Enviado em ' : 'Marcar como enviado em ') + rotuloMes()"
-                      (click)="alternarEnvioMes(envio.acesso.id!)"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                    </button>
-                  </div>
-
-                  <div class="space-y-1.5 border-t border-zinc-800 pt-3">
-                    @if (envio.acesso.tipo === 'anydesk') {
-                      <app-copy-field rotulo="Código AnyDesk" [valor]="envio.acesso.identificador" [mono]="true"></app-copy-field>
-                      <app-copy-field rotulo="Senha" [valor]="envio.acesso.senha" [mascaravel]="true"></app-copy-field>
-                    } @else if (envio.acesso.identificador) {
-                      <app-copy-field
-                        [rotulo]="rotuloIdentificador(envio.acesso.tipo)"
-                        [valor]="envio.acesso.identificador"
-                      ></app-copy-field>
-                    }
-                    @if (envio.acesso.link || (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor)) {
-                      <div class="mt-1 flex items-center justify-between gap-2">
-                        @if (envio.acesso.link) {
-                          <a
-                            [href]="envio.acesso.tipo === 'acesso_zeta' ? linkAutoLogin(envio.acesso) : envio.acesso.link"
-                            target="_blank"
-                            rel="noopener"
-                            class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
-                          >
-                            Abrir link
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                          </a>
+        <div class="mt-5">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @for (envio of enviosDaContabilidade(); track envio.acesso.id) {
+              <div class="rounded-lg border border-zinc-800 p-3">
+                <div class="mb-3 flex items-start justify-between gap-2">
+                  <button type="button" class="min-w-0 flex-1 text-left" (click)="abrirEdicaoCliente(envio.cliente)" title="Editar cliente">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ envio.cliente.nome }}</p>
+                      <span class="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300">{{ rotuloTipo(envio.acesso.tipo) }}</span>
+                      <span
+                        class="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                        [ngClass]="statusEnviosMes().get(envio.acesso.id!) ? 'bg-emerald-500/15 text-emerald-400' : 'bg-zinc-800 text-zinc-500'"
+                      >
+                        @if (statusEnviosMes().get(envio.acesso.id!)) {
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3 w-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         }
-                        @if (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor) {
-                          <span class="ml-auto shrink-0 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-xs font-medium text-zinc-300">
-                            Servidor {{ envio.acesso.servidor }}
-                          </span>
-                        }
-                      </div>
+                        {{ statusEnviosMes().get(envio.acesso.id!) ? 'Enviado' : 'Pendente' }}
+                      </span>
+                    </div>
+                    @if (envio.cliente.cnpj) {
+                      <p class="truncate text-xs text-zinc-500">{{ envio.cliente.cnpj }}</p>
                     }
-                  </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition"
+                    [class.border-emerald-500/50]="enviadoNoMes(envio.acesso.id!)"
+                    [class.bg-emerald-500/15]="enviadoNoMes(envio.acesso.id!)"
+                    [class.text-emerald-400]="enviadoNoMes(envio.acesso.id!)"
+                    [class.border-zinc-700]="!enviadoNoMes(envio.acesso.id!)"
+                    [class.text-zinc-700]="!enviadoNoMes(envio.acesso.id!)"
+                    [class.hover:border-zinc-600]="!enviadoNoMes(envio.acesso.id!)"
+                    [title]="(enviadoNoMes(envio.acesso.id!) ? 'Enviado em ' : 'Marcar como enviado em ') + rotuloMes()"
+                    (click)="alternarEnvioMes(envio.acesso.id!)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                  </button>
                 </div>
-              }
-            </div>
-          }
+
+                <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                  @if (envio.acesso.tipo === 'anydesk') {
+                    <app-copy-field rotulo="Código AnyDesk" [valor]="envio.acesso.identificador" [mono]="true"></app-copy-field>
+                    <app-copy-field rotulo="Senha" [valor]="envio.acesso.senha" [mascaravel]="true"></app-copy-field>
+                  } @else if (envio.acesso.identificador) {
+                    <app-copy-field
+                      [rotulo]="rotuloIdentificador(envio.acesso.tipo)"
+                      [valor]="envio.acesso.identificador"
+                    ></app-copy-field>
+                  }
+                  @if (envio.acesso.link || (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor)) {
+                    <div class="mt-1 flex items-center justify-between gap-2">
+                      @if (envio.acesso.link) {
+                        <a
+                          [href]="envio.acesso.tipo === 'acesso_zeta' ? linkAutoLogin(envio.acesso) : envio.acesso.link"
+                          target="_blank"
+                          rel="noopener"
+                          class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                        >
+                          Abrir link
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        </a>
+                      }
+                      @if (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor) {
+                        <span class="ml-auto shrink-0 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-xs font-medium text-zinc-300">
+                          Servidor {{ envio.acesso.servidor }}
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <div class="flex min-h-[220px] w-full items-center justify-center rounded-xl border border-dashed border-zinc-800 sm:col-span-2 xl:col-span-3">
+                <p class="text-sm text-zinc-600">Nenhum cliente encontrado para esse filtro.</p>
+              </div>
+            }
+          </div>
         </div>
       }
     </div>
