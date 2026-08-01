@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { Acesso, Cliente, Contabilidade, TIPOS_ACESSO } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
+import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 
@@ -11,6 +12,11 @@ interface Envio {
   cliente: Cliente;
   acesso: Acesso;
 }
+
+const NOMES_MES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
 
 @Component({
   selector: 'app-envios-contabilidade-panel',
@@ -20,6 +26,7 @@ interface Envio {
 export class EnviosContabilidadePanelComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private contabilidadesService = inject(ContabilidadesService);
+  private enviosContabilidadeService = inject(EnviosContabilidadeService);
 
   readonly tipos = TIPOS_ACESSO;
 
@@ -40,6 +47,15 @@ export class EnviosContabilidadePanelComponent implements OnInit {
 
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
+
+  mesSelecionado = signal(this.mesAtual());
+  statusEnviosMes = signal<Map<number, boolean>>(new Map());
+  carregandoStatusMes = signal(false);
+
+  rotuloMes = computed(() => {
+    const { ano, mes } = this.mesSelecionado();
+    return `${NOMES_MES[mes - 1]} de ${ano}`;
+  });
 
   // um envio por acesso (anydesk / acesso_web / acesso_zeta) marcado com "enviar para a contabilidade"
   envios = computed<Envio[]>(() => {
@@ -93,6 +109,7 @@ export class EnviosContabilidadePanelComponent implements OnInit {
 
   ngOnInit() {
     this.carregar();
+    this.carregarStatusMes();
   }
 
   async carregar() {
@@ -106,6 +123,56 @@ export class EnviosContabilidadePanelComponent implements OnInit {
       this.clientes.set(clientes);
     } finally {
       this.carregando.set(false);
+    }
+  }
+
+  private mesAtual(): { ano: number; mes: number } {
+    const hoje = new Date();
+    return { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
+  }
+
+  async carregarStatusMes() {
+    const { ano, mes } = this.mesSelecionado();
+    this.carregandoStatusMes.set(true);
+    try {
+      const lista = await firstValueFrom(this.enviosContabilidadeService.listarStatusMes(ano, mes));
+      this.statusEnviosMes.set(new Map(lista.map((s) => [s.acesso_id, !!s.enviado])));
+    } finally {
+      this.carregandoStatusMes.set(false);
+    }
+  }
+
+  mesAnterior() {
+    const { ano, mes } = this.mesSelecionado();
+    this.mesSelecionado.set(mes === 1 ? { ano: ano - 1, mes: 12 } : { ano, mes: mes - 1 });
+    this.carregarStatusMes();
+  }
+
+  proximoMes() {
+    const { ano, mes } = this.mesSelecionado();
+    this.mesSelecionado.set(mes === 12 ? { ano: ano + 1, mes: 1 } : { ano, mes: mes + 1 });
+    this.carregarStatusMes();
+  }
+
+  enviadoNoMes(acessoId: number): boolean {
+    return this.statusEnviosMes().get(acessoId) || false;
+  }
+
+  async alternarEnvioMes(acessoId: number) {
+    const anterior = this.enviadoNoMes(acessoId);
+    const novoValor = !anterior;
+
+    const mapa = new Map(this.statusEnviosMes());
+    mapa.set(acessoId, novoValor);
+    this.statusEnviosMes.set(mapa);
+
+    const { ano, mes } = this.mesSelecionado();
+    try {
+      await firstValueFrom(this.enviosContabilidadeService.marcar(acessoId, ano, mes, novoValor));
+    } catch {
+      const mapaRevertido = new Map(this.statusEnviosMes());
+      mapaRevertido.set(acessoId, anterior);
+      this.statusEnviosMes.set(mapaRevertido);
     }
   }
 

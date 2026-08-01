@@ -51,6 +51,11 @@ export interface Contabilidade {
   criado_em?: string;
 }
 
+export interface EnvioContabilidadeStatus {
+  acesso_id: number;
+  enviado: boolean | number;
+}
+
 export interface ContaInterna {
   id?: number;
   servico: string;
