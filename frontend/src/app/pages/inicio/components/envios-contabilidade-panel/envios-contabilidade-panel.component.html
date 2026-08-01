@@ -62,7 +62,7 @@
           <p class="px-3 py-2 text-sm text-zinc-600">Carregando…</p>
         } @else if (contabilidadesFiltradas().length === 0) {
           <p class="px-3 py-2 text-sm text-zinc-600">
-            {{ contabilidades().length === 0 ? 'Nenhuma contabilidade cadastrada ainda.' : 'Nenhuma contabilidade encontrada.' }}
+            {{ contabilidadesComEnvio().length === 0 ? 'Nenhum cliente marcado para envio à contabilidade ainda.' : 'Nenhuma contabilidade encontrada.' }}
           </p>
         } @else {
           @for (contabilidade of contabilidadesFiltradas(); track contabilidade.id) {

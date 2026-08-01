@@ -63,10 +63,15 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return mapa;
   });
 
+  // só as contabilidades que realmente têm algum envio marcado, pra não poluir a lista
+  contabilidadesComEnvio = computed(() => {
+    const totais = this.totalPorContabilidade();
+    return this.contabilidades().filter((c) => (totais.get(c.id!) || 0) > 0);
+  });
+
   contabilidadesFiltradas = computed(() => {
     const termo = this.buscaContabilidade().trim().toLowerCase();
-    const lista = this.contabilidades();
-    return lista.filter((c) => !termo || c.nome.toLowerCase().includes(termo));
+    return this.contabilidadesComEnvio().filter((c) => !termo || c.nome.toLowerCase().includes(termo));
   });
 
   contabilidadeSelecionada = computed(
