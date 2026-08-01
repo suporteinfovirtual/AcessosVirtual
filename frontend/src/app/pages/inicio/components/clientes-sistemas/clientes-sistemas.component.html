@@ -44,18 +44,18 @@
   <div class="mt-5">
     @if (carregando()) {
       <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
-    } @else if (ehZeta()) {
-      @if (clientesZetaFiltrados().length === 0) {
+    } @else if (ehUnificado()) {
+      @if (clientesUnificadosFiltrados().length === 0) {
         <p class="py-10 text-center text-sm text-zinc-600">
-          {{ clientesZeta().length === 0 ? 'Nenhum cliente cadastrado ainda.' : 'Nenhum cliente encontrado.' }}
+          {{ clientesUnificados().length === 0 ? 'Nenhum cliente cadastrado ainda.' : 'Nenhum cliente encontrado.' }}
         </p>
       } @else {
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          @for (cliente of clientesZetaFiltrados(); track cliente.id) {
+          @for (cliente of clientesUnificadosFiltrados(); track cliente.id) {
             <button
               type="button"
               class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
-              (click)="abrirEdicaoZeta(cliente)"
+              (click)="abrirEdicaoUnificado(cliente)"
             >
               <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
               @if (cliente.cnpj) {
@@ -63,17 +63,33 @@
               }
 
               <div class="mt-3 space-y-1 border-t border-zinc-800 pt-3">
-                @if (cliente.licencas) {
-                  <div class="min-w-0">
-                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Licenças</span>
-                    <span class="block truncate text-sm text-zinc-300">{{ cliente.licencas }}</span>
-                  </div>
-                }
-                @if (cliente.enquadramento_fiscal) {
-                  <div class="min-w-0">
-                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
-                    <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
-                  </div>
+                @if (tipoUnificado() === 'acesso_zeta') {
+                  @if (cliente.licencas) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Licenças</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ cliente.licencas }}</span>
+                    </div>
+                  }
+                  @if (cliente.enquadramento_fiscal) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
+                    </div>
+                  }
+                } @else {
+                  @let acesso = acessoUnificado(cliente);
+                  @if (acesso?.contabilidade_nome) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Contabilidade</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ acesso!.contabilidade_nome }}</span>
+                    </div>
+                  }
+                  @if (acesso?.servidor) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Servidor</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ acesso!.servidor }}</span>
+                    </div>
+                  }
                 }
               </div>
             </button>
@@ -133,11 +149,11 @@
   ></app-cliente-sistema-modal>
 }
 
-@if (modalZetaAberto()) {
+@if (modalUnificadoAberto()) {
   <app-cliente-modal
-    [cliente]="clienteZetaEmEdicao()"
-    [tipoInicial]="'acesso_zeta'"
-    (fechar)="fecharModalZeta()"
-    (salvo)="aoSalvarZeta()"
+    [cliente]="clienteUnificadoEmEdicao()"
+    [tipoInicial]="tipoUnificado()"
+    (fechar)="fecharModalUnificado()"
+    (salvo)="aoSalvarUnificado()"
   ></app-cliente-modal>
 }

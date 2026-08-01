@@ -115,7 +115,7 @@ export interface ClienteSistema {
 
 export const SISTEMAS: { valor: Sistema; rotulo: string; temVersaoBuild: boolean }[] = [
   { valor: 'uniplus', rotulo: 'Uniplus', temVersaoBuild: true },
-  { valor: 'uniplus_web', rotulo: 'Uniplus Web', temVersaoBuild: true },
+  { valor: 'uniplus_web', rotulo: 'Uniplus Web', temVersaoBuild: false },
   { valor: 'sgbr', rotulo: 'SGBR', temVersaoBuild: false },
   { valor: 'zeta', rotulo: 'Zeta', temVersaoBuild: false },
 ];
