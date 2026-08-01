@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Cliente, ClienteSistema, SISTEMAS, Sistema } from '../../../../core/models';
@@ -15,8 +15,6 @@ import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component'
 export class ClientesSistemasComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private clientesService = inject(ClientesService);
-
-  voltar = output<void>();
 
   readonly sistemas = SISTEMAS;
 

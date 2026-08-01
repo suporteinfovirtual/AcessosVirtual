@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, Cliente, TIPOS_ACESSO } from '../../../../core/models';
@@ -24,8 +24,6 @@ interface ResumoContabilidade {
 })
 export class EnviosContabilidadePanelComponent implements OnInit {
   private clientesService = inject(ClientesService);
-
-  voltar = output<void>();
 
   readonly tipos = TIPOS_ACESSO;
 
