@@ -38,12 +38,12 @@ export class EnviosContabilidadePanelComponent implements OnInit {
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
 
-  // um envio por acesso (acesso_web / acesso_zeta) marcado com "enviar para a contabilidade"
+  // um envio por acesso (anydesk / acesso_web / acesso_zeta) marcado com "enviar para a contabilidade"
   envios = computed<Envio[]>(() => {
     const lista: Envio[] = [];
     for (const cliente of this.clientes()) {
       for (const acesso of cliente.acessos || []) {
-        if ((acesso.tipo === 'acesso_web' || acesso.tipo === 'acesso_zeta') && acesso.enviar_contabilidade && acesso.contabilidade_id) {
+        if (acesso.enviar_contabilidade && acesso.contabilidade_id) {
           lista.push({ cliente, acesso });
         }
       }

@@ -211,27 +211,25 @@
                       />
                     </div>
                   }
-                  @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
-                    <div>
-                      <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
-                      <select
-                        [(ngModel)]="acessosPorTipo[tipo.valor].contabilidadeId"
-                        [name]="tipo.valor + '_contabilidadeId'"
-                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
-                      >
-                        <option [ngValue]="null">Sem contabilidade</option>
-                        @for (contabilidade of contabilidades(); track contabilidade.id) {
-                          <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
-                        }
-                      </select>
-                    </div>
-                    <div>
-                      <label class="mb-1 block text-xs text-zinc-500">E-mail Contabilidade</label>
-                      <p class="w-full truncate rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-sm text-zinc-400">
-                        {{ emailContabilidade(tipo.valor) || '—' }}
-                      </p>
-                    </div>
-                  }
+                  <div>
+                    <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
+                    <select
+                      [(ngModel)]="acessosPorTipo[tipo.valor].contabilidadeId"
+                      [name]="tipo.valor + '_contabilidadeId'"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    >
+                      <option [ngValue]="null">Sem contabilidade</option>
+                      @for (contabilidade of contabilidades(); track contabilidade.id) {
+                        <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs text-zinc-500">E-mail Contabilidade</label>
+                    <p class="w-full truncate rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-sm text-zinc-400">
+                      {{ emailContabilidade(tipo.valor) || '—' }}
+                    </p>
+                  </div>
                   @if (tipo.valor === 'acesso_web') {
                     <div>
                       <label class="mb-1 block text-xs text-zinc-500">Servidor</label>
@@ -243,17 +241,15 @@
                       />
                     </div>
                   }
-                  @if (tipo.valor === 'acesso_web' || tipo.valor === 'acesso_zeta') {
-                    <label class="col-span-2 flex items-center gap-2 text-sm text-zinc-300">
-                      <input
-                        type="checkbox"
-                        [(ngModel)]="acessosPorTipo[tipo.valor].enviarContabilidade"
-                        [name]="tipo.valor + '_enviarContabilidade'"
-                        class="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-accent outline-none focus:ring-2 focus:ring-accent-soft"
-                      />
-                      Enviar para a contabilidade
-                    </label>
-                  }
+                  <label class="col-span-2 flex items-center gap-2 text-sm text-zinc-300">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="acessosPorTipo[tipo.valor].enviarContabilidade"
+                      [name]="tipo.valor + '_enviarContabilidade'"
+                      class="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-accent outline-none focus:ring-2 focus:ring-accent-soft"
+                    />
+                    Enviar para a contabilidade
+                  </label>
                 </div>
               }
             </div>
