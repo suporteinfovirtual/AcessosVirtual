@@ -1,20 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Cliente, TIPOS_ACESSO } from '../../../../core/models';
+import { Acesso, Cliente, Contabilidade, TIPOS_ACESSO } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
+import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 
 interface Envio {
   cliente: Cliente;
   acesso: Acesso;
-}
-
-interface ResumoContabilidade {
-  id: number;
-  nome: string;
-  total: number;
 }
 
 @Component({
@@ -24,14 +19,24 @@ interface ResumoContabilidade {
 })
 export class EnviosContabilidadePanelComponent implements OnInit {
   private clientesService = inject(ClientesService);
+  private contabilidadesService = inject(ContabilidadesService);
 
   readonly tipos = TIPOS_ACESSO;
 
-  busca = signal('');
+  buscaContabilidade = signal('');
+  buscaCliente = signal('');
+
+  contabilidades = signal<Contabilidade[]>([]);
   clientes = signal<Cliente[]>([]);
   carregando = signal(true);
 
-  contabilidadeSelecionada = signal<number | null>(null);
+  contabilidadeSelecionadaId = signal<number | null>(null);
+
+  formNovaAberto = signal(false);
+  nomeNova = signal('');
+  emailNova = signal('');
+  criando = signal(false);
+  erroNova = signal('');
 
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
@@ -49,31 +54,29 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return lista;
   });
 
-  // só as contabilidades que realmente têm algum envio marcado
-  contabilidades = computed<ResumoContabilidade[]>(() => {
-    const mapa = new Map<number, ResumoContabilidade>();
+  totalPorContabilidade = computed(() => {
+    const mapa = new Map<number, number>();
     for (const { acesso } of this.envios()) {
       const id = acesso.contabilidade_id!;
-      if (!mapa.has(id)) mapa.set(id, { id, nome: acesso.contabilidade_nome || 'Sem nome', total: 0 });
-      mapa.get(id)!.total++;
+      mapa.set(id, (mapa.get(id) || 0) + 1);
     }
-    return Array.from(mapa.values()).sort((a, b) => a.nome.localeCompare(b.nome));
+    return mapa;
   });
 
   contabilidadesFiltradas = computed(() => {
-    const termo = this.busca().trim().toLowerCase();
-    if (!termo) return this.contabilidades();
-    return this.contabilidades().filter((c) => c.nome.toLowerCase().includes(termo));
+    const termo = this.buscaContabilidade().trim().toLowerCase();
+    const lista = this.contabilidades();
+    return lista.filter((c) => !termo || c.nome.toLowerCase().includes(termo));
   });
 
-  nomeContabilidadeSelecionada = computed(
-    () => this.contabilidades().find((c) => c.id === this.contabilidadeSelecionada())?.nome || ''
+  contabilidadeSelecionada = computed(
+    () => this.contabilidades().find((c) => c.id === this.contabilidadeSelecionadaId()) || null
   );
 
   enviosDaContabilidade = computed(() => {
-    const id = this.contabilidadeSelecionada();
+    const id = this.contabilidadeSelecionadaId();
     if (!id) return [];
-    const termo = this.busca().trim().toLowerCase();
+    const termo = this.buscaCliente().trim().toLowerCase();
     return this.envios()
       .filter((e) => e.acesso.contabilidade_id === id)
       .filter(
@@ -90,7 +93,11 @@ export class EnviosContabilidadePanelComponent implements OnInit {
   async carregar() {
     this.carregando.set(true);
     try {
-      const clientes = await firstValueFrom(this.clientesService.listar());
+      const [contabilidades, clientes] = await Promise.all([
+        firstValueFrom(this.contabilidadesService.listar()),
+        firstValueFrom(this.clientesService.listar()),
+      ]);
+      this.contabilidades.set(contabilidades);
       this.clientes.set(clientes);
     } finally {
       this.carregando.set(false);
@@ -101,14 +108,46 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return this.tipos.find((t) => t.valor === tipo)?.rotulo || tipo;
   }
 
-  selecionarContabilidade(id: number) {
-    this.contabilidadeSelecionada.set(id);
-    this.busca.set('');
+  rotuloIdentificador(tipo: string): string {
+    if (tipo === 'anydesk') return 'Código AnyDesk';
+    if (tipo === 'acesso_zeta') return 'E-mail do Cliente';
+    return 'Identificador';
   }
 
-  voltarParaContabilidades() {
-    this.contabilidadeSelecionada.set(null);
-    this.busca.set('');
+  selecionarContabilidade(id: number) {
+    this.contabilidadeSelecionadaId.set(id);
+    this.buscaCliente.set('');
+  }
+
+  abrirFormNova() {
+    this.nomeNova.set('');
+    this.emailNova.set('');
+    this.erroNova.set('');
+    this.formNovaAberto.set(true);
+  }
+
+  cancelarFormNova() {
+    this.formNovaAberto.set(false);
+  }
+
+  async criarContabilidade() {
+    const nome = this.nomeNova().trim().toUpperCase();
+    if (!nome || this.criando()) return;
+
+    this.criando.set(true);
+    this.erroNova.set('');
+    try {
+      const resultado = await firstValueFrom(
+        this.contabilidadesService.criar({ nome, email: this.emailNova().trim() || null })
+      );
+      this.formNovaAberto.set(false);
+      await this.carregar();
+      this.selecionarContabilidade(resultado.id);
+    } catch {
+      this.erroNova.set('Já existe uma contabilidade com esse nome.');
+    } finally {
+      this.criando.set(false);
+    }
   }
 
   abrirEdicaoCliente(cliente: Cliente) {

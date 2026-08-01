@@ -78,6 +78,7 @@ export class InicioComponent implements OnInit {
   contabilidadesModalAberto = signal(false);
 
   senhaDoDia = signal(this.calcularSenhaDoDia());
+  senhaDoDiaCopiada = signal(false);
 
   mostrandoInternos = computed(() => this.abaAtiva() === 'internos');
   mostrandoManuais = computed(() => this.abaAtiva() === 'manuais');
@@ -258,6 +259,16 @@ export class InicioComponent implements OnInit {
   async aoSalvarCliente() {
     this.fecharModalCliente();
     await this.carregarClientes();
+  }
+
+  async copiarSenhaDoDia() {
+    try {
+      await navigator.clipboard.writeText(this.senhaDoDia());
+      this.senhaDoDiaCopiada.set(true);
+      setTimeout(() => this.senhaDoDiaCopiada.set(false), 1500);
+    } catch {
+      // clipboard indisponível (ex: contexto não seguro) — ignora silenciosamente
+    }
   }
 
   // mesma fórmula do projeto "senha-do-dia": dia x mês x (ano % 100) x 3
