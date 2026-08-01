@@ -78,8 +78,12 @@
               </button>
 
               <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                @if (envio.acesso.tipo === 'anydesk') {
+                  <app-copy-field rotulo="Código AnyDesk" [valor]="envio.acesso.identificador" [mono]="true"></app-copy-field>
+                  <app-copy-field rotulo="Senha" [valor]="envio.acesso.senha" [mascaravel]="true"></app-copy-field>
+                }
                 <app-copy-field rotulo="E-mail Contabilidade" [valor]="envio.acesso.contabilidade_email"></app-copy-field>
-                @if (envio.acesso.identificador) {
+                @if (envio.acesso.tipo !== 'anydesk' && envio.acesso.identificador) {
                   <app-copy-field
                     [rotulo]="envio.acesso.tipo === 'acesso_zeta' ? 'E-mail do Cliente' : 'Identificador'"
                     [valor]="envio.acesso.identificador"
