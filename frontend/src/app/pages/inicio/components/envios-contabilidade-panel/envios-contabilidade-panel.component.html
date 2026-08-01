@@ -130,15 +130,37 @@
                     }
                   </button>
 
-                  @if (envio.acesso.identificador) {
-                    <div class="border-t border-zinc-800 pt-3">
+                  <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                    @if (envio.acesso.tipo === 'anydesk') {
+                      <app-copy-field rotulo="Código AnyDesk" [valor]="envio.acesso.identificador" [mono]="true"></app-copy-field>
+                      <app-copy-field rotulo="Senha" [valor]="envio.acesso.senha" [mascaravel]="true"></app-copy-field>
+                    } @else if (envio.acesso.identificador) {
                       <app-copy-field
                         [rotulo]="rotuloIdentificador(envio.acesso.tipo)"
                         [valor]="envio.acesso.identificador"
-                        [mono]="envio.acesso.tipo === 'anydesk'"
                       ></app-copy-field>
-                    </div>
-                  }
+                    }
+                    @if (envio.acesso.link || (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor)) {
+                      <div class="mt-1 flex items-center justify-between gap-2">
+                        @if (envio.acesso.link) {
+                          <a
+                            [href]="envio.acesso.tipo === 'acesso_zeta' ? linkAutoLogin(envio.acesso) : envio.acesso.link"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                          >
+                            Abrir link
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                          </a>
+                        }
+                        @if (envio.acesso.tipo === 'acesso_web' && envio.acesso.servidor) {
+                          <span class="ml-auto shrink-0 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-xs font-medium text-zinc-300">
+                            Servidor {{ envio.acesso.servidor }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
                 </div>
               }
             </div>

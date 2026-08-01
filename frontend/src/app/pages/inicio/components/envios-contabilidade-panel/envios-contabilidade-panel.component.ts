@@ -114,6 +114,16 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return 'Identificador';
   }
 
+  // o userscript de auto-login do zweb lê zw_e/zw_p do hash da URL para preencher o formulário sozinho
+  linkAutoLogin(acesso: Acesso): string {
+    const link = acesso.link || '';
+    if (!link || !acesso.identificador || !acesso.senha) return link;
+    const [base, hash = ''] = link.split('#');
+    const caminho = hash.split('?')[0];
+    const params = new URLSearchParams({ zw_e: acesso.identificador, zw_p: acesso.senha }).toString();
+    return `${base}#${caminho}?${params}`;
+  }
+
   selecionarContabilidade(id: number) {
     this.contabilidadeSelecionadaId.set(id);
     this.buscaCliente.set('');
