@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, effect, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../shared/card.component';
 
@@ -10,9 +10,17 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   templateUrl: './envio-arquivos.component.html',
 })
 export class EnvioArquivosComponent {
+  // pré-preenche o destinatário com o e-mail da contabilidade selecionada; reajusta sozinho
+  // se o valor mudar (ex: usuário troca de contabilidade na aba de envios)
+  emailInicial = input<string | null | undefined>(null);
+
   arquivos = signal<File[]>([]);
   email = signal('');
   arrastando = signal(false);
+
+  constructor() {
+    effect(() => this.email.set(this.emailInicial() ?? ''));
+  }
 
   emailValido = computed(() => EMAIL_REGEX.test(this.email().trim()));
   podeEnviar = computed(() => this.arquivos().length > 0 && this.emailValido());
