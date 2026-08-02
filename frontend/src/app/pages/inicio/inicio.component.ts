@@ -1,4 +1,5 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, Categoria, Cliente, Contabilidade, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
@@ -22,6 +23,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais';
   selector: 'app-inicio',
   imports: [
     FormsModule,
+    NgClass,
     CopyFieldComponent,
     LinkModalComponent,
     ClienteModalComponent,

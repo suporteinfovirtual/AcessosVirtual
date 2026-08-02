@@ -7,6 +7,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
+import { CardComponent } from '../../../../shared/card.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 
 interface Envio {
@@ -21,7 +22,7 @@ const NOMES_MES = [
 
 @Component({
   selector: 'app-envios-contabilidade-panel',
-  imports: [FormsModule, NgClass, CopyFieldComponent, ClienteModalComponent],
+  imports: [FormsModule, NgClass, CopyFieldComponent, CardComponent, ClienteModalComponent],
   templateUrl: './envios-contabilidade-panel.component.html',
 })
 export class EnviosContabilidadePanelComponent implements OnInit {

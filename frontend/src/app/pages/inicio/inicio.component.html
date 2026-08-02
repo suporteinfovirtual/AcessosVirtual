@@ -16,20 +16,18 @@
       </button>
     </div>
 
-    <nav class="flex flex-col gap-0.5 px-3 pb-4">
+    <nav class="flex flex-col gap-1.5 px-3 pb-4">
       <h2 class="px-1 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Acessos</h2>
       @for (aba of abasAcessos; track aba.valor) {
         <button
           type="button"
-          class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
-          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
-          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
+          class="flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-sm font-medium transition-colors"
+          [ngClass]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor
+            ? 'border-accent/40 bg-accent-soft text-accent'
+            : 'border-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/50'"
           (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
         >
-          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
-            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
-          }
-          <span class="flex items-center gap-2">
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
             @switch (aba.valor) {
               @case ('anydesk') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10" /><path stroke-linecap="round" stroke-linejoin="round" d="M7 20h10" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 16v4" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 16v4" /></svg>
@@ -41,9 +39,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4" /><path stroke-linecap="round" stroke-linejoin="round" d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 7l1 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 13l6 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 17l2 0" /></svg>
               }
             }
-            {{ aba.rotulo }}
           </span>
-          <span class="ml-1.5 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
+          <span class="flex-1 truncate text-left">{{ aba.rotulo }}</span>
+          <span class="shrink-0 text-xs text-zinc-600">{{ contagemPorTipo()[aba.valor] }}</span>
         </button>
       }
 
@@ -51,15 +49,13 @@
       @for (aba of abasFerramentas; track aba.valor) {
         <button
           type="button"
-          class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
-          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
-          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
+          class="flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-sm font-medium transition-colors"
+          [ngClass]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor
+            ? 'border-accent/40 bg-accent-soft text-accent'
+            : 'border-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/50'"
           (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
         >
-          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
-            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
-          }
-          <span class="flex items-center gap-2">
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
             @switch (aba.valor) {
               @case ('manuais') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 6l0 13" /></svg>
@@ -68,8 +64,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path stroke-linecap="round" stroke-linejoin="round" d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
               }
             }
-            {{ aba.rotulo }}
           </span>
+          <span class="flex-1 truncate text-left">{{ aba.rotulo }}</span>
         </button>
       }
     </nav>
@@ -94,14 +90,16 @@
           <p class="px-1 py-2 text-xs text-zinc-600">Nenhum link cadastrado ainda.</p>
         } @else {
           @for (link of links(); track link.id) {
-            <div class="group flex items-center rounded-lg pl-1 pr-0.5 hover:bg-zinc-900">
+            <div class="group flex items-center gap-2 rounded-lg border border-zinc-800/60 py-1 pl-1.5 pr-0.5 transition-colors hover:border-zinc-700 hover:bg-zinc-900/50">
               <a
                 [href]="link.url"
                 target="_blank"
                 rel="noopener"
-                class="flex min-w-0 flex-1 items-center gap-2 py-1.5 text-sm text-zinc-300 hover:text-accent"
+                class="flex min-w-0 flex-1 items-center gap-2.5 py-0.5 text-sm text-zinc-300 hover:text-accent"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15l6 -6" /><path stroke-linecap="round" stroke-linejoin="round" d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" /></svg>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15l6 -6" /><path stroke-linecap="round" stroke-linejoin="round" d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" /></svg>
+                </span>
                 <span class="truncate">{{ link.titulo }}</span>
               </a>
               <button
@@ -120,24 +118,32 @@
 
     <div class="border-t border-zinc-900 px-3 py-4">
       <h2 class="px-1 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Gestão</h2>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col gap-1.5">
         <button
           type="button"
-          class="flex items-center gap-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
-          [class.text-accent]="mostrandoClientesSistemas()"
+          class="flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left text-sm font-medium transition-colors"
+          [ngClass]="mostrandoClientesSistemas()
+            ? 'border-accent/40 bg-accent-soft text-accent'
+            : 'border-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/50'"
           (click)="mostrandoEnviosContabilidade.set(false); mostrandoClientesSistemas.set(true)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+          </span>
           Clientes
         </button>
 
         <button
           type="button"
-          class="flex items-center gap-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
-          [class.text-accent]="mostrandoEnviosContabilidade()"
+          class="flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left text-sm font-medium transition-colors"
+          [ngClass]="mostrandoEnviosContabilidade()
+            ? 'border-accent/40 bg-accent-soft text-accent'
+            : 'border-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/50'"
           (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(true)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 10l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 6l7 -3l7 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M4 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M20 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 14l0 3" /></svg>
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-2" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 15h6" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 18h6" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h6" /></svg>
+          </span>
           Envios contabilidade
         </button>
       </div>

@@ -3,7 +3,7 @@
 
   <div class="mt-5 flex flex-col gap-6 lg:flex-row lg:items-start">
     <div class="w-full shrink-0 lg:w-72">
-      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3">
+      <app-card padding="p-3">
         <div class="relative">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -19,7 +19,7 @@
         @if (!formNovaAberto()) {
           <button
             type="button"
-            class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-400 transition hover:border-accent/50 hover:text-accent"
+            class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-accent to-accent-hover px-3 py-2 text-sm font-medium text-zinc-950 transition-colors hover:from-accent-hover hover:to-accent-hover"
             (click)="abrirFormNova()"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -81,7 +81,7 @@
             }
           }
         </div>
-      </div>
+      </app-card>
     </div>
 
     <div class="min-w-0 flex-1">
@@ -91,7 +91,7 @@
         </div>
       } @else {
         @let contabilidade = contabilidadeSelecionada()!;
-        <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5">
+        <app-card padding="p-4 sm:p-5">
           <h3 class="truncate text-base font-semibold text-zinc-100">{{ contabilidade.nome }}</h3>
           @if (contabilidade.email) {
             <div class="mt-1.5 max-w-xs">
@@ -135,12 +135,12 @@
               class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
             />
           </div>
-        </div>
+        </app-card>
 
         <div class="mt-5">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @for (envio of enviosDaContabilidade(); track envio.acesso.id) {
-              <div class="rounded-lg border border-zinc-800 p-3">
+              <app-card padding="p-3">
                 <div class="mb-3 flex items-start justify-between gap-2">
                   <button type="button" class="min-w-0 flex-1 text-left" (click)="abrirEdicaoCliente(envio.cliente)" title="Editar cliente">
                     <div class="flex flex-wrap items-center gap-2">
@@ -208,7 +208,7 @@
                     </div>
                   }
                 </div>
-              </div>
+              </app-card>
             } @empty {
               <div class="flex min-h-[220px] w-full items-center justify-center rounded-xl border border-dashed border-zinc-800 sm:col-span-2 xl:col-span-3">
                 <p class="text-sm text-zinc-600">Nenhum cliente encontrado para esse filtro.</p>
