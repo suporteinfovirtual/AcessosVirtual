@@ -11,6 +11,7 @@ import { CardComponent } from '../../../../shared/card.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { EnvioArquivosComponent } from '../../../../features/envio-arquivos/envio-arquivos.component';
 
 interface Envio {
   cliente: Cliente;
@@ -24,7 +25,7 @@ const NOMES_MES = [
 
 @Component({
   selector: 'app-envios-contabilidade-panel',
-  imports: [FormsModule, NgClass, CopyFieldComponent, CardComponent, ClienteModalComponent, SkeletonComponent],
+  imports: [FormsModule, NgClass, CopyFieldComponent, CardComponent, ClienteModalComponent, SkeletonComponent, EnvioArquivosComponent],
   templateUrl: './envios-contabilidade-panel.component.html',
 })
 export class EnviosContabilidadePanelComponent implements OnInit {

@@ -1,0 +1,44 @@
+import { Component, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CardComponent } from '../../shared/card.component';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+@Component({
+  selector: 'app-envio-arquivos',
+  imports: [FormsModule, CardComponent],
+  templateUrl: './envio-arquivos.component.html',
+})
+export class EnvioArquivosComponent {
+  arquivos = signal<File[]>([]);
+  email = signal('');
+
+  emailValido = computed(() => EMAIL_REGEX.test(this.email().trim()));
+  podeEnviar = computed(() => this.arquivos().length > 0 && this.emailValido());
+
+  aoSelecionarArquivos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const novos = Array.from(input.files ?? []);
+    if (novos.length > 0) {
+      this.arquivos.update((atuais) => [...atuais, ...novos]);
+    }
+    input.value = '';
+  }
+
+  removerArquivo(indice: number) {
+    this.arquivos.update((atuais) => atuais.filter((_, i) => i !== indice));
+  }
+
+  formatarTamanho(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+  }
+
+  enviarEmail() {
+    if (!this.podeEnviar()) return;
+    console.log('Enviar e-mail', { destinatario: this.email(), arquivos: this.arquivos() });
+    // TODO: conectar com o endpoint /api/enviar-email depois que o Resend estiver configurado
+  }
+}

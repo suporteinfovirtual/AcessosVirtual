@@ -138,6 +138,10 @@
         </app-card>
 
         <div class="mt-5">
+          <app-envio-arquivos></app-envio-arquivos>
+        </div>
+
+        <div class="mt-5">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @for (envio of enviosDaContabilidade(); track envio.acesso.id) {
               <app-card padding="p-3">
