@@ -321,6 +321,17 @@
                       @if (abaAtiva() === 'anydesk') {
                         <app-copy-field rotulo="Código AnyDesk" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
                         <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>
+                        @if (acesso.identificador) {
+                          <button
+                            type="button"
+                            class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                            (click)="conectarAnydesk(acesso)"
+                            title="Abre o AnyDesk já direcionado pra esse ID e copia a senha pra colar"
+                          >
+                            Conectar
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                          </button>
+                        }
                       }
                       @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
                         @if (acesso.contabilidade_nome) {
