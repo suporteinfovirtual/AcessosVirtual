@@ -6,6 +6,10 @@ import { ClientesSistemasService } from '../../../../core/clientes-sistemas.serv
 import { ClientesService } from '../../../../core/clientes.service';
 import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-sistema-modal.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
+import { ToastService } from '../../../../shared/toast.service';
+import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
+import { ViewModeService } from '../../../../shared/view-mode.service';
+import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
 // sistemas sem cadastro proprio: usam direto a tabela clientes/acessos, filtrando pelo tipo de acesso correspondente
 const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
@@ -15,12 +19,14 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
 
 @Component({
   selector: 'app-clientes-sistemas',
-  imports: [FormsModule, ClienteSistemaModalComponent, ClienteModalComponent],
+  imports: [FormsModule, ClienteSistemaModalComponent, ClienteModalComponent, ViewModeToggleComponent, SkeletonComponent],
   templateUrl: './clientes-sistemas.component.html',
 })
 export class ClientesSistemasComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private clientesService = inject(ClientesService);
+  private toast = inject(ToastService);
+  viewMode = inject(ViewModeService);
 
   readonly sistemas = SISTEMAS;
 
@@ -121,10 +127,12 @@ export class ClientesSistemasComponent implements OnInit {
   async aoSalvar() {
     this.fecharModal();
     await this.carregar();
+    this.toast.sucesso('Cliente salvo.');
   }
 
   async aoSalvarUnificado() {
     this.fecharModalUnificado();
     await this.carregar();
+    this.toast.sucesso('Cliente salvo.');
   }
 }

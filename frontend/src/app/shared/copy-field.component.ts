@@ -1,4 +1,5 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
+import { ToastService } from './toast.service';
 
 // Campo discreto com valor + botão de copiar, usado nos cartões de acesso.
 @Component({
@@ -45,6 +46,8 @@ import { Component, input, signal } from '@angular/core';
   `,
 })
 export class CopyFieldComponent {
+  private toast = inject(ToastService);
+
   rotulo = input.required<string>();
   valor = input<string | null | undefined>();
   mascaravel = input(false);
@@ -52,10 +55,6 @@ export class CopyFieldComponent {
 
   mascarado = signal(false);
   copiado = signal(false);
-
-  constructor() {
-    // esconde por padrão se for um campo mascarável (ex: senha)
-  }
 
   ngOnInit() {
     if (this.mascaravel()) this.mascarado.set(true);
@@ -67,9 +66,10 @@ export class CopyFieldComponent {
     try {
       await navigator.clipboard.writeText(texto);
       this.copiado.set(true);
+      this.toast.sucesso(`${this.rotulo()} copiado`);
       setTimeout(() => this.copiado.set(false), 1500);
     } catch {
-      // clipboard indisponível (ex: contexto não seguro) — ignora silenciosamente
+      this.toast.erro('Não foi possível copiar.');
     }
   }
 }

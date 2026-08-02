@@ -9,6 +9,8 @@ import { EnviosContabilidadeService } from '../../../../core/envios-contabilidad
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { CardComponent } from '../../../../shared/card.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
+import { ToastService } from '../../../../shared/toast.service';
+import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
 interface Envio {
   cliente: Cliente;
@@ -22,13 +24,14 @@ const NOMES_MES = [
 
 @Component({
   selector: 'app-envios-contabilidade-panel',
-  imports: [FormsModule, NgClass, CopyFieldComponent, CardComponent, ClienteModalComponent],
+  imports: [FormsModule, NgClass, CopyFieldComponent, CardComponent, ClienteModalComponent, SkeletonComponent],
   templateUrl: './envios-contabilidade-panel.component.html',
 })
 export class EnviosContabilidadePanelComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private contabilidadesService = inject(ContabilidadesService);
   private enviosContabilidadeService = inject(EnviosContabilidadeService);
+  private toast = inject(ToastService);
 
   readonly tipos = TIPOS_ACESSO;
 
@@ -227,6 +230,7 @@ export class EnviosContabilidadePanelComponent implements OnInit {
       this.formNovaAberto.set(false);
       await this.carregar();
       this.selecionarContabilidade(resultado.id);
+      this.toast.sucesso('Contabilidade criada.');
     } catch {
       this.erroNova.set('Já existe uma contabilidade com esse nome.');
     } finally {
@@ -247,5 +251,6 @@ export class EnviosContabilidadePanelComponent implements OnInit {
   async aoSalvarCliente() {
     this.fecharModalCliente();
     await this.carregar();
+    this.toast.sucesso('Cliente salvo.');
   }
 }

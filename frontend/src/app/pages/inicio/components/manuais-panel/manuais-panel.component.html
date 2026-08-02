@@ -2,8 +2,14 @@
   <app-manual-detalhe [manualId]="id" (voltar)="voltarParaLista()" (removido)="voltarParaLista()"></app-manual-detalhe>
 } @else {
   <div>
+    <div class="flex justify-end">
+      <app-view-mode-toggle></app-view-mode-toggle>
+    </div>
+
     @if (carregando()) {
-      <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+      <div class="mt-4">
+        <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
+      </div>
     } @else if (manuaisFiltrados().length === 0) {
       <p class="py-10 text-center text-sm text-zinc-600">
         {{ manuais().length === 0 ? 'Nenhum manual cadastrado ainda.' : 'Nenhum manual encontrado.' }}
@@ -11,18 +17,20 @@
     }
 
     @if (manuaisFiltrados().length > 0) {
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-4" [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
         @for (manual of manuaisFiltrados(); track manual.id) {
           <button
             type="button"
-            class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-accent/50"
+            [class]="viewMode.modo() === 'lista'
+              ? 'flex w-full items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-accent/50'
+              : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-accent/50'"
             (click)="abrirManual(manual)"
           >
-            <p class="truncate text-sm font-medium text-zinc-100">{{ manual.titulo }}</p>
+            <p [class]="viewMode.modo() === 'lista' ? 'shrink-0 truncate text-sm font-medium text-zinc-100 sm:w-48' : 'truncate text-sm font-medium text-zinc-100'">{{ manual.titulo }}</p>
             @if (manual.descricao) {
-              <p class="mt-1 line-clamp-2 text-xs text-zinc-500">{{ manual.descricao }}</p>
+              <p [class]="viewMode.modo() === 'lista' ? 'min-w-0 flex-1 truncate text-xs text-zinc-500' : 'mt-1 line-clamp-2 text-xs text-zinc-500'">{{ manual.descricao }}</p>
             }
-            <p class="mt-2 text-[11px] text-zinc-600">{{ manual.total_passos }} passo{{ manual.total_passos === 1 ? '' : 's' }}</p>
+            <p [class]="viewMode.modo() === 'lista' ? 'shrink-0 text-[11px] text-zinc-600' : 'mt-2 text-[11px] text-zinc-600'">{{ manual.total_passos }} passo{{ manual.total_passos === 1 ? '' : 's' }}</p>
           </button>
         }
       </div>

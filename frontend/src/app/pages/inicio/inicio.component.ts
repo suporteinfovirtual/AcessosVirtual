@@ -7,6 +7,10 @@ import { CategoriasService } from '../../core/categorias.service';
 import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
+import { ToastService } from '../../shared/toast.service';
+import { ViewModeToggleComponent } from '../../shared/view-mode-toggle.component';
+import { ViewModeService } from '../../shared/view-mode.service';
+import { SkeletonComponent } from '../../shared/skeleton.component';
 import { LinkModalComponent } from './components/link-modal/link-modal.component';
 import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.component';
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
@@ -31,6 +35,8 @@ type Aba = TipoAcesso | 'internos' | 'manuais';
     ManuaisPanelComponent,
     ClientesSistemasComponent,
     EnviosContabilidadePanelComponent,
+    ViewModeToggleComponent,
+    SkeletonComponent,
   ],
   templateUrl: './inicio.component.html',
 })
@@ -40,6 +46,8 @@ export class InicioComponent implements OnInit {
   private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
   private destroyRef = inject(DestroyRef);
+  private toast = inject(ToastService);
+  viewMode = inject(ViewModeService);
 
   // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
   mostrandoClientesSistemas = signal(false);
@@ -165,6 +173,7 @@ export class InicioComponent implements OnInit {
   async aoSalvarLink() {
     this.fecharModalLink();
     await this.carregarLinks();
+    this.toast.sucesso('Link salvo.');
   }
 
   // --- painel de clientes ---
@@ -194,6 +203,7 @@ export class InicioComponent implements OnInit {
   async aoAlterarCategorias() {
     await this.carregarCategorias();
     await this.carregarClientes();
+    this.toast.sucesso('Categorias atualizadas.');
   }
 
   async carregarContabilidades() {
@@ -208,6 +218,7 @@ export class InicioComponent implements OnInit {
   async aoAlterarContabilidades() {
     await this.carregarContabilidades();
     await this.carregarClientes();
+    this.toast.sucesso('Contabilidades atualizadas.');
   }
 
   selecionarAba(valor: Aba) {
@@ -259,15 +270,17 @@ export class InicioComponent implements OnInit {
   async aoSalvarCliente() {
     this.fecharModalCliente();
     await this.carregarClientes();
+    this.toast.sucesso('Cliente salvo.');
   }
 
   async copiarSenhaDoDia() {
     try {
       await navigator.clipboard.writeText(this.senhaDoDia());
       this.senhaDoDiaCopiada.set(true);
+      this.toast.sucesso('Senha do dia copiada.');
       setTimeout(() => this.senhaDoDiaCopiada.set(false), 1500);
     } catch {
-      // clipboard indisponível (ex: contexto não seguro) — ignora silenciosamente
+      this.toast.erro('Não foi possível copiar.');
     }
   }
 

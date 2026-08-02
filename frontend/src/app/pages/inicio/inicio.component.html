@@ -202,6 +202,7 @@
         <app-envios-contabilidade-panel></app-envios-contabilidade-panel>
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+          <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
           @if (!mostrandoInternos() && !mostrandoManuais()) {
             <div class="flex items-center gap-2">
               @if (abaAtiva() === 'acesso_web') {
@@ -271,18 +272,22 @@
           } @else if (mostrandoManuais()) {
             <app-manuais-panel [busca]="busca()"></app-manuais-panel>
           } @else if (carregandoClientes()) {
-            <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+            <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
           } @else if (erro()) {
             <p class="py-10 text-center text-sm text-red-400">{{ erro() }}</p>
           } @else if (clientesFiltrados().length === 0) {
             <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente encontrado nessa categoria.</p>
           } @else {
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
               @for (cliente of clientesFiltrados(); track cliente.id) {
-                <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+                <div
+                  [class]="viewMode.modo() === 'lista'
+                    ? 'rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 transition hover:border-zinc-700 sm:flex sm:items-center sm:gap-5'
+                    : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700'"
+                >
                   <button
                     type="button"
-                    class="mb-3 block w-full text-left"
+                    [class]="viewMode.modo() === 'lista' ? 'block w-full text-left sm:w-56 sm:shrink-0' : 'mb-3 block w-full text-left'"
                     (click)="abrirEdicaoCliente(cliente)"
                     title="Editar cliente"
                   >
@@ -308,7 +313,11 @@
 
                   @let acesso = acessoDoTipo(cliente, abaAtiva());
                   @if (acesso) {
-                    <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+                    <div
+                      [class]="viewMode.modo() === 'lista'
+                        ? 'mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 sm:mt-0 sm:min-w-0 sm:flex-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+                        : 'space-y-1.5 border-t border-zinc-800 pt-3'"
+                    >
                       @if (abaAtiva() === 'anydesk') {
                         <app-copy-field rotulo="Código AnyDesk" [valor]="acesso.identificador" [mono]="true"></app-copy-field>
                         <app-copy-field rotulo="Senha" [valor]="acesso.senha" [mascaravel]="true"></app-copy-field>

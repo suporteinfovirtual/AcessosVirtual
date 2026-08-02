@@ -4,14 +4,20 @@ import { Manual } from '../../../../core/models';
 import { ManuaisService } from '../../../../core/manuais.service';
 import { ManualModalComponent } from '../manual-modal/manual-modal.component';
 import { ManualDetalheComponent } from '../manual-detalhe/manual-detalhe.component';
+import { ToastService } from '../../../../shared/toast.service';
+import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
+import { ViewModeService } from '../../../../shared/view-mode.service';
+import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
 @Component({
   selector: 'app-manuais-panel',
-  imports: [ManualModalComponent, ManualDetalheComponent],
+  imports: [ManualModalComponent, ManualDetalheComponent, ViewModeToggleComponent, SkeletonComponent],
   templateUrl: './manuais-panel.component.html',
 })
 export class ManuaisPanelComponent implements OnInit {
   private manuaisService = inject(ManuaisService);
+  private toast = inject(ToastService);
+  viewMode = inject(ViewModeService);
 
   busca = input('');
 
@@ -67,5 +73,6 @@ export class ManuaisPanelComponent implements OnInit {
   async aoSalvar() {
     this.fecharModal();
     await this.carregar();
+    this.toast.sucesso('Manual salvo.');
   }
 }

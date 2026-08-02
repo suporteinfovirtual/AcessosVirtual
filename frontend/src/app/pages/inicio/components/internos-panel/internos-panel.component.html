@@ -1,6 +1,12 @@
 <div>
+  <div class="flex justify-end">
+    <app-view-mode-toggle></app-view-mode-toggle>
+  </div>
+
   @if (carregando()) {
-    <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+    <div class="mt-4">
+      <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
+    </div>
   } @else if (contasFiltradas().length === 0) {
     <p class="py-10 text-center text-sm text-zinc-600">
       {{ contas().length === 0 ? 'Nenhuma conta interna cadastrada ainda.' : 'Nenhuma conta interna encontrada.' }}
@@ -8,19 +14,27 @@
   }
 
   @if (contasFiltradas().length > 0) {
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-4" [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
       @for (conta of contasFiltradas(); track conta.id) {
-        <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700">
+        <div
+          [class]="viewMode.modo() === 'lista'
+            ? 'rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 transition hover:border-zinc-700 sm:flex sm:items-center sm:gap-5'
+            : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700'"
+        >
           <button
             type="button"
-            class="mb-3 block w-full text-left"
+            [class]="viewMode.modo() === 'lista' ? 'block w-full text-left sm:w-48 sm:shrink-0' : 'mb-3 block w-full text-left'"
             (click)="abrirEdicao(conta)"
             title="Editar conta interna"
           >
             <p class="truncate text-sm font-medium text-zinc-100">{{ conta.servico }}</p>
           </button>
 
-          <div class="space-y-1.5 border-t border-zinc-800 pt-3">
+          <div
+            [class]="viewMode.modo() === 'lista'
+              ? 'mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 sm:mt-0 sm:min-w-0 sm:flex-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+              : 'space-y-1.5 border-t border-zinc-800 pt-3'"
+          >
             <app-copy-field rotulo="Usuário" [valor]="conta.usuario"></app-copy-field>
             <app-copy-field rotulo="Senha" [valor]="conta.senha" [mascaravel]="true"></app-copy-field>
             @if (conta.observacoes) {
