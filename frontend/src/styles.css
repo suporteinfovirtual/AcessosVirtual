@@ -59,6 +59,8 @@ body {
 
 .painel {
   position: relative;
+  /* trava o brilho decorativo dentro da coluna de conteudo, sem vazar pra sidebar */
+  overflow: hidden;
 }
 
 /* brilho decorativo no canto superior esquerdo — irmão do conteúdo, não ancestral,
@@ -66,7 +68,7 @@ body {
 .painel-glow {
   position: absolute;
   top: -220px;
-  left: -220px;
+  left: -160px;
   width: 780px;
   height: 780px;
   background: radial-gradient(circle at 35% 35%, rgba(255, 140, 0, 0.4) 0%, rgba(255, 140, 0, 0.15) 32%, rgba(255, 140, 0, 0) 68%);
