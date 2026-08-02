@@ -21,16 +21,16 @@
       @for (aba of abasAcessos; track aba.valor) {
         <button
           type="button"
-          class="flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-sm font-medium transition-colors"
+          class="flex items-center gap-2.5 rounded-lg border border-l-[3px] px-2.5 py-2 text-sm font-medium transition-colors"
           [ngClass]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor
-            ? 'border-accent/40 bg-accent-soft text-accent'
-            : 'border-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/50'"
+            ? 'border-accent/40 border-l-accent bg-accent-soft text-accent'
+            : 'border-zinc-800/60 border-l-zinc-800/60 text-zinc-400 hover:border-zinc-700 hover:border-l-zinc-700 hover:bg-zinc-900/50'"
           (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
         >
           <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/5">
             @switch (aba.valor) {
               @case ('anydesk') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10" /><path stroke-linecap="round" stroke-linejoin="round" d="M7 20h10" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 16v4" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 16v4" /></svg>
+                <img src="icons/anydesk.svg" alt="AnyDesk" class="h-4 w-4 shrink-0" />
               }
               @case ('acesso_web') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.6 15h16.8" /><path stroke-linecap="round" stroke-linejoin="round" d="M11.5 3a17 17 0 0 0 0 18" /><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 3a17 17 0 0 1 0 18" /></svg>
