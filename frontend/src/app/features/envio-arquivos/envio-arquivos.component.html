@@ -1,14 +1,20 @@
 <app-card>
   <h3 class="text-sm font-semibold text-zinc-100">Enviar arquivos por e-mail</h3>
 
-  <div class="mt-4">
-    <label
-      for="envio-arquivos-input"
-      class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-zinc-100"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739 10.682 20.43a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32a1.5 1.5 0 0 1-2.121-2.122l7.81-7.81"/></svg>
-      Selecionar arquivos
-    </label>
+  <div
+    class="relative mt-4 flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center transition"
+    [class.border-accent]="arrastando()"
+    [class.bg-accent-soft]="arrastando()"
+    [class.border-zinc-800]="!arrastando()"
+    (dragover)="aoArrastarSobre($event)"
+    (dragleave)="aoSairArraste($event)"
+    (drop)="aoSoltarArquivos($event)"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6 text-zinc-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m-6 0 3-3m0 0 3 3m-3-3v9.75"/></svg>
+    <p class="text-sm text-zinc-400">
+      Arraste os arquivos aqui ou
+      <label for="envio-arquivos-input" class="cursor-pointer font-medium text-accent hover:text-accent-hover">selecione no computador</label>
+    </p>
     <input id="envio-arquivos-input" type="file" multiple class="hidden" (change)="aoSelecionarArquivos($event)" />
   </div>
 

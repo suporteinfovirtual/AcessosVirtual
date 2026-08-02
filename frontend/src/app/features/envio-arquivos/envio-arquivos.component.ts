@@ -12,17 +12,38 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export class EnvioArquivosComponent {
   arquivos = signal<File[]>([]);
   email = signal('');
+  arrastando = signal(false);
 
   emailValido = computed(() => EMAIL_REGEX.test(this.email().trim()));
   podeEnviar = computed(() => this.arquivos().length > 0 && this.emailValido());
 
   aoSelecionarArquivos(event: Event) {
     const input = event.target as HTMLInputElement;
-    const novos = Array.from(input.files ?? []);
+    this.adicionarArquivos(input.files);
+    input.value = '';
+  }
+
+  aoArrastarSobre(event: DragEvent) {
+    event.preventDefault();
+    this.arrastando.set(true);
+  }
+
+  aoSairArraste(event: DragEvent) {
+    event.preventDefault();
+    this.arrastando.set(false);
+  }
+
+  aoSoltarArquivos(event: DragEvent) {
+    event.preventDefault();
+    this.arrastando.set(false);
+    this.adicionarArquivos(event.dataTransfer?.files);
+  }
+
+  private adicionarArquivos(lista: FileList | null | undefined) {
+    const novos = Array.from(lista ?? []);
     if (novos.length > 0) {
       this.arquivos.update((atuais) => [...atuais, ...novos]);
     }
-    input.value = '';
   }
 
   removerArquivo(indice: number) {
