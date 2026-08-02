@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-zinc-950 lg:flex">
   <aside class="border-b border-zinc-900 bg-zinc-950/90 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
-    <div class="px-4 py-4">
+    <div class="flex justify-center px-4 py-4">
       <button
         type="button"
         class="rounded"
@@ -123,20 +123,28 @@
       <div class="flex flex-col gap-1">
         <button
           type="button"
-          class="flex items-center gap-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+          class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoClientesSistemas()"
+          [class.text-zinc-500]="!mostrandoClientesSistemas()"
           (click)="mostrandoEnviosContabilidade.set(false); mostrandoClientesSistemas.set(true)"
         >
+          @if (mostrandoClientesSistemas()) {
+            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
+          }
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
           Clientes
         </button>
 
         <button
           type="button"
-          class="flex items-center gap-2 rounded-lg border border-zinc-800 px-3 py-2 text-left text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+          class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoEnviosContabilidade()"
+          [class.text-zinc-500]="!mostrandoEnviosContabilidade()"
           (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(true)"
         >
+          @if (mostrandoEnviosContabilidade()) {
+            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
+          }
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 10l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 6l7 -3l7 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M4 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M20 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 14l0 3" /></svg>
           Envios contabilidade
         </button>
