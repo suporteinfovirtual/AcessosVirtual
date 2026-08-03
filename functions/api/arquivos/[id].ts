@@ -49,6 +49,26 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
 }
 
+// PATCH /api/arquivos/:id -> renomeia o titulo amigável (sem mexer no arquivo)
+// json: { titulo: string | null }
+export async function onRequestPatch(context: EventContext<Env, { id: string }, unknown>) {
+  const { request, env, params } = context;
+
+  let body: { titulo?: string | null };
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
+  }
+
+  await env.DB
+    .prepare(`UPDATE arquivos SET titulo = ?, atualizado_em = datetime('now') WHERE id = ?`)
+    .bind(body.titulo?.trim() || null, params.id)
+    .run();
+
+  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+}
+
 // DELETE /api/arquivos/:id -> remove o arquivo
 export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
   const { env, params } = context;

@@ -75,6 +75,7 @@ export interface LinkPessoal {
 export interface Arquivo {
   id?: number;
   nome_arquivo: string;
+  titulo?: string | null;
   tipo?: string | null;
   tamanho?: number;
   criado_em?: string;

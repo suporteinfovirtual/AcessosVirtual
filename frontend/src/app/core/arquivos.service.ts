@@ -11,9 +11,10 @@ export class ArquivosService {
     return this.http.get<Arquivo[]>('/api/arquivos');
   }
 
-  enviar(arquivo: File): Observable<{ id: number }> {
+  enviar(arquivo: File, titulo?: string | null): Observable<{ id: number }> {
     const form = new FormData();
     form.append('arquivo', arquivo, arquivo.name);
+    if (titulo) form.append('titulo', titulo);
     return this.http.post<{ id: number }>('/api/arquivos', form);
   }
 
@@ -21,6 +22,10 @@ export class ArquivosService {
     const form = new FormData();
     form.append('arquivo', arquivo, arquivo.name);
     return this.http.put<{ ok: true }>(`/api/arquivos/${id}`, form);
+  }
+
+  renomear(id: number, titulo: string | null): Observable<{ ok: true }> {
+    return this.http.patch<{ ok: true }>(`/api/arquivos/${id}`, { titulo });
   }
 
   baixar(id: number): Observable<Blob> {

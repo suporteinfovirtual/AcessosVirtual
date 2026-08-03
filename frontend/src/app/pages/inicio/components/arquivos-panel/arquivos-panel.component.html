@@ -15,15 +15,44 @@
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6 text-zinc-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m-6 0 3-3m0 0 3 3m-3-3v9.75"/></svg>
       <p class="text-sm text-zinc-400">
-        @if (enviando()) {
-          Enviando…
-        } @else {
-          Arraste um arquivo aqui ou
-          <label for="arquivos-input" class="cursor-pointer font-medium text-accent hover:text-accent-hover">selecione no computador</label>
-        }
+        Arraste um arquivo aqui ou
+        <label for="arquivos-input" class="cursor-pointer font-medium text-accent hover:text-accent-hover">selecione no computador</label>
       </p>
-      <input id="arquivos-input" type="file" multiple class="hidden" [disabled]="enviando()" (change)="aoSelecionarArquivos($event)" />
+      <input id="arquivos-input" type="file" multiple class="hidden" (change)="aoSelecionarArquivos($event)" />
     </div>
+
+    @if (pendentes().length > 0) {
+      <ul class="mt-3 flex flex-col gap-1.5">
+        @for (pendente of pendentes(); track pendente.file.name + pendente.file.size + $index; let i = $index) {
+          <li class="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+            <span class="min-w-0 shrink-0 truncate text-xs text-zinc-500 sm:w-40" [title]="pendente.file.name">{{ pendente.file.name }}</span>
+            <input
+              [(ngModel)]="pendente.titulo"
+              type="text"
+              placeholder="Nome amigável (opcional), ex: Script atalho do acesso"
+              class="min-w-0 flex-1 rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+            <button
+              type="button"
+              class="shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-red-400"
+              (click)="removerPendente(i)"
+              title="Remover"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <button
+        type="button"
+        class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-accent to-accent-hover px-4 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:from-accent-hover hover:to-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="enviando()"
+        (click)="enviarPendentes()"
+      >
+        {{ enviando() ? 'Enviando…' : (pendentes().length === 1 ? 'Enviar arquivo' : 'Enviar ' + pendentes().length + ' arquivos') }}
+      </button>
+    }
   </app-card>
 
   @if (carregando()) {
@@ -44,7 +73,32 @@
             : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700'"
         >
           <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 flex-1' : 'min-w-0'">
-            <p class="truncate text-sm font-medium text-zinc-100">{{ arquivo.nome_arquivo }}</p>
+            @if (editandoId() === arquivo.id) {
+              <div class="flex items-center gap-1.5">
+                <input
+                  [(ngModel)]="tituloEdicao"
+                  type="text"
+                  placeholder="Nome amigável, ex: Script atalho do acesso"
+                  class="min-w-0 flex-1 rounded-md border border-accent/50 bg-zinc-950 px-2 py-1 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:ring-2 focus:ring-accent-soft"
+                  (keydown.enter)="salvarTitulo(arquivo)"
+                  (keydown.escape)="cancelarEdicaoTitulo()"
+                />
+                <button type="button" class="shrink-0 rounded p-1 text-accent hover:bg-zinc-800" (click)="salvarTitulo(arquivo)" title="Salvar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                </button>
+                <button type="button" class="shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-800" (click)="cancelarEdicaoTitulo()" title="Cancelar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            } @else {
+              <button type="button" class="group/titulo flex min-w-0 items-center gap-1.5 text-left" (click)="iniciarEdicaoTitulo(arquivo)" title="Clique para renomear">
+                <p class="truncate text-sm font-medium text-zinc-100">{{ arquivo.titulo || arquivo.nome_arquivo }}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0 text-zinc-600 opacity-0 transition group-hover/titulo:opacity-100"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+              </button>
+              @if (arquivo.titulo) {
+                <p class="truncate text-xs text-zinc-500">{{ arquivo.nome_arquivo }}</p>
+              }
+            }
             <p class="mt-0.5 text-xs text-zinc-500">{{ formatarTamanho(arquivo.tamanho) }}</p>
           </div>
 

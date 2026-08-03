@@ -145,6 +145,7 @@ CREATE TABLE IF NOT EXISTS links_pessoais (
 CREATE TABLE IF NOT EXISTS arquivos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome_arquivo TEXT NOT NULL,
+  titulo TEXT, -- nome amigável opcional, ex: "Script atalho do acesso"
   tipo TEXT,
   tamanho INTEGER NOT NULL,
   arquivo BLOB NOT NULL,

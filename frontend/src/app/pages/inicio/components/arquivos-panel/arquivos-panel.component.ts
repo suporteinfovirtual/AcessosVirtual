@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Arquivo } from '../../../../core/models';
 import { ArquivosService } from '../../../../core/arquivos.service';
@@ -8,9 +9,14 @@ import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.com
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
+interface Pendente {
+  file: File;
+  titulo: string;
+}
+
 @Component({
   selector: 'app-arquivos-panel',
-  imports: [CardComponent, ViewModeToggleComponent, SkeletonComponent],
+  imports: [FormsModule, CardComponent, ViewModeToggleComponent, SkeletonComponent],
   templateUrl: './arquivos-panel.component.html',
 })
 export class ArquivosPanelComponent implements OnInit {
@@ -26,10 +32,17 @@ export class ArquivosPanelComponent implements OnInit {
   arrastando = signal(false);
   substituindoId = signal<number | null>(null);
 
+  pendentes = signal<Pendente[]>([]);
+
+  editandoId = signal<number | null>(null);
+  tituloEdicao = signal('');
+
   arquivosFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
     if (!termo) return this.arquivos();
-    return this.arquivos().filter((a) => a.nome_arquivo.toLowerCase().includes(termo));
+    return this.arquivos().filter(
+      (a) => a.nome_arquivo.toLowerCase().includes(termo) || (a.titulo || '').toLowerCase().includes(termo)
+    );
   });
 
   ngOnInit() {
@@ -48,7 +61,7 @@ export class ArquivosPanelComponent implements OnInit {
 
   aoSelecionarArquivos(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.enviarArquivos(input.files);
+    this.adicionarPendentes(input.files);
     input.value = '';
   }
 
@@ -65,20 +78,32 @@ export class ArquivosPanelComponent implements OnInit {
   aoSoltarArquivos(event: DragEvent) {
     event.preventDefault();
     this.arrastando.set(false);
-    this.enviarArquivos(event.dataTransfer?.files);
+    this.adicionarPendentes(event.dataTransfer?.files);
   }
 
-  private async enviarArquivos(lista: FileList | null | undefined) {
-    const arquivos = Array.from(lista ?? []);
-    if (arquivos.length === 0 || this.enviando()) return;
+  private adicionarPendentes(lista: FileList | null | undefined) {
+    const novos = Array.from(lista ?? []).map((file) => ({ file, titulo: '' }));
+    if (novos.length > 0) {
+      this.pendentes.update((atuais) => [...atuais, ...novos]);
+    }
+  }
+
+  removerPendente(indice: number) {
+    this.pendentes.update((atuais) => atuais.filter((_, i) => i !== indice));
+  }
+
+  async enviarPendentes() {
+    const pendentes = this.pendentes();
+    if (pendentes.length === 0 || this.enviando()) return;
 
     this.enviando.set(true);
     try {
-      for (const arquivo of arquivos) {
-        await firstValueFrom(this.arquivosService.enviar(arquivo));
+      for (const pendente of pendentes) {
+        await firstValueFrom(this.arquivosService.enviar(pendente.file, pendente.titulo.trim() || null));
       }
+      this.pendentes.set([]);
       await this.carregar();
-      this.toast.sucesso(arquivos.length === 1 ? 'Arquivo enviado.' : 'Arquivos enviados.');
+      this.toast.sucesso(pendentes.length === 1 ? 'Arquivo enviado.' : 'Arquivos enviados.');
     } catch {
       this.toast.erro('Não foi possível enviar o arquivo.');
     } finally {
@@ -104,6 +129,28 @@ export class ArquivosPanelComponent implements OnInit {
     }
   }
 
+  iniciarEdicaoTitulo(arquivo: Arquivo) {
+    if (!arquivo.id) return;
+    this.editandoId.set(arquivo.id);
+    this.tituloEdicao.set(arquivo.titulo || '');
+  }
+
+  cancelarEdicaoTitulo() {
+    this.editandoId.set(null);
+  }
+
+  async salvarTitulo(arquivo: Arquivo) {
+    if (!arquivo.id) return;
+    const titulo = this.tituloEdicao().trim() || null;
+    try {
+      await firstValueFrom(this.arquivosService.renomear(arquivo.id, titulo));
+      this.arquivos.update((lista) => lista.map((a) => (a.id === arquivo.id ? { ...a, titulo } : a)));
+      this.editandoId.set(null);
+    } catch {
+      this.toast.erro('Não foi possível renomear o arquivo.');
+    }
+  }
+
   async baixar(arquivo: Arquivo) {
     if (!arquivo.id) return;
     try {
@@ -120,7 +167,8 @@ export class ArquivosPanelComponent implements OnInit {
   }
 
   async remover(arquivo: Arquivo) {
-    if (!arquivo.id || !confirm(`Excluir "${arquivo.nome_arquivo}"?`)) return;
+    const nome = arquivo.titulo || arquivo.nome_arquivo;
+    if (!arquivo.id || !confirm(`Excluir "${nome}"?`)) return;
     await firstValueFrom(this.arquivosService.remover(arquivo.id));
     await this.carregar();
     this.toast.sucesso('Arquivo excluído.');
