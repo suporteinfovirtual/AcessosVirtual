@@ -5,13 +5,12 @@ import { InternosService } from '../../../../core/internos.service';
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { InternoModalComponent } from '../interno-modal/interno-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
-import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
 @Component({
   selector: 'app-internos-panel',
-  imports: [CopyFieldComponent, InternoModalComponent, ViewModeToggleComponent, SkeletonComponent],
+  imports: [CopyFieldComponent, InternoModalComponent, SkeletonComponent],
   templateUrl: './internos-panel.component.html',
 })
 export class InternosPanelComponent implements OnInit {

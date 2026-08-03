@@ -5,7 +5,6 @@ import { Arquivo } from '../../../../core/models';
 import { ArquivosService } from '../../../../core/arquivos.service';
 import { CardComponent } from '../../../../shared/card.component';
 import { ToastService } from '../../../../shared/toast.service';
-import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
@@ -16,7 +15,7 @@ interface Pendente {
 
 @Component({
   selector: 'app-arquivos-panel',
-  imports: [FormsModule, CardComponent, ViewModeToggleComponent, SkeletonComponent],
+  imports: [FormsModule, CardComponent, SkeletonComponent],
   templateUrl: './arquivos-panel.component.html',
 })
 export class ArquivosPanelComponent implements OnInit {

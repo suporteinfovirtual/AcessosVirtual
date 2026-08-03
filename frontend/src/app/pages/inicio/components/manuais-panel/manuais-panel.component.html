@@ -2,10 +2,6 @@
   <app-manual-detalhe [manualId]="id" (voltar)="voltarParaLista()" (removido)="voltarParaLista()"></app-manual-detalhe>
 } @else {
   <div>
-    <div class="flex justify-end">
-      <app-view-mode-toggle></app-view-mode-toggle>
-    </div>
-
     @if (carregando()) {
       <div class="mt-4">
         <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
