@@ -72,6 +72,15 @@ export interface LinkPessoal {
   criado_em?: string;
 }
 
+export interface Arquivo {
+  id?: number;
+  nome_arquivo: string;
+  tipo?: string | null;
+  tamanho?: number;
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
 export interface ManualPassoImagem {
   id: number;
   passo_id?: number;

@@ -17,10 +17,11 @@ import { InternosPanelComponent } from './components/internos-panel/internos-pan
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
+import { ArquivosPanelComponent } from './components/arquivos-panel/arquivos-panel.component';
 import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
 import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
 
-type Aba = TipoAcesso | 'internos' | 'manuais';
+type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
 
 @Component({
   selector: 'app-inicio',
@@ -33,6 +34,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais';
     CategoriasModalComponent,
     ContabilidadesModalComponent,
     ManuaisPanelComponent,
+    ArquivosPanelComponent,
     ClientesSistemasComponent,
     EnviosContabilidadePanelComponent,
     ViewModeToggleComponent,
@@ -66,6 +68,7 @@ export class InicioComponent implements OnInit {
   readonly abasFerramentas: { valor: Aba; rotulo: string }[] = [
     { valor: 'manuais', rotulo: 'Manuais' },
     { valor: 'internos', rotulo: 'Contas Internas' },
+    { valor: 'arquivos', rotulo: 'Arquivos' },
   ];
 
   clientes = signal<Cliente[]>([]);
@@ -90,8 +93,9 @@ export class InicioComponent implements OnInit {
 
   mostrandoInternos = computed(() => this.abaAtiva() === 'internos');
   mostrandoManuais = computed(() => this.abaAtiva() === 'manuais');
+  mostrandoArquivos = computed(() => this.abaAtiva() === 'arquivos');
   tipoInicialModal = computed<TipoAcesso | null>(() =>
-    this.mostrandoInternos() || this.mostrandoManuais() ? null : (this.abaAtiva() as TipoAcesso)
+    this.mostrandoInternos() || this.mostrandoManuais() || this.mostrandoArquivos() ? null : (this.abaAtiva() as TipoAcesso)
   );
 
   clientesFiltrados = computed(() => {
@@ -100,7 +104,7 @@ export class InicioComponent implements OnInit {
     const categoriaId = this.categoriaFiltro();
     const servidor = this.servidorFiltro();
     const contabilidade = this.contabilidadeFiltro();
-    if (tipo === 'internos' || tipo === 'manuais') return [];
+    if (tipo === 'internos' || tipo === 'manuais' || tipo === 'arquivos') return [];
 
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))

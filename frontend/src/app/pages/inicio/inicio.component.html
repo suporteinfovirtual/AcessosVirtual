@@ -67,6 +67,9 @@
               @case ('internos') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path stroke-linecap="round" stroke-linejoin="round" d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
               }
+              @case ('arquivos') {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m-6 0 3-3m0 0 3 3m-3-3v9.75" /></svg>
+              }
             }
             {{ aba.rotulo }}
           </span>
@@ -164,7 +167,7 @@
             <input
               [(ngModel)]="busca"
               type="text"
-              [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : 'Buscar por nome ou CNPJ…'"
+              [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : mostrandoArquivos() ? 'Buscar arquivo…' : 'Buscar por nome ou CNPJ…'"
               class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
             />
           </div>
@@ -203,7 +206,7 @@
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
-          @if (!mostrandoInternos() && !mostrandoManuais()) {
+          @if (!mostrandoInternos() && !mostrandoManuais() && !mostrandoArquivos()) {
             <div class="flex items-center gap-2">
               @if (abaAtiva() === 'acesso_web') {
                 <select
@@ -271,6 +274,8 @@
             <app-internos-panel [busca]="busca()"></app-internos-panel>
           } @else if (mostrandoManuais()) {
             <app-manuais-panel [busca]="busca()"></app-manuais-panel>
+          } @else if (mostrandoArquivos()) {
+            <app-arquivos-panel [busca]="busca()"></app-arquivos-panel>
           } @else if (carregandoClientes()) {
             <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
           } @else if (erro()) {
