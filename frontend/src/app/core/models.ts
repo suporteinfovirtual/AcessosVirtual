@@ -52,6 +52,15 @@ export interface Licenca {
   criado_em?: string;
 }
 
+export interface ClienteNegociacao {
+  id?: number;
+  nome: string;
+  cnpj?: string | null;
+  enquadramento_fiscal?: string | null;
+  observacoes?: string | null;
+  criado_em?: string;
+}
+
 export interface Contabilidade {
   id?: number;
   nome: string;

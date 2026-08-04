@@ -178,3 +178,15 @@ CREATE TABLE IF NOT EXISTS clientes_sistemas_licencas (
 
 CREATE INDEX IF NOT EXISTS idx_cliente_licencas_licenca ON cliente_licencas(licenca_id);
 CREATE INDEX IF NOT EXISTS idx_clientes_sistemas_licencas_licenca ON clientes_sistemas_licencas(licenca_id);
+
+-- Clientes em negociação: cadastro simples pra prospects, feito só na aba Gestão > Negociação
+CREATE TABLE IF NOT EXISTS clientes_negociacao (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL,
+  cnpj TEXT,
+  enquadramento_fiscal TEXT,
+  observacoes TEXT,
+  criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_clientes_negociacao_nome ON clientes_negociacao(nome);

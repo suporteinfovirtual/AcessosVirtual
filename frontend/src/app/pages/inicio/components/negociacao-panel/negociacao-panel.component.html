@@ -1,0 +1,85 @@
+<div>
+  <h2 class="text-lg font-semibold text-zinc-100">Clientes em negociação</h2>
+
+  <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="relative w-full sm:max-w-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+      </svg>
+      <input
+        [(ngModel)]="busca"
+        type="text"
+        placeholder="Buscar por nome ou CNPJ…"
+        class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+      />
+    </div>
+
+    <div class="flex items-center gap-2">
+      <app-view-mode-toggle></app-view-mode-toggle>
+      <button
+        type="button"
+        class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+        (click)="abrirNovo()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Novo cliente
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    @if (carregando()) {
+      <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
+    } @else if (clientesFiltrados().length === 0) {
+      <p class="py-10 text-center text-sm text-zinc-600">
+        {{ clientes().length === 0 ? 'Nenhum cliente em negociação ainda.' : 'Nenhum cliente encontrado.' }}
+      </p>
+    } @else {
+      <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
+        @for (cliente of clientesFiltrados(); track cliente.id) {
+          <button
+            type="button"
+            [class]="viewMode.modo() === 'lista'
+              ? 'flex w-full flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-zinc-700'
+              : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700'"
+            (click)="abrirEdicao(cliente)"
+          >
+            <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
+              <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
+              @if (cliente.cnpj) {
+                <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
+              }
+            </div>
+
+            <div
+              [class]="viewMode.modo() === 'lista'
+                ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+                : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
+            >
+              @if (cliente.enquadramento_fiscal) {
+                <div class="min-w-0">
+                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
+                  <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
+                </div>
+              }
+              @if (cliente.observacoes) {
+                <div class="min-w-0">
+                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Observações</span>
+                  <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
+                </div>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (modalAberto()) {
+  <app-negociacao-modal
+    [cliente]="clienteEmEdicao()"
+    (fechar)="fecharModal()"
+    (salvo)="aoSalvar()"
+  ></app-negociacao-modal>
+}

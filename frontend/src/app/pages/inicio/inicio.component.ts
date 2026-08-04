@@ -20,6 +20,7 @@ import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.
 import { ArquivosPanelComponent } from './components/arquivos-panel/arquivos-panel.component';
 import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
 import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
+import { NegociacaoPanelComponent } from './components/negociacao-panel/negociacao-panel.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
 
@@ -37,6 +38,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
     ArquivosPanelComponent,
     ClientesSistemasComponent,
     EnviosContabilidadePanelComponent,
+    NegociacaoPanelComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
   ],
@@ -56,6 +58,9 @@ export class InicioComponent implements OnInit {
 
   // --- área separada "Envios para a contabilidade" ---
   mostrandoEnviosContabilidade = signal(false);
+
+  // --- área separada "Clientes em negociação" ---
+  mostrandoNegociacao = signal(false);
 
   // --- links pessoais ---
   links = signal<LinkPessoal[]>([]);
