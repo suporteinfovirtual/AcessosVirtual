@@ -1,14 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ClienteNegociacao } from './models';
+import { ClienteNegociacao, StatusNegociacao } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class NegociacaoService {
   private http = inject(HttpClient);
 
-  listar(busca?: string): Observable<ClienteNegociacao[]> {
-    const params: Record<string, string> = busca ? { busca } : {};
+  listar(busca?: string, status?: StatusNegociacao): Observable<ClienteNegociacao[]> {
+    const params: Record<string, string> = {
+      ...(busca ? { busca } : {}),
+      ...(status ? { status } : {}),
+    };
     return this.http.get<ClienteNegociacao[]>('/api/negociacao', { params });
   }
 

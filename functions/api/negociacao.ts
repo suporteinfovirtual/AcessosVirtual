@@ -2,14 +2,26 @@ interface Env {
   DB: D1Database;
 }
 
-// GET /api/negociacao?busca=texto -> lista os clientes em negociação, filtrando por nome e/ou cnpj
+// GET /api/negociacao?busca=texto&status=em_negociacao -> lista os clientes em negociação, filtrando por nome, cnpj e/ou status
 export async function onRequestGet(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
   const url = new URL(request.url);
   const busca = url.searchParams.get('busca')?.trim();
+  const status = url.searchParams.get('status')?.trim();
 
-  const where = busca ? 'WHERE nome LIKE ? OR cnpj LIKE ?' : '';
-  const binds = busca ? [`%${busca}%`, `%${busca}%`] : [];
+  const condicoes: string[] = [];
+  const binds: string[] = [];
+
+  if (busca) {
+    condicoes.push('(nome LIKE ? OR cnpj LIKE ?)');
+    binds.push(`%${busca}%`, `%${busca}%`);
+  }
+  if (status) {
+    condicoes.push('status = ?');
+    binds.push(status);
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
 
   const { results } = await env.DB
     .prepare(`SELECT * FROM clientes_negociacao ${where} ORDER BY nome`)

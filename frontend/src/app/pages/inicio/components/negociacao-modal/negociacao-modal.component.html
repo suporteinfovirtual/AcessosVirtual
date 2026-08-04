@@ -24,6 +24,21 @@
           />
         </div>
 
+        @if (editando) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">Status</label>
+            <select
+              [(ngModel)]="status"
+              name="status"
+              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            >
+              @for (opcao of statusOpcoes; track opcao.valor) {
+                <option [ngValue]="opcao.valor">{{ opcao.rotulo }}</option>
+              }
+            </select>
+          </div>
+        }
+
         <div>
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">CNPJ</label>
           <input

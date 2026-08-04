@@ -71,6 +71,14 @@ export interface Implantacao {
   criado_em?: string;
 }
 
+export type StatusNegociacao = 'em_negociacao' | 'desistiu' | 'fechou';
+
+export const STATUS_NEGOCIACAO: { valor: StatusNegociacao; rotulo: string }[] = [
+  { valor: 'em_negociacao', rotulo: 'Em negociação' },
+  { valor: 'desistiu', rotulo: 'Desistiu' },
+  { valor: 'fechou', rotulo: 'Fechou' },
+];
+
 export interface ClienteNegociacao {
   id?: number;
   nome: string;
@@ -78,6 +86,7 @@ export interface ClienteNegociacao {
   telefone?: string | null;
   enquadramento_fiscal?: string | null;
   observacoes?: string | null;
+  status?: StatusNegociacao;
   criado_em?: string;
 }
 

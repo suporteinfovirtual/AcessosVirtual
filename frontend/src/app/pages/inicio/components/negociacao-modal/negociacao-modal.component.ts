@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, STATUS_NEGOCIACAO, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 
@@ -22,6 +22,8 @@ export class NegociacaoModalComponent implements OnInit {
   telefone = signal('');
   enquadramentoFiscal = signal('');
   observacoes = signal('');
+  status = signal<StatusNegociacao>('em_negociacao');
+  readonly statusOpcoes = STATUS_NEGOCIACAO;
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -43,6 +45,7 @@ export class NegociacaoModalComponent implements OnInit {
       this.telefone.set(cliente.telefone || '');
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.observacoes.set(cliente.observacoes || '');
+      this.status.set(cliente.status || 'em_negociacao');
     }
   }
 
@@ -62,7 +65,7 @@ export class NegociacaoModalComponent implements OnInit {
 
     try {
       if (this.editando) {
-        await firstValueFrom(this.negociacaoService.atualizar(this.cliente()!.id!, dados));
+        await firstValueFrom(this.negociacaoService.atualizar(this.cliente()!.id!, { ...dados, status: this.status() }));
       } else {
         await firstValueFrom(this.negociacaoService.criar(dados));
       }
