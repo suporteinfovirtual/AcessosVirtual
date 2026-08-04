@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS implantacoes (
   cliente_ref_id INTEGER NOT NULL,
   data TEXT NOT NULL, -- YYYY-MM-DD
   hora TEXT NOT NULL, -- HH:MM
+  observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

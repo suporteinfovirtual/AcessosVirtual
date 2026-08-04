@@ -44,6 +44,16 @@
             />
           </div>
         </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Observações</label>
+          <textarea
+            [(ngModel)]="observacoes"
+            name="observacoes"
+            rows="3"
+            class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          ></textarea>
+        </div>
       </div>
 
       @if (erro()) {

@@ -12,6 +12,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     cliente_ref_id?: number;
     data?: string;
     hora?: string;
+    observacoes?: string;
   };
   try {
     body = await request.json();
@@ -28,9 +29,17 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
 
   await env.DB
     .prepare(
-      'UPDATE implantacoes SET cliente_nome = ?, cliente_sistema = ?, cliente_ref_id = ?, data = ?, hora = ? WHERE id = ?'
+      'UPDATE implantacoes SET cliente_nome = ?, cliente_sistema = ?, cliente_ref_id = ?, data = ?, hora = ?, observacoes = ? WHERE id = ?'
     )
-    .bind(body.cliente_nome.trim(), body.cliente_sistema, body.cliente_ref_id, body.data.trim(), body.hora.trim(), params.id)
+    .bind(
+      body.cliente_nome.trim(),
+      body.cliente_sistema,
+      body.cliente_ref_id,
+      body.data.trim(),
+      body.hora.trim(),
+      body.observacoes?.trim() || null,
+      params.id
+    )
     .run();
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });

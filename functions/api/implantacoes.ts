@@ -19,6 +19,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     cliente_ref_id?: number;
     data?: string;
     hora?: string;
+    observacoes?: string;
   };
   try {
     body = await request.json();
@@ -35,9 +36,16 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
 
   const resultado = await env.DB
     .prepare(
-      'INSERT INTO implantacoes (cliente_nome, cliente_sistema, cliente_ref_id, data, hora) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO implantacoes (cliente_nome, cliente_sistema, cliente_ref_id, data, hora, observacoes) VALUES (?, ?, ?, ?, ?, ?)'
     )
-    .bind(body.cliente_nome.trim(), body.cliente_sistema, body.cliente_ref_id, body.data.trim(), body.hora.trim())
+    .bind(
+      body.cliente_nome.trim(),
+      body.cliente_sistema,
+      body.cliente_ref_id,
+      body.data.trim(),
+      body.hora.trim(),
+      body.observacoes?.trim() || null
+    )
     .run();
 
   return new Response(JSON.stringify({ id: resultado.meta.last_row_id }), {

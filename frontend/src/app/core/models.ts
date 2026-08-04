@@ -66,6 +66,7 @@ export interface Implantacao {
   cliente_ref_id: number;
   data: string;
   hora: string;
+  observacoes?: string | null;
   criado_em?: string;
 }
 

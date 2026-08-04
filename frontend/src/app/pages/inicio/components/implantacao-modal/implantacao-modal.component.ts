@@ -21,6 +21,7 @@ export class ImplantacaoModalComponent implements OnInit {
   cliente = signal<ClienteRef | null>(null);
   data = signal('');
   hora = signal('');
+  observacoes = signal('');
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -36,6 +37,7 @@ export class ImplantacaoModalComponent implements OnInit {
       this.cliente.set({ sistema: item.cliente_sistema, ref_id: item.cliente_ref_id, nome: item.cliente_nome });
       this.data.set(item.data);
       this.hora.set(item.hora);
+      this.observacoes.set(item.observacoes || '');
     } else if (this.dataInicial()) {
       this.data.set(this.dataInicial()!);
     }
@@ -54,6 +56,7 @@ export class ImplantacaoModalComponent implements OnInit {
       cliente_ref_id: cliente.ref_id,
       data: this.data(),
       hora: this.hora(),
+      observacoes: this.observacoes().trim() || null,
     };
 
     try {
