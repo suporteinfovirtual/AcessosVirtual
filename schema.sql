@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL,
   cnpj TEXT,
+  telefone TEXT,
   observacoes TEXT,
   categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
   licencas TEXT, -- usado no Acesso Zeta / Clientes > Zeta
@@ -113,6 +114,7 @@ CREATE TABLE IF NOT EXISTS clientes_sistemas (
   sistema TEXT NOT NULL CHECK (sistema IN ('uniplus', 'uniplus_web', 'sgbr', 'zeta')),
   nome TEXT NOT NULL,
   cnpj TEXT,
+  telefone TEXT,
   licencas TEXT,
   enquadramento_fiscal TEXT,
   versao_build TEXT,
@@ -184,6 +186,7 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL,
   cnpj TEXT,
+  telefone TEXT,
   enquadramento_fiscal TEXT,
   observacoes TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))

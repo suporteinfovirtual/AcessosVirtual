@@ -34,6 +34,17 @@
           />
         </div>
 
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Telefone</label>
+          <input
+            [ngModel]="telefone()"
+            (ngModelChange)="aoDigitarTelefone($event)"
+            name="telefone"
+            placeholder="(47) 9 3333-6633"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
         @if (tipoInicial() === 'acesso_zeta') {
           <div>
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Categoria</label>

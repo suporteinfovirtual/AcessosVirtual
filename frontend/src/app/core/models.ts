@@ -28,6 +28,7 @@ export interface Cliente {
   id?: number;
   nome: string;
   cnpj?: string | null;
+  telefone?: string | null;
   observacoes?: string | null;
   categoria_id?: number | null;
   categoria_nome?: string | null;
@@ -74,6 +75,7 @@ export interface ClienteNegociacao {
   id?: number;
   nome: string;
   cnpj?: string | null;
+  telefone?: string | null;
   enquadramento_fiscal?: string | null;
   observacoes?: string | null;
   criado_em?: string;
@@ -156,6 +158,7 @@ export interface ClienteSistema {
   sistema: Sistema;
   nome: string;
   cnpj?: string | null;
+  telefone?: string | null;
   licencas?: string | null;
   licencas_selecionadas?: Licenca[];
   licenca_ids?: number[];

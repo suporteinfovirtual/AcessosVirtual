@@ -48,6 +48,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   let body: {
     nome?: string;
     cnpj?: string;
+    telefone?: string;
     observacoes?: string;
     categoria_id?: number | null;
     licencas?: string;
@@ -66,11 +67,12 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
 
   await env.DB
     .prepare(
-      'UPDATE clientes SET nome = ?, cnpj = ?, observacoes = ?, categoria_id = ?, licencas = ?, enquadramento_fiscal = ? WHERE id = ?'
+      'UPDATE clientes SET nome = ?, cnpj = ?, telefone = ?, observacoes = ?, categoria_id = ?, licencas = ?, enquadramento_fiscal = ? WHERE id = ?'
     )
     .bind(
       body.nome.trim(),
       body.cnpj?.trim() || null,
+      body.telefone?.trim() || null,
       body.observacoes?.trim() || null,
       body.categoria_id || null,
       body.licencas?.trim() || null,

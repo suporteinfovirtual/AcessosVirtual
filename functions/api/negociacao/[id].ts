@@ -6,7 +6,7 @@ interface Env {
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
-  let body: { nome?: string; cnpj?: string; enquadramento_fiscal?: string; observacoes?: string };
+  let body: { nome?: string; cnpj?: string; telefone?: string; enquadramento_fiscal?: string; observacoes?: string };
   try {
     body = await request.json();
   } catch {
@@ -18,8 +18,15 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   }
 
   await env.DB
-    .prepare('UPDATE clientes_negociacao SET nome = ?, cnpj = ?, enquadramento_fiscal = ?, observacoes = ? WHERE id = ?')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.enquadramento_fiscal?.trim() || null, body.observacoes?.trim() || null, params.id)
+    .prepare('UPDATE clientes_negociacao SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ? WHERE id = ?')
+    .bind(
+      body.nome.trim(),
+      body.cnpj?.trim() || null,
+      body.telefone?.trim() || null,
+      body.enquadramento_fiscal?.trim() || null,
+      body.observacoes?.trim() || null,
+      params.id
+    )
     .run();
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });

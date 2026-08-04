@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ClienteSistema, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { LicencasService } from '../../../../core/licencas.service';
-import { somenteDigitos } from '../../../../core/texto.util';
+import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 @Component({
@@ -23,6 +23,7 @@ export class ClienteSistemaModalComponent implements OnInit {
 
   nome = signal('');
   cnpj = signal('');
+  telefone = signal('');
   licencas = signal('');
   licencaIds = signal<number[]>([]);
   licencasDisponiveis = signal<Licenca[]>([]);
@@ -46,6 +47,10 @@ export class ClienteSistemaModalComponent implements OnInit {
     return this.sistema() === 'uniplus';
   }
 
+  aoDigitarTelefone(valor: string) {
+    this.telefone.set(formatarTelefone(valor));
+  }
+
   ngOnInit() {
     if (this.usaListaDeLicencas) {
       firstValueFrom(this.licencasService.listar()).then((licencas) => this.licencasDisponiveis.set(licencas));
@@ -55,6 +60,7 @@ export class ClienteSistemaModalComponent implements OnInit {
     if (cliente) {
       this.nome.set(cliente.nome);
       this.cnpj.set(cliente.cnpj || '');
+      this.telefone.set(cliente.telefone || '');
       this.licencas.set(cliente.licencas || '');
       this.licencaIds.set((cliente.licencas_selecionadas || []).map((l) => l.id!));
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
@@ -72,6 +78,7 @@ export class ClienteSistemaModalComponent implements OnInit {
     const dados = {
       nome: this.nome().trim(),
       cnpj: somenteDigitos(this.cnpj()) || null,
+      telefone: this.telefone().trim() || null,
       licencas: this.licencas().trim() || null,
       licenca_ids: this.usaListaDeLicencas ? this.licencaIds() : undefined,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,

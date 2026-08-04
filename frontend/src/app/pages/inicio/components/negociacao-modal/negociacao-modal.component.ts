@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
-import { somenteDigitos } from '../../../../core/texto.util';
+import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 
 @Component({
   selector: 'app-negociacao-modal',
@@ -19,6 +19,7 @@ export class NegociacaoModalComponent implements OnInit {
 
   nome = signal('');
   cnpj = signal('');
+  telefone = signal('');
   enquadramentoFiscal = signal('');
   observacoes = signal('');
 
@@ -30,11 +31,16 @@ export class NegociacaoModalComponent implements OnInit {
     return !!this.cliente()?.id;
   }
 
+  aoDigitarTelefone(valor: string) {
+    this.telefone.set(formatarTelefone(valor));
+  }
+
   ngOnInit() {
     const cliente = this.cliente();
     if (cliente) {
       this.nome.set(cliente.nome);
       this.cnpj.set(cliente.cnpj || '');
+      this.telefone.set(cliente.telefone || '');
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.observacoes.set(cliente.observacoes || '');
     }
@@ -49,6 +55,7 @@ export class NegociacaoModalComponent implements OnInit {
     const dados = {
       nome: this.nome().trim(),
       cnpj: somenteDigitos(this.cnpj()) || null,
+      telefone: this.telefone().trim() || null,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       observacoes: this.observacoes().trim() || null,
     };

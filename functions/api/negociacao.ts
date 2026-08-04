@@ -23,7 +23,7 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
 export async function onRequestPost(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
 
-  let body: { nome?: string; cnpj?: string; enquadramento_fiscal?: string; observacoes?: string };
+  let body: { nome?: string; cnpj?: string; telefone?: string; enquadramento_fiscal?: string; observacoes?: string };
   try {
     body = await request.json();
   } catch {
@@ -35,8 +35,14 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
   }
 
   const resultado = await env.DB
-    .prepare('INSERT INTO clientes_negociacao (nome, cnpj, enquadramento_fiscal, observacoes) VALUES (?, ?, ?, ?)')
-    .bind(body.nome.trim(), body.cnpj?.trim() || null, body.enquadramento_fiscal?.trim() || null, body.observacoes?.trim() || null)
+    .prepare('INSERT INTO clientes_negociacao (nome, cnpj, telefone, enquadramento_fiscal, observacoes) VALUES (?, ?, ?, ?, ?)')
+    .bind(
+      body.nome.trim(),
+      body.cnpj?.trim() || null,
+      body.telefone?.trim() || null,
+      body.enquadramento_fiscal?.trim() || null,
+      body.observacoes?.trim() || null
+    )
     .run();
 
   return new Response(JSON.stringify({ id: resultado.meta.last_row_id }), {

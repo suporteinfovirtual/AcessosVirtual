@@ -332,6 +332,9 @@
                     @if (cliente.cnpj) {
                       <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
                     }
+                    @if (cliente.telefone) {
+                      <p class="truncate text-xs text-zinc-500">{{ cliente.telefone }}</p>
+                    }
                     @if (abaAtiva() === 'acesso_zeta' && cliente.categoria_nome) {
                       <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{{ cliente.categoria_nome }}</span>
                     }

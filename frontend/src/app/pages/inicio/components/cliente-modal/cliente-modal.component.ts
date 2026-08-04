@@ -8,7 +8,7 @@ import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { LicencasService } from '../../../../core/licencas.service';
 import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
-import { somenteDigitos } from '../../../../core/texto.util';
+import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 interface CampoAcesso {
@@ -44,6 +44,7 @@ export class ClienteModalComponent implements OnInit {
 
   nome = signal('');
   cnpj = signal('');
+  telefone = signal('');
   observacoes = signal('');
   categoriaId = signal<number | null>(null);
   licencas = signal('');
@@ -86,6 +87,10 @@ export class ClienteModalComponent implements OnInit {
     return this.tipoInicial() === 'acesso_web';
   }
 
+  aoDigitarTelefone(valor: string) {
+    this.telefone.set(formatarTelefone(valor));
+  }
+
   ngOnInit() {
     firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
     firstValueFrom(this.contabilidadesService.listar()).then((contabilidades) => this.contabilidades.set(contabilidades));
@@ -97,6 +102,7 @@ export class ClienteModalComponent implements OnInit {
     if (cliente) {
       this.nome.set(cliente.nome);
       this.cnpj.set(cliente.cnpj || '');
+      this.telefone.set(cliente.telefone || '');
       this.observacoes.set(cliente.observacoes || '');
       this.categoriaId.set(cliente.categoria_id || null);
       this.licencas.set(cliente.licencas || '');
@@ -155,6 +161,7 @@ export class ClienteModalComponent implements OnInit {
     const dadosCliente = {
       nome: this.nome().trim(),
       cnpj: somenteDigitos(this.cnpj()) || null,
+      telefone: this.telefone().trim() || null,
       observacoes: this.observacoes().trim() || null,
       categoria_id: this.categoriaId(),
       licencas: this.licencas().trim() || null,
