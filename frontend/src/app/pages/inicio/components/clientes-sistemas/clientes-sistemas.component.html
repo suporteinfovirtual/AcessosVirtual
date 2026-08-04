@@ -33,6 +33,16 @@
 
     <div class="flex items-center gap-2">
       <app-view-mode-toggle></app-view-mode-toggle>
+      @if (usaListaDeLicencas()) {
+        <button
+          type="button"
+          class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+          (click)="abrirLicencas()"
+          title="Gerenciar licenças"
+        >
+          Licenças
+        </button>
+      }
       <button
         type="button"
         class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
@@ -101,6 +111,16 @@
                       <span class="block truncate text-sm text-zinc-300">{{ acesso!.servidor }}</span>
                     </div>
                   }
+                  @if (cliente.licencas_selecionadas?.length) {
+                    <div class="min-w-0 basis-full">
+                      <span class="mb-1 block text-[11px] uppercase tracking-wide text-zinc-500">Licenças</span>
+                      <div class="flex flex-wrap gap-1">
+                        @for (licenca of cliente.licencas_selecionadas; track licenca.id) {
+                          <span class="rounded-full border border-accent/30 bg-accent-soft px-2 py-0.5 text-xs text-accent">{{ licenca.nome }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
                 }
               </div>
             </button>
@@ -133,7 +153,18 @@
                 ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
                 : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
             >
-              @if (cliente.licencas) {
+              @if (usaListaDeLicencas()) {
+                @if (cliente.licencas_selecionadas?.length) {
+                  <div class="min-w-0 basis-full">
+                    <span class="mb-1 block text-[11px] uppercase tracking-wide text-zinc-500">Licenças</span>
+                    <div class="flex flex-wrap gap-1">
+                      @for (licenca of cliente.licencas_selecionadas; track licenca.id) {
+                        <span class="rounded-full border border-accent/30 bg-accent-soft px-2 py-0.5 text-xs text-accent">{{ licenca.nome }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              } @else if (cliente.licencas) {
                 <div class="min-w-0">
                   <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Licenças</span>
                   <span class="block truncate text-sm text-zinc-300">{{ cliente.licencas }}</span>
@@ -175,4 +206,11 @@
     (fechar)="fecharModalUnificado()"
     (salvo)="aoSalvarUnificado()"
   ></app-cliente-modal>
+}
+
+@if (licencasModalAberto()) {
+  <app-licencas-modal
+    (fechar)="licencasModalAberto.set(false)"
+    (alterado)="aoAlterarLicencas()"
+  ></app-licencas-modal>
 }

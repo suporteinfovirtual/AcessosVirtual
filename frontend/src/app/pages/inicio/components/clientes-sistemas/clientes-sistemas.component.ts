@@ -6,6 +6,7 @@ import { ClientesSistemasService } from '../../../../core/clientes-sistemas.serv
 import { ClientesService } from '../../../../core/clientes.service';
 import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-sistema-modal.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
+import { LicencasModalComponent } from '../licencas-modal/licencas-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
@@ -17,9 +18,19 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
   zeta: 'acesso_zeta',
 };
 
+// sistemas que usam a lista de licenças cadastrada (em vez do campo de texto livre)
+const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
+
 @Component({
   selector: 'app-clientes-sistemas',
-  imports: [FormsModule, ClienteSistemaModalComponent, ClienteModalComponent, ViewModeToggleComponent, SkeletonComponent],
+  imports: [
+    FormsModule,
+    ClienteSistemaModalComponent,
+    ClienteModalComponent,
+    LicencasModalComponent,
+    ViewModeToggleComponent,
+    SkeletonComponent,
+  ],
   templateUrl: './clientes-sistemas.component.html',
 })
 export class ClientesSistemasComponent implements OnInit {
@@ -43,9 +54,12 @@ export class ClientesSistemasComponent implements OnInit {
   modalUnificadoAberto = signal(false);
   clienteUnificadoEmEdicao = signal<Cliente | null>(null);
 
+  licencasModalAberto = signal(false);
+
   tipoUnificado = computed<TipoAcesso | null>(() => TIPO_POR_SISTEMA_UNIFICADO[this.sistemaAtivo()] ?? null);
   ehUnificado = computed(() => this.tipoUnificado() !== null);
   temVersaoBuild = computed(() => this.sistemas.find((s) => s.valor === this.sistemaAtivo())?.temVersaoBuild ?? false);
+  usaListaDeLicencas = computed(() => SISTEMAS_COM_LISTA_DE_LICENCAS.includes(this.sistemaAtivo()));
 
   clientesFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
@@ -134,5 +148,14 @@ export class ClientesSistemasComponent implements OnInit {
     this.fecharModalUnificado();
     await this.carregar();
     this.toast.sucesso('Cliente salvo.');
+  }
+
+  abrirLicencas() {
+    this.licencasModalAberto.set(true);
+  }
+
+  async aoAlterarLicencas() {
+    await this.carregar();
+    this.toast.sucesso('Licenças atualizadas.');
   }
 }

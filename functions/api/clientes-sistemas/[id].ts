@@ -11,7 +11,18 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
     return new Response(JSON.stringify({ erro: 'Cliente não encontrado' }), { status: 404 });
   }
 
-  return new Response(JSON.stringify(cliente), { headers: { 'Content-Type': 'application/json' } });
+  const { results: licencasSelecionadas } = await env.DB
+    .prepare(
+      `SELECT licencas.id, licencas.nome FROM clientes_sistemas_licencas
+       JOIN licencas ON licencas.id = clientes_sistemas_licencas.licenca_id
+       WHERE clientes_sistemas_licencas.cliente_sistema_id = ?`
+    )
+    .bind(params.id)
+    .all();
+
+  return new Response(JSON.stringify({ ...cliente, licencas_selecionadas: licencasSelecionadas }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 // PUT /api/clientes-sistemas/:id -> atualiza os dados do cliente
@@ -25,6 +36,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     enquadramento_fiscal?: string;
     versao_build?: string;
     observacoes?: string;
+    licenca_ids?: number[];
   };
   try {
     body = await request.json();
@@ -52,6 +64,16 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       params.id
     )
     .run();
+
+  if (Array.isArray(body.licenca_ids)) {
+    await env.DB.prepare('DELETE FROM clientes_sistemas_licencas WHERE cliente_sistema_id = ?').bind(params.id).run();
+    for (const licencaId of body.licenca_ids) {
+      await env.DB
+        .prepare('INSERT INTO clientes_sistemas_licencas (cliente_sistema_id, licenca_id) VALUES (?, ?)')
+        .bind(params.id, licencaId)
+        .run();
+    }
+  }
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
 }

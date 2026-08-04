@@ -1,17 +1,20 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteSistema, Sistema, SISTEMAS } from '../../../../core/models';
+import { ClienteSistema, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
+import { LicencasService } from '../../../../core/licencas.service';
 import { somenteDigitos } from '../../../../core/texto.util';
+import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 @Component({
   selector: 'app-cliente-sistema-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, LicencasSelectComponent],
   templateUrl: './cliente-sistema-modal.component.html',
 })
 export class ClienteSistemaModalComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
+  private licencasService = inject(LicencasService);
 
   cliente = input<ClienteSistema | null>(null);
   sistema = input.required<Sistema>();
@@ -21,6 +24,8 @@ export class ClienteSistemaModalComponent implements OnInit {
   nome = signal('');
   cnpj = signal('');
   licencas = signal('');
+  licencaIds = signal<number[]>([]);
+  licencasDisponiveis = signal<Licenca[]>([]);
   enquadramentoFiscal = signal('');
   versaoBuild = signal('');
   observacoes = signal('');
@@ -37,12 +42,21 @@ export class ClienteSistemaModalComponent implements OnInit {
     return SISTEMAS.find((s) => s.valor === this.sistema())?.temVersaoBuild ?? false;
   }
 
+  get usaListaDeLicencas() {
+    return this.sistema() === 'uniplus';
+  }
+
   ngOnInit() {
+    if (this.usaListaDeLicencas) {
+      firstValueFrom(this.licencasService.listar()).then((licencas) => this.licencasDisponiveis.set(licencas));
+    }
+
     const cliente = this.cliente();
     if (cliente) {
       this.nome.set(cliente.nome);
       this.cnpj.set(cliente.cnpj || '');
       this.licencas.set(cliente.licencas || '');
+      this.licencaIds.set((cliente.licencas_selecionadas || []).map((l) => l.id!));
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.versaoBuild.set(cliente.versao_build || '');
       this.observacoes.set(cliente.observacoes || '');
@@ -59,6 +73,7 @@ export class ClienteSistemaModalComponent implements OnInit {
       nome: this.nome().trim(),
       cnpj: somenteDigitos(this.cnpj()) || null,
       licencas: this.licencas().trim() || null,
+      licenca_ids: this.usaListaDeLicencas ? this.licencaIds() : undefined,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       versao_build: this.temVersaoBuild ? this.versaoBuild().trim() || null : null,
       observacoes: this.observacoes().trim() || null,

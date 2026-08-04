@@ -26,9 +26,19 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
     .bind(params.id)
     .first();
 
-  return new Response(JSON.stringify({ ...cliente, acessos, certificado: certificado || null }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const { results: licencasSelecionadas } = await env.DB
+    .prepare(
+      `SELECT licencas.id, licencas.nome FROM cliente_licencas
+       JOIN licencas ON licencas.id = cliente_licencas.licenca_id
+       WHERE cliente_licencas.cliente_id = ?`
+    )
+    .bind(params.id)
+    .all();
+
+  return new Response(
+    JSON.stringify({ ...cliente, acessos, certificado: certificado || null, licencas_selecionadas: licencasSelecionadas }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 // PUT /api/clientes/:id -> atualiza nome, cnpj ou observações do cliente
@@ -42,6 +52,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     categoria_id?: number | null;
     licencas?: string;
     enquadramento_fiscal?: string;
+    licenca_ids?: number[];
   };
   try {
     body = await request.json();
@@ -67,6 +78,13 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       params.id
     )
     .run();
+
+  if (Array.isArray(body.licenca_ids)) {
+    await env.DB.prepare('DELETE FROM cliente_licencas WHERE cliente_id = ?').bind(params.id).run();
+    for (const licencaId of body.licenca_ids) {
+      await env.DB.prepare('INSERT INTO cliente_licencas (cliente_id, licenca_id) VALUES (?, ?)').bind(params.id, licencaId).run();
+    }
+  }
 
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
 }

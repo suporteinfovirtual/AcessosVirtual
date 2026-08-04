@@ -2,12 +2,14 @@ import { Component, OnInit, inject, input, output, signal } from '@angular/core'
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
+import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, Licenca, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
+import { LicencasService } from '../../../../core/licencas.service';
 import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
 import { somenteDigitos } from '../../../../core/texto.util';
+import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -24,13 +26,14 @@ interface CampoAcesso {
 
 @Component({
   selector: 'app-cliente-modal',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, LicencasSelectComponent],
   templateUrl: './cliente-modal.component.html',
 })
 export class ClienteModalComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private categoriasService = inject(CategoriasService);
   private contabilidadesService = inject(ContabilidadesService);
+  private licencasService = inject(LicencasService);
 
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
@@ -44,6 +47,8 @@ export class ClienteModalComponent implements OnInit {
   observacoes = signal('');
   categoriaId = signal<number | null>(null);
   licencas = signal('');
+  licencaIds = signal<number[]>([]);
+  licencasDisponiveis = signal<Licenca[]>([]);
   enquadramentoFiscal = signal('');
   categorias = signal<Categoria[]>([]);
   contabilidades = signal<Contabilidade[]>([]);
@@ -77,9 +82,16 @@ export class ClienteModalComponent implements OnInit {
     return this.contabilidades().find((c) => c.id === id)?.email || null;
   }
 
+  get usaListaDeLicencas() {
+    return this.tipoInicial() === 'acesso_web';
+  }
+
   ngOnInit() {
     firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
     firstValueFrom(this.contabilidadesService.listar()).then((contabilidades) => this.contabilidades.set(contabilidades));
+    if (this.usaListaDeLicencas) {
+      firstValueFrom(this.licencasService.listar()).then((licencas) => this.licencasDisponiveis.set(licencas));
+    }
 
     const cliente = this.cliente();
     if (cliente) {
@@ -88,6 +100,7 @@ export class ClienteModalComponent implements OnInit {
       this.observacoes.set(cliente.observacoes || '');
       this.categoriaId.set(cliente.categoria_id || null);
       this.licencas.set(cliente.licencas || '');
+      this.licencaIds.set((cliente.licencas_selecionadas || []).map((l) => l.id!));
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.certificado.set(cliente.certificado || null);
 
@@ -145,6 +158,7 @@ export class ClienteModalComponent implements OnInit {
       observacoes: this.observacoes().trim() || null,
       categoria_id: this.categoriaId(),
       licencas: this.licencas().trim() || null,
+      licenca_ids: this.usaListaDeLicencas ? this.licencaIds() : undefined,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
     };
 

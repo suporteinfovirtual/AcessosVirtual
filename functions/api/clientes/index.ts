@@ -55,10 +55,20 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
     .prepare('SELECT cliente_id, nome_arquivo, senha, validade, atualizado_em FROM certificados')
     .all();
 
+  const { results: licencasVinculadas } = await env.DB
+    .prepare(
+      `SELECT cliente_licencas.cliente_id, licencas.id, licencas.nome
+       FROM cliente_licencas JOIN licencas ON licencas.id = cliente_licencas.licenca_id`
+    )
+    .all();
+
   const clientesComAcessos = clientes.map((cliente: any) => ({
     ...cliente,
     acessos: acessos.filter((a: any) => a.cliente_id === cliente.id),
     certificado: certificados.find((c: any) => c.cliente_id === cliente.id) || null,
+    licencas_selecionadas: licencasVinculadas
+      .filter((l: any) => l.cliente_id === cliente.id)
+      .map((l: any) => ({ id: l.id, nome: l.nome })),
   }));
 
   return new Response(JSON.stringify(clientesComAcessos), {
@@ -77,6 +87,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     categoria_id?: number | null;
     licencas?: string;
     enquadramento_fiscal?: string;
+    licenca_ids?: number[];
     acessos?: AcessoInput[];
   };
   try {
@@ -104,6 +115,12 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     .run();
 
   const clienteId = resultadoCliente.meta.last_row_id;
+
+  if (Array.isArray(body.licenca_ids)) {
+    for (const licencaId of body.licenca_ids) {
+      await env.DB.prepare('INSERT INTO cliente_licencas (cliente_id, licenca_id) VALUES (?, ?)').bind(clienteId, licencaId).run();
+    }
+  }
 
   if (Array.isArray(body.acessos)) {
     for (const acesso of body.acessos) {

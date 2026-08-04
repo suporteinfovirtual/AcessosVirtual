@@ -32,6 +32,8 @@ export interface Cliente {
   categoria_id?: number | null;
   categoria_nome?: string | null;
   licencas?: string | null;
+  licencas_selecionadas?: Licenca[];
+  licenca_ids?: number[];
   enquadramento_fiscal?: string | null;
   criado_em?: string;
   acessos?: Acesso[];
@@ -39,6 +41,12 @@ export interface Cliente {
 }
 
 export interface Categoria {
+  id?: number;
+  nome: string;
+  criado_em?: string;
+}
+
+export interface Licenca {
   id?: number;
   nome: string;
   criado_em?: string;
@@ -122,6 +130,8 @@ export interface ClienteSistema {
   nome: string;
   cnpj?: string | null;
   licencas?: string | null;
+  licencas_selecionadas?: Licenca[];
+  licenca_ids?: number[];
   enquadramento_fiscal?: string | null;
   versao_build?: string | null;
   observacoes?: string | null;

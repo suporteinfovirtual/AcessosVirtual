@@ -25,12 +25,30 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
   }
 
   const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
-  const { results } = await env.DB
+  const { results: clientes } = await env.DB
     .prepare(`SELECT * FROM clientes_sistemas ${where} ORDER BY nome`)
     .bind(...binds)
     .all();
 
-  return new Response(JSON.stringify(results), { headers: { 'Content-Type': 'application/json' } });
+  if (clientes.length === 0) {
+    return new Response(JSON.stringify([]), { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const { results: licencasVinculadas } = await env.DB
+    .prepare(
+      `SELECT clientes_sistemas_licencas.cliente_sistema_id, licencas.id, licencas.nome
+       FROM clientes_sistemas_licencas JOIN licencas ON licencas.id = clientes_sistemas_licencas.licenca_id`
+    )
+    .all();
+
+  const clientesComLicencas = clientes.map((cliente: any) => ({
+    ...cliente,
+    licencas_selecionadas: licencasVinculadas
+      .filter((l: any) => l.cliente_sistema_id === cliente.id)
+      .map((l: any) => ({ id: l.id, nome: l.nome })),
+  }));
+
+  return new Response(JSON.stringify(clientesComLicencas), { headers: { 'Content-Type': 'application/json' } });
 }
 
 // POST /api/clientes-sistemas -> cria um cliente num dos sistemas
@@ -45,6 +63,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     enquadramento_fiscal?: string;
     versao_build?: string;
     observacoes?: string;
+    licenca_ids?: number[];
   };
   try {
     body = await request.json();
@@ -75,7 +94,18 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     )
     .run();
 
-  return new Response(JSON.stringify({ id: resultado.meta.last_row_id }), {
+  const clienteSistemaId = resultado.meta.last_row_id;
+
+  if (Array.isArray(body.licenca_ids)) {
+    for (const licencaId of body.licenca_ids) {
+      await env.DB
+        .prepare('INSERT INTO clientes_sistemas_licencas (cliente_sistema_id, licenca_id) VALUES (?, ?)')
+        .bind(clienteSistemaId, licencaId)
+        .run();
+    }
+  }
+
+  return new Response(JSON.stringify({ id: clienteSistemaId }), {
     status: 201,
     headers: { 'Content-Type': 'application/json' },
   });
