@@ -52,6 +52,23 @@ export interface Licenca {
   criado_em?: string;
 }
 
+export interface ClienteRef {
+  sistema: Sistema;
+  ref_id: number;
+  nome: string;
+  cnpj?: string | null;
+}
+
+export interface Implantacao {
+  id?: number;
+  cliente_nome: string;
+  cliente_sistema: Sistema;
+  cliente_ref_id: number;
+  data: string;
+  hora: string;
+  criado_em?: string;
+}
+
 export interface ClienteNegociacao {
   id?: number;
   nome: string;

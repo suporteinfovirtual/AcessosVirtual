@@ -1,0 +1,48 @@
+<div>
+  @if (selecionado()) {
+    <div class="flex items-center justify-between rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2">
+      <div class="min-w-0">
+        <p class="truncate text-sm text-zinc-100">{{ selecionado()!.nome }}</p>
+        <p class="text-xs text-zinc-500">{{ rotuloSistema(selecionado()!.sistema) }}</p>
+      </div>
+      <button type="button" class="shrink-0 text-xs font-medium text-zinc-500 hover:text-zinc-300" (click)="limpar()">
+        Trocar
+      </button>
+    </div>
+  } @else {
+    <div class="relative">
+      <input
+        [(ngModel)]="busca"
+        name="buscaCliente"
+        [placeholder]="carregando() ? 'Carregando clientes…' : 'Buscar cliente pelo nome…'"
+        [disabled]="carregando()"
+        class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft disabled:opacity-60"
+        (focus)="sugestoesAbertas.set(true)"
+        (blur)="fecharComAtraso()"
+      />
+
+      @if (sugestoesAbertas() && busca().trim()) {
+        @if (sugestoes().length > 0) {
+          <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl">
+            @for (cliente of sugestoes(); track cliente.sistema + '-' + cliente.ref_id) {
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-zinc-800"
+                  (click)="selecionar(cliente)"
+                >
+                  <span class="truncate text-zinc-200">{{ cliente.nome }}</span>
+                  <span class="shrink-0 text-xs text-zinc-500">{{ rotuloSistema(cliente.sistema) }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-500 shadow-xl">
+            Nenhum cliente encontrado.
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

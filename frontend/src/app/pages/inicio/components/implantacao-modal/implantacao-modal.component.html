@@ -1,0 +1,86 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
+  <div
+    class="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-100">
+        {{ editando ? 'Editar implantação' : 'Nova implantação' }}
+      </h2>
+      <button type="button" class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" (click)="fechar.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form class="px-6 py-5" (ngSubmit)="salvarImplantacao()">
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Cliente*</label>
+          <app-cliente-picker
+            [selecionado]="cliente()"
+            (selecionadoChange)="cliente.set($event)"
+          ></app-cliente-picker>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">Data*</label>
+            <input
+              type="date"
+              [(ngModel)]="data"
+              name="data"
+              required
+              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">Hora*</label>
+            <input
+              type="time"
+              [(ngModel)]="hora"
+              name="hora"
+              required
+              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+          </div>
+        </div>
+      </div>
+
+      @if (erro()) {
+        <p class="mt-4 text-sm text-red-400">{{ erro() }}</p>
+      }
+
+      <div class="mt-6 flex items-center justify-between border-t border-zinc-800 pt-4">
+        @if (editando) {
+          <button
+            type="button"
+            [disabled]="excluindo()"
+            class="text-sm font-medium text-red-400 hover:text-red-300 disabled:opacity-50"
+            (click)="excluirImplantacao()"
+          >
+            {{ excluindo() ? 'Excluindo…' : 'Excluir' }}
+          </button>
+        } @else {
+          <span></span>
+        }
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800"
+            (click)="fechar.emit()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="!cliente() || !data() || !hora() || salvando()"
+            class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ salvando() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
