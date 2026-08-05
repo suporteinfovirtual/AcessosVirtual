@@ -100,6 +100,7 @@ export interface ClienteNegociacao {
   precisa_migrar_base?: boolean | number;
   motivo_desistencia?: string | null;
   convertido_em?: string | null;
+  atualizado_em?: string | null;
   criado_em?: string;
 }
 

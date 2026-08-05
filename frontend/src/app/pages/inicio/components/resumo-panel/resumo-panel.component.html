@@ -1,0 +1,96 @@
+<div>
+  <h2 class="text-lg font-semibold text-zinc-100">Resumo</h2>
+
+  @if (carregando()) {
+    <div class="mt-5">
+      <app-skeleton variante="linhas" [quantidade]="4"></app-skeleton>
+    </div>
+  } @else {
+    <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <button
+        type="button"
+        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        (click)="irPara.emit('negociacao')"
+      >
+        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Em negociação</span>
+        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ emNegociacao() }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        (click)="irPara.emit('implantacao')"
+      >
+        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Implantações essa semana</span>
+        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ implantacoesSemana() }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        (click)="irPara.emit('faturamento')"
+      >
+        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Prontos pra faturar</span>
+        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ prontosParaFaturar() }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        (click)="irPara.emit('clientesSistemas')"
+      >
+        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Certificados vencendo</span>
+        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ certificadosVencidos() + certificadosAlerta() }}</span>
+        @if (certificadosVencidos() > 0) {
+          <span class="mt-0.5 block text-[11px] font-medium text-red-400">{{ certificadosVencidos() }} já vencido(s)</span>
+        }
+      </button>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-200">Negociações paradas</h3>
+        @if (negociacoesParadas().length === 0) {
+          <p class="mt-3 text-sm text-zinc-600">Nenhuma negociação parada há mais de 7 dias.</p>
+        } @else {
+          <div class="mt-3 flex flex-col gap-2">
+            @for (item of negociacoesParadas(); track item.cliente.id) {
+              <button
+                type="button"
+                class="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-zinc-700"
+                (click)="irPara.emit('negociacao')"
+              >
+                <span class="min-w-0 truncate text-sm uppercase text-zinc-200">{{ item.cliente.nome }}</span>
+                <span class="shrink-0 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-400">
+                  {{ item.dias }} dias sem atualização
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-200">Implantações atrasadas</h3>
+        @if (implantacoesAtrasadas().length === 0) {
+          <p class="mt-3 text-sm text-zinc-600">Nenhuma implantação atrasada.</p>
+        } @else {
+          <div class="mt-3 flex flex-col gap-2">
+            @for (item of implantacoesAtrasadas(); track item.id) {
+              <button
+                type="button"
+                class="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-zinc-700"
+                (click)="irPara.emit('implantacao')"
+              >
+                <span class="min-w-0 truncate text-sm uppercase text-zinc-200">{{ item.cliente_nome }}</span>
+                <span class="shrink-0 rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] font-medium text-rose-400">
+                  {{ formatarDataBr(item.data) }}
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

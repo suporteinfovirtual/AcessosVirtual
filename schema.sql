@@ -196,6 +196,7 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
   precisa_migrar_base INTEGER NOT NULL DEFAULT 0,
   motivo_desistencia TEXT,
   convertido_em TEXT,
+  atualizado_em TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

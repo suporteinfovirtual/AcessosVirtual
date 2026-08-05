@@ -32,3 +32,12 @@ export async function lerValidadeCertificado(arquivo: File, senha: string): Prom
 export function paraDataIso(data: Date): string {
   return data.toISOString().slice(0, 10);
 }
+
+// vencido: já passou. alerta: vence em até 30 dias. null: sem validade ou tranquilo.
+export function statusCertificado(validade?: string | null): 'vencido' | 'alerta' | null {
+  if (!validade) return null;
+  const dias = (new Date(validade).getTime() - Date.now()) / 86_400_000;
+  if (dias < 0) return 'vencido';
+  if (dias <= 30) return 'alerta';
+  return null;
+}

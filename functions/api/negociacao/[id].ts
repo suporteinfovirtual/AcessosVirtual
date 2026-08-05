@@ -46,7 +46,8 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       `UPDATE clientes_negociacao
        SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ?,
            precisa_migrar_base = ?, motivo_desistencia = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
-           convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END
+           convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END,
+           atualizado_em = datetime('now')
        WHERE id = ?`
     )
     .bind(

@@ -20,6 +20,7 @@ import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { NegociacaoService } from '../../core/negociacao.service';
 import { ImplantacoesService } from '../../core/implantacoes.service';
+import { statusCertificado as calcularStatusCertificado } from '../../core/certificado.util';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
 import { ToastService } from '../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../shared/view-mode-toggle.component';
@@ -38,6 +39,7 @@ import { EnviosContabilidadePanelComponent } from './components/envios-contabili
 import { NegociacaoPanelComponent } from './components/negociacao-panel/negociacao-panel.component';
 import { ImplantacaoPanelComponent } from './components/implantacao-panel/implantacao-panel.component';
 import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
+import { ResumoPanelComponent } from './components/resumo-panel/resumo-panel.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
 
@@ -66,6 +68,7 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
     NegociacaoPanelComponent,
     ImplantacaoPanelComponent,
     FaturamentoPanelComponent,
+    ResumoPanelComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
   ],
@@ -85,6 +88,9 @@ export class InicioComponent implements OnInit {
   // --- lembrete de implantações marcadas pra hoje ---
   implantacoesHoje = signal<Implantacao[]>([]);
   lembreteFechado = signal(false);
+
+  // --- área separada "Resumo" (visão geral / alertas) ---
+  mostrandoResumo = signal(false);
 
   // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
   mostrandoClientesSistemas = signal(false);
@@ -297,6 +303,7 @@ export class InicioComponent implements OnInit {
   // abas normais (Acessos/Ferramentas) são mutuamente exclusivas — sempre fecha todas
   // as seções de Gestão antes de trocar pra outra área, senão fica mais de uma "ativa"
   private fecharSecoesGestao() {
+    this.mostrandoResumo.set(false);
     this.mostrandoClientesSistemas.set(false);
     this.mostrandoEnviosContabilidade.set(false);
     this.mostrandoNegociacao.set(false);
@@ -308,8 +315,9 @@ export class InicioComponent implements OnInit {
     this.selecionarAba('anydesk');
   }
 
-  abrirSecaoGestao(secao: 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
+  abrirSecaoGestao(secao: 'resumo' | 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
     this.fecharSecoesGestao();
+    if (secao === 'resumo') this.mostrandoResumo.set(true);
     if (secao === 'clientesSistemas') this.mostrandoClientesSistemas.set(true);
     if (secao === 'enviosContabilidade') this.mostrandoEnviosContabilidade.set(true);
     if (secao === 'negociacao') this.mostrandoNegociacao.set(true);
@@ -331,12 +339,7 @@ export class InicioComponent implements OnInit {
   }
 
   statusCertificado(cliente: Cliente): 'vencido' | 'alerta' | null {
-    const validade = cliente.certificado?.validade;
-    if (!validade) return null;
-    const dias = (new Date(validade).getTime() - Date.now()) / 86_400_000;
-    if (dias < 0) return 'vencido';
-    if (dias <= 30) return 'alerta';
-    return null;
+    return calcularStatusCertificado(cliente.certificado?.validade);
   }
 
   // o userscript de auto-login do zweb lê zw_e/zw_p do hash da URL para preencher o formulário sozinho

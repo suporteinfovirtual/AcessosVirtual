@@ -7,7 +7,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { LicencasService } from '../../../../core/licencas.service';
-import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
+import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
@@ -288,12 +288,7 @@ export class ClienteModalComponent implements OnInit {
   }
 
   statusCertificado(): 'vencido' | 'alerta' | null {
-    const validade = this.certificado()?.validade;
-    if (!validade) return null;
-    const dias = (new Date(validade).getTime() - Date.now()) / 86_400_000;
-    if (dias < 0) return 'vencido';
-    if (dias <= 30) return 'alerta';
-    return null;
+    return calcularStatusCertificado(this.certificado()?.validade);
   }
 
   async enviarCertificado() {
