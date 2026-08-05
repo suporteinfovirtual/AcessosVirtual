@@ -73,6 +73,7 @@ export class ResumoPanelComponent implements OnInit {
   certificadosAlerta = computed(
     () => this.clientes().filter((c) => statusCertificado(c.certificado?.validade) === 'alerta').length
   );
+  temAtencaoCertificados = computed(() => this.certificadosVencidos() + this.certificadosAlerta() > 0);
 
   negociacoesParadas = computed<NegociacaoParada[]>(() => {
     const agora = Date.now();

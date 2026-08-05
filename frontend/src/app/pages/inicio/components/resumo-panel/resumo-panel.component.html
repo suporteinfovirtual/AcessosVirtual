@@ -12,7 +12,10 @@
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('negociacao')"
       >
-        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Em negociação</span>
+        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+          Em negociação
+        </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ emNegociacao() }}</span>
       </button>
 
@@ -21,7 +24,10 @@
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('implantacao')"
       >
-        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Implantações essa semana</span>
+        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008Z"/></svg>
+          Implantações essa semana
+        </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ implantacoesSemana() }}</span>
       </button>
 
@@ -30,17 +36,39 @@
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('faturamento')"
       >
-        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Prontos pra faturar</span>
+        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-4.5-3.75a2.25 2.25 0 0 0 2.25 2.25h4.5a2.25 2.25 0 0 0 0-4.5h-4.5a2.25 2.25 0 0 1 0-4.5h4.5a2.25 2.25 0 0 1 2.25 2.25"/></svg>
+          Prontos pra faturar
+        </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ prontosParaFaturar() }}</span>
       </button>
 
       <button
         type="button"
-        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        class="rounded-xl border p-4 text-left transition"
+        [class.border-zinc-800]="!temAtencaoCertificados()"
+        [class.bg-zinc-900/60]="!temAtencaoCertificados()"
+        [class.hover:border-zinc-700]="!temAtencaoCertificados()"
+        [class.border-red-500/30]="temAtencaoCertificados()"
+        [class.bg-red-500/5]="temAtencaoCertificados()"
+        [class.hover:border-red-500/50]="temAtencaoCertificados()"
         (click)="irPara.emit('clientesSistemas')"
       >
-        <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Certificados vencendo</span>
-        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ certificadosVencidos() + certificadosAlerta() }}</span>
+        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="h-3.5 w-3.5 shrink-0"
+            [class.text-red-400]="temAtencaoCertificados()"
+          ><path stroke-linecap="round" stroke-linejoin="round" d="M7 11a5 5 0 1 0 10 0a5 5 0 1 0 -10 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 15.5L7 21l5 -3l5 3l-2 -5.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 11l1.5 1.5l3.5 -3.5" /></svg>
+          Certificados vencendo
+        </span>
+        <span class="mt-1 block text-2xl font-semibold" [class.text-zinc-100]="!temAtencaoCertificados()" [class.text-red-400]="temAtencaoCertificados()">
+          {{ certificadosVencidos() + certificadosAlerta() }}
+        </span>
         @if (certificadosVencidos() > 0) {
           <span class="mt-0.5 block text-[11px] font-medium text-red-400">{{ certificadosVencidos() }} já vencido(s)</span>
         }
