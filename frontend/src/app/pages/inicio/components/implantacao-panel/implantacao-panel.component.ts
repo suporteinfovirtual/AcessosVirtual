@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { Implantacao } from '../../../../core/models';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
 import { ImplantacaoModalComponent } from '../implantacao-modal/implantacao-modal.component';
+import { TecnicosModalComponent } from '../tecnicos-modal/tecnicos-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
@@ -30,7 +31,7 @@ function formatarDataIso(data: Date): string {
 
 @Component({
   selector: 'app-implantacao-panel',
-  imports: [ImplantacaoModalComponent, SkeletonComponent],
+  imports: [ImplantacaoModalComponent, TecnicosModalComponent, SkeletonComponent],
   templateUrl: './implantacao-panel.component.html',
 })
 export class ImplantacaoPanelComponent implements OnInit {
@@ -46,6 +47,8 @@ export class ImplantacaoPanelComponent implements OnInit {
   modalAberto = signal(false);
   implantacaoEmEdicao = signal<Implantacao | null>(null);
   dataParaNova = signal<string | null>(null);
+
+  tecnicosModalAberto = signal(false);
 
   rotuloMes = computed(() => {
     const mes = this.mesExibido();
@@ -156,5 +159,14 @@ export class ImplantacaoPanelComponent implements OnInit {
     this.fecharModal();
     await this.carregar();
     this.toast.sucesso('Implantação salva.');
+  }
+
+  abrirTecnicos() {
+    this.tecnicosModalAberto.set(true);
+  }
+
+  async aoAlterarTecnicos() {
+    await this.carregar();
+    this.toast.sucesso('Técnicos atualizados.');
   }
 }

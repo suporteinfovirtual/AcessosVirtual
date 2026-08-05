@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteRef, Implantacao } from '../../../../core/models';
+import { ClienteRef, Implantacao, Tecnico } from '../../../../core/models';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
+import { TecnicosService } from '../../../../core/tecnicos.service';
 import { ClientePickerComponent } from '../cliente-picker/cliente-picker.component';
 
 @Component({
@@ -12,6 +13,7 @@ import { ClientePickerComponent } from '../cliente-picker/cliente-picker.compone
 })
 export class ImplantacaoModalComponent implements OnInit {
   private implantacoesService = inject(ImplantacoesService);
+  private tecnicosService = inject(TecnicosService);
 
   implantacao = input<Implantacao | null>(null);
   dataInicial = input<string | null>(null);
@@ -23,6 +25,8 @@ export class ImplantacaoModalComponent implements OnInit {
   hora = signal('');
   observacoes = signal('');
   concluidaManual = signal(false);
+  tecnicoId = signal<number | null>(null);
+  tecnicos = signal<Tecnico[]>([]);
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -40,6 +44,8 @@ export class ImplantacaoModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    firstValueFrom(this.tecnicosService.listar()).then((tecnicos) => this.tecnicos.set(tecnicos));
+
     const item = this.implantacao();
     if (item) {
       this.cliente.set({ sistema: item.cliente_sistema, ref_id: item.cliente_ref_id, nome: item.cliente_nome });
@@ -47,6 +53,7 @@ export class ImplantacaoModalComponent implements OnInit {
       this.hora.set(item.hora);
       this.observacoes.set(item.observacoes || '');
       this.concluidaManual.set(!!item.concluida_manual);
+      this.tecnicoId.set(item.tecnico_id || null);
     } else if (this.dataInicial()) {
       this.data.set(this.dataInicial()!);
     }
@@ -67,6 +74,7 @@ export class ImplantacaoModalComponent implements OnInit {
       hora: this.hora(),
       observacoes: this.observacoes().trim() || null,
       concluida_manual: this.concluidaManual(),
+      tecnico_id: this.tecnicoId(),
     };
 
     try {

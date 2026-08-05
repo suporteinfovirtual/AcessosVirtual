@@ -271,7 +271,32 @@ export class InicioComponent implements OnInit {
     this.toast.sucesso('Contabilidades atualizadas.');
   }
 
+  // as seções de Gestão (Clientes, Envios, Negociação, Implantação, Faturamento) e as
+  // abas normais (Acessos/Ferramentas) são mutuamente exclusivas — sempre fecha todas
+  // as seções de Gestão antes de trocar pra outra área, senão fica mais de uma "ativa"
+  private fecharSecoesGestao() {
+    this.mostrandoClientesSistemas.set(false);
+    this.mostrandoEnviosContabilidade.set(false);
+    this.mostrandoNegociacao.set(false);
+    this.mostrandoImplantacao.set(false);
+    this.mostrandoFaturamento.set(false);
+  }
+
+  voltarAoPainel() {
+    this.fecharSecoesGestao();
+  }
+
+  abrirSecaoGestao(secao: 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
+    this.fecharSecoesGestao();
+    if (secao === 'clientesSistemas') this.mostrandoClientesSistemas.set(true);
+    if (secao === 'enviosContabilidade') this.mostrandoEnviosContabilidade.set(true);
+    if (secao === 'negociacao') this.mostrandoNegociacao.set(true);
+    if (secao === 'implantacao') this.mostrandoImplantacao.set(true);
+    if (secao === 'faturamento') this.mostrandoFaturamento.set(true);
+  }
+
   selecionarAba(valor: Aba) {
+    this.fecharSecoesGestao();
     this.abaAtiva.set(valor);
     if (valor !== 'acesso_web') this.servidorFiltro.set(null);
     if (valor !== 'acesso_zeta') this.categoriaFiltro.set(null);

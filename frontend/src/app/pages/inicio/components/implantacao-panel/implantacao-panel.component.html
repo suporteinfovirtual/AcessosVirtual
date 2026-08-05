@@ -5,6 +5,13 @@
     <div class="flex items-center gap-2">
       <button
         type="button"
+        class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+        (click)="abrirTecnicos()"
+      >
+        Técnicos
+      </button>
+      <button
+        type="button"
         class="rounded-lg border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-950 bg-accent hover:bg-accent-hover"
         (click)="abrirNovo()"
       >
@@ -77,9 +84,10 @@
                   [class]="concluida(item)
                     ? 'truncate rounded bg-zinc-800 px-1.5 py-0.5 text-[11px] text-zinc-500 line-through hover:bg-zinc-700'
                     : 'truncate rounded bg-accent-soft px-1.5 py-0.5 text-[11px] text-accent hover:bg-accent/25'"
+                  [title]="item.tecnico_nome ? item.hora + ' · ' + item.cliente_nome + ' · técnico: ' + item.tecnico_nome : item.hora + ' · ' + item.cliente_nome"
                   (click)="$event.stopPropagation(); abrirEdicao(item)"
                 >
-                  {{ item.hora }} · {{ item.cliente_nome }}
+                  {{ item.hora }} · {{ item.cliente_nome }}{{ item.tecnico_nome ? ' · ' + item.tecnico_nome : '' }}
                 </span>
               }
             </div>
@@ -97,4 +105,11 @@
     (fechar)="fecharModal()"
     (salvo)="aoSalvar()"
   ></app-implantacao-modal>
+}
+
+@if (tecnicosModalAberto()) {
+  <app-tecnicos-modal
+    (fechar)="tecnicosModalAberto.set(false)"
+    (alterado)="aoAlterarTecnicos()"
+  ></app-tecnicos-modal>
 }

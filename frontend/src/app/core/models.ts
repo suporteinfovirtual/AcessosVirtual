@@ -60,6 +60,12 @@ export interface ClienteRef {
   cnpj?: string | null;
 }
 
+export interface Tecnico {
+  id?: number;
+  nome: string;
+  criado_em?: string;
+}
+
 export interface Implantacao {
   id?: number;
   cliente_nome: string;
@@ -69,6 +75,8 @@ export interface Implantacao {
   hora: string;
   observacoes?: string | null;
   concluida_manual?: boolean | number;
+  tecnico_id?: number | null;
+  tecnico_nome?: string | null;
   criado_em?: string;
 }
 

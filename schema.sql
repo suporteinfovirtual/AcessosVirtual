@@ -201,6 +201,13 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
 CREATE INDEX IF NOT EXISTS idx_clientes_negociacao_nome ON clientes_negociacao(nome);
 CREATE INDEX IF NOT EXISTS idx_clientes_negociacao_status ON clientes_negociacao(status);
 
+-- Técnicos: quem vai a campo dar treinamento nas implantações
+CREATE TABLE IF NOT EXISTS tecnicos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL UNIQUE,
+  criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Agenda de implantação: visitas de treinamento marcadas num dia/hora pra um cliente já
 -- cadastrado em Gestão > Clientes (Uniplus / Uniplus Web / SGBR / Zeta). Como esses clientes
 -- vivem em tabelas diferentes (clientes_sistemas ou clientes), guardamos qual sistema e o id
@@ -215,10 +222,12 @@ CREATE TABLE IF NOT EXISTS implantacoes (
   hora TEXT NOT NULL, -- HH:MM
   observacoes TEXT,
   concluida_manual INTEGER NOT NULL DEFAULT 0,
+  tecnico_id INTEGER REFERENCES tecnicos(id) ON DELETE SET NULL,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_implantacoes_data ON implantacoes(data);
+CREATE INDEX IF NOT EXISTS idx_implantacoes_tecnico ON implantacoes(tecnico_id);
 
 -- Registro de quando um cliente foi marcado como faturado. A lista de "pronto pra faturar"
 -- é calculada na hora a partir de implantacoes — esta tabela só guarda quem já foi marcado.

@@ -5,7 +5,7 @@
         type="button"
         class="rounded"
         title="Voltar ao painel"
-        (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false)"
+        (click)="voltarAoPainel()"
       >
         <img
           src="logo.png"
@@ -22,11 +22,11 @@
         <button
           type="button"
           class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
-          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
-          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
+          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento() && abaAtiva() === aba.valor"
+          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || mostrandoNegociacao() || mostrandoImplantacao() || mostrandoFaturamento() || abaAtiva() !== aba.valor"
+          (click)="selecionarAba(aba.valor)"
         >
-          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
+          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento() && abaAtiva() === aba.valor) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
           }
           <span class="flex items-center gap-2">
@@ -52,11 +52,11 @@
         <button
           type="button"
           class="relative flex items-center justify-between rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
-          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor"
-          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || abaAtiva() !== aba.valor"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); selecionarAba(aba.valor)"
+          [class.text-accent]="!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento() && abaAtiva() === aba.valor"
+          [class.text-zinc-500]="mostrandoClientesSistemas() || mostrandoEnviosContabilidade() || mostrandoNegociacao() || mostrandoImplantacao() || mostrandoFaturamento() || abaAtiva() !== aba.valor"
+          (click)="selecionarAba(aba.valor)"
         >
-          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && abaAtiva() === aba.valor) {
+          @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento() && abaAtiva() === aba.valor) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
           }
           <span class="flex items-center gap-2">
@@ -129,7 +129,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoClientesSistemas()"
           [class.text-zinc-500]="!mostrandoClientesSistemas()"
-          (click)="mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoClientesSistemas.set(true)"
+          (click)="abrirSecaoGestao('clientesSistemas')"
         >
           @if (mostrandoClientesSistemas()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -143,7 +143,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoEnviosContabilidade()"
           [class.text-zinc-500]="!mostrandoEnviosContabilidade()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoEnviosContabilidade.set(true)"
+          (click)="abrirSecaoGestao('enviosContabilidade')"
         >
           @if (mostrandoEnviosContabilidade()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -157,7 +157,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoNegociacao()"
           [class.text-zinc-500]="!mostrandoNegociacao()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoNegociacao.set(true)"
+          (click)="abrirSecaoGestao('negociacao')"
         >
           @if (mostrandoNegociacao()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -171,7 +171,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoImplantacao()"
           [class.text-zinc-500]="!mostrandoImplantacao()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoFaturamento.set(false); mostrandoImplantacao.set(true)"
+          (click)="abrirSecaoGestao('implantacao')"
         >
           @if (mostrandoImplantacao()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -185,7 +185,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoFaturamento()"
           [class.text-zinc-500]="!mostrandoFaturamento()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(true)"
+          (click)="abrirSecaoGestao('faturamento')"
         >
           @if (mostrandoFaturamento()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
