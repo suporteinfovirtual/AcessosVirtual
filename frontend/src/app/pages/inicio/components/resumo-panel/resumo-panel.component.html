@@ -190,5 +190,64 @@
         }
       </div>
     </div>
+
+    <div class="mt-8">
+      <h3 class="text-sm font-semibold text-zinc-200">Distribuição de acessos</h3>
+      <div class="mt-3">
+        <app-card>
+          @if (donutTotal() === 0) {
+            <p class="text-sm text-zinc-600">Nenhum acesso cadastrado ainda.</p>
+          } @else {
+            <div class="flex flex-col items-center gap-6 sm:flex-row">
+              <div class="relative shrink-0" [style.width.px]="donutTamanho" [style.height.px]="donutTamanho">
+                <svg
+                  [attr.viewBox]="'0 0 ' + donutTamanho + ' ' + donutTamanho"
+                  [attr.width]="donutTamanho"
+                  [attr.height]="donutTamanho"
+                  class="-rotate-90"
+                >
+                  <circle
+                    [attr.cx]="donutTamanho / 2"
+                    [attr.cy]="donutTamanho / 2"
+                    [attr.r]="donutRaio"
+                    fill="none"
+                    stroke="currentColor"
+                    class="text-zinc-800"
+                    [attr.stroke-width]="donutEspessura"
+                  />
+                  @for (seg of donutSegments(); track seg.tipo) {
+                    <circle
+                      [attr.cx]="donutTamanho / 2"
+                      [attr.cy]="donutTamanho / 2"
+                      [attr.r]="donutRaio"
+                      fill="none"
+                      [attr.stroke]="seg.cor"
+                      [attr.stroke-width]="donutEspessura"
+                      [attr.stroke-dasharray]="seg.dasharray"
+                      [attr.stroke-dashoffset]="seg.dashoffset"
+                    />
+                  }
+                </svg>
+                <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-xl font-semibold text-zinc-100">{{ donutTotal() }}</span>
+                  <span class="text-[10px] uppercase tracking-wide text-zinc-500">acessos</span>
+                </div>
+              </div>
+
+              <div class="flex w-full flex-1 flex-col gap-2.5">
+                @for (seg of donutSegments(); track seg.tipo) {
+                  <div class="flex items-center gap-2.5">
+                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background-color]="seg.cor"></span>
+                    <span class="min-w-0 flex-1 truncate text-sm text-zinc-300">{{ seg.rotulo }}</span>
+                    <span class="shrink-0 text-sm font-medium text-zinc-100">{{ seg.valor }}</span>
+                    <span class="w-10 shrink-0 text-right text-xs text-zinc-500">{{ seg.percentual }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </app-card>
+      </div>
+    </div>
   }
 </div>
