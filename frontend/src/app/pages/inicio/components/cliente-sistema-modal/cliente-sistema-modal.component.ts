@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ClienteSistema, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { LicencasService } from '../../../../core/licencas.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
@@ -15,6 +16,7 @@ import { LicencasSelectComponent } from '../licencas-select/licencas-select.comp
 export class ClienteSistemaModalComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private licencasService = inject(LicencasService);
+  private confirmService = inject(ConfirmService);
 
   cliente = input<ClienteSistema | null>(null);
   sistema = input.required<Sistema>();
@@ -103,7 +105,7 @@ export class ClienteSistemaModalComponent implements OnInit {
   async excluirCliente() {
     const cliente = this.cliente();
     if (!cliente?.id || this.excluindo()) return;
-    if (!confirm(`Excluir "${cliente.nome}"?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir "${cliente.nome}"?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Manual, ManualPasso } from '../../../../core/models';
 import { ManuaisService } from '../../../../core/manuais.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { ManualModalComponent } from '../manual-modal/manual-modal.component';
 
 @Component({
@@ -13,6 +14,7 @@ import { ManualModalComponent } from '../manual-modal/manual-modal.component';
 })
 export class ManualDetalheComponent implements OnInit {
   private manuaisService = inject(ManuaisService);
+  private confirmService = inject(ConfirmService);
 
   manualId = input.required<number>();
   voltar = output<void>();
@@ -134,7 +136,7 @@ export class ManualDetalheComponent implements OnInit {
   }
 
   async removerImagemDoPasso(imagemId: number) {
-    if (!confirm('Remover essa imagem?')) return;
+    if (!(await this.confirmService.confirmar('Remover essa imagem?'))) return;
     await firstValueFrom(this.manuaisService.removerImagemPasso(imagemId));
     await this.carregar();
   }
@@ -193,7 +195,8 @@ export class ManualDetalheComponent implements OnInit {
   }
 
   async removerPasso(passo: ManualPasso) {
-    if (!passo.id || !confirm('Remover esse passo?')) return;
+    if (!passo.id) return;
+    if (!(await this.confirmService.confirmar('Remover esse passo?'))) return;
     await firstValueFrom(this.manuaisService.removerPasso(passo.id));
     await this.carregar();
   }

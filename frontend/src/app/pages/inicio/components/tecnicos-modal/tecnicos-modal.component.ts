@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Tecnico } from '../../../../core/models';
 import { TecnicosService } from '../../../../core/tecnicos.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-tecnicos-modal',
@@ -11,6 +12,7 @@ import { TecnicosService } from '../../../../core/tecnicos.service';
 })
 export class TecnicosModalComponent implements OnInit {
   private tecnicosService = inject(TecnicosService);
+  private confirmService = inject(ConfirmService);
 
   fechar = output<void>();
   alterado = output<void>();
@@ -90,7 +92,7 @@ export class TecnicosModalComponent implements OnInit {
   }
 
   async excluirTecnico(tecnico: Tecnico) {
-    if (!confirm(`Excluir o técnico "${tecnico.nome}"? As implantações ligadas a ele ficam sem técnico.`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir o técnico "${tecnico.nome}"? As implantações ligadas a ele ficam sem técnico.`))) return;
 
     try {
       await firstValueFrom(this.tecnicosService.remover(tecnico.id!));

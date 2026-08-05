@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Licenca } from '../../../../core/models';
 import { LicencasService } from '../../../../core/licencas.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-licencas-modal',
@@ -11,6 +12,7 @@ import { LicencasService } from '../../../../core/licencas.service';
 })
 export class LicencasModalComponent implements OnInit {
   private licencasService = inject(LicencasService);
+  private confirmService = inject(ConfirmService);
 
   fechar = output<void>();
   alterado = output<void>();
@@ -98,7 +100,7 @@ export class LicencasModalComponent implements OnInit {
   }
 
   async excluirLicenca(licenca: Licenca) {
-    if (!confirm(`Excluir a licença "${licenca.nome}"? Os clientes ligados a ela perdem o vínculo.`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir a licença "${licenca.nome}"? Os clientes ligados a ela perdem o vínculo.`))) return;
 
     try {
       await firstValueFrom(this.licencasService.remover(licenca.id!));

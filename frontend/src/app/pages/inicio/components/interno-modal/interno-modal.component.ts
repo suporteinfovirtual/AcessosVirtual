@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ContaInterna } from '../../../../core/models';
 import { InternosService } from '../../../../core/internos.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-interno-modal',
@@ -11,6 +12,7 @@ import { InternosService } from '../../../../core/internos.service';
 })
 export class InternoModalComponent implements OnInit {
   private internosService = inject(InternosService);
+  private confirmService = inject(ConfirmService);
 
   conta = input<ContaInterna | null>(null);
   fechar = output<void>();
@@ -69,7 +71,7 @@ export class InternoModalComponent implements OnInit {
   async excluirConta() {
     const conta = this.conta();
     if (!conta?.id || this.excluindo()) return;
-    if (!confirm(`Excluir a conta interna "${conta.servico}"?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir a conta interna "${conta.servico}"?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

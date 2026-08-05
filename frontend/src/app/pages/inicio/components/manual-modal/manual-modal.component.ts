@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Manual } from '../../../../core/models';
 import { ManuaisService } from '../../../../core/manuais.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-manual-modal',
@@ -11,6 +12,7 @@ import { ManuaisService } from '../../../../core/manuais.service';
 })
 export class ManualModalComponent implements OnInit {
   private manuaisService = inject(ManuaisService);
+  private confirmService = inject(ConfirmService);
 
   manual = input<Manual | null>(null);
   fechar = output<void>();
@@ -60,7 +62,7 @@ export class ManualModalComponent implements OnInit {
   async excluirManual() {
     const manual = this.manual();
     if (!manual?.id || this.excluindo()) return;
-    if (!confirm(`Excluir o manual "${manual.titulo}" e todos os passos dele?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir o manual "${manual.titulo}" e todos os passos dele?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

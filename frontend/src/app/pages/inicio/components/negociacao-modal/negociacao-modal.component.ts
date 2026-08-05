@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 
 @Component({
@@ -12,6 +13,7 @@ import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 })
 export class NegociacaoModalComponent implements OnInit {
   private negociacaoService = inject(NegociacaoService);
+  private confirmService = inject(ConfirmService);
 
   cliente = input<ClienteNegociacao | null>(null);
   fechar = output<void>();
@@ -88,7 +90,7 @@ export class NegociacaoModalComponent implements OnInit {
   async excluirCliente() {
     const cliente = this.cliente();
     if (!cliente?.id || this.excluindo()) return;
-    if (!confirm(`Excluir "${cliente.nome}"?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir "${cliente.nome}"?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

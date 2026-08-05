@@ -9,6 +9,7 @@ import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { LicencasService } from '../../../../core/licencas.service';
 import { lerValidadeCertificado, paraDataIso } from '../../../../core/certificado.util';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 interface CampoAcesso {
@@ -34,6 +35,7 @@ export class ClienteModalComponent implements OnInit {
   private categoriasService = inject(CategoriasService);
   private contabilidadesService = inject(ContabilidadesService);
   private licencasService = inject(LicencasService);
+  private confirmService = inject(ConfirmService);
 
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
@@ -319,7 +321,7 @@ export class ClienteModalComponent implements OnInit {
   async excluirCliente() {
     const cliente = this.cliente();
     if (!cliente?.id || this.excluindo()) return;
-    if (!confirm(`Excluir "${cliente.nome}" e todos os acessos vinculados a ele?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir "${cliente.nome}" e todos os acessos vinculados a ele?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

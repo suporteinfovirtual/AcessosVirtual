@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { LinkPessoal } from '../../../../core/models';
 import { LinksService } from '../../../../core/links.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-link-modal',
@@ -11,6 +12,7 @@ import { LinksService } from '../../../../core/links.service';
 })
 export class LinkModalComponent implements OnInit {
   private linksService = inject(LinksService);
+  private confirmService = inject(ConfirmService);
 
   link = input<LinkPessoal | null>(null);
   fechar = output<void>();
@@ -60,7 +62,7 @@ export class LinkModalComponent implements OnInit {
   async excluirLink() {
     const link = this.link();
     if (!link?.id || this.excluindo()) return;
-    if (!confirm(`Excluir o link "${link.titulo}"?`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir o link "${link.titulo}"?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

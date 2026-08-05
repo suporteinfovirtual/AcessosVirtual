@@ -5,6 +5,7 @@ import { Arquivo } from '../../../../core/models';
 import { ArquivosService } from '../../../../core/arquivos.service';
 import { CardComponent } from '../../../../shared/card.component';
 import { ToastService } from '../../../../shared/toast.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
@@ -21,6 +22,7 @@ interface Pendente {
 export class ArquivosPanelComponent implements OnInit {
   private arquivosService = inject(ArquivosService);
   private toast = inject(ToastService);
+  private confirmService = inject(ConfirmService);
   viewMode = inject(ViewModeService);
 
   busca = input('');
@@ -167,7 +169,8 @@ export class ArquivosPanelComponent implements OnInit {
 
   async remover(arquivo: Arquivo) {
     const nome = arquivo.titulo || arquivo.nome_arquivo;
-    if (!arquivo.id || !confirm(`Excluir "${nome}"?`)) return;
+    if (!arquivo.id) return;
+    if (!(await this.confirmService.confirmar(`Excluir "${nome}"?`))) return;
     await firstValueFrom(this.arquivosService.remover(arquivo.id));
     await this.carregar();
     this.toast.sucesso('Arquivo excluído.');

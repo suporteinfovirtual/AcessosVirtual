@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Contabilidade } from '../../../../core/models';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-contabilidades-modal',
@@ -11,6 +12,7 @@ import { ContabilidadesService } from '../../../../core/contabilidades.service';
 })
 export class ContabilidadesModalComponent implements OnInit {
   private contabilidadesService = inject(ContabilidadesService);
+  private confirmService = inject(ConfirmService);
 
   fechar = output<void>();
   alterado = output<void>();
@@ -95,7 +97,7 @@ export class ContabilidadesModalComponent implements OnInit {
   }
 
   async excluirContabilidade(contabilidade: Contabilidade) {
-    if (!confirm(`Excluir a contabilidade "${contabilidade.nome}"? Os acessos ligados a ela ficam sem contabilidade.`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir a contabilidade "${contabilidade.nome}"? Os acessos ligados a ela ficam sem contabilidade.`))) return;
 
     try {
       await firstValueFrom(this.contabilidadesService.remover(contabilidade.id!));

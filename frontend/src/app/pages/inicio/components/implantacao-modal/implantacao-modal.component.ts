@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ClienteRef, Implantacao, Tecnico } from '../../../../core/models';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
 import { TecnicosService } from '../../../../core/tecnicos.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 import { ClientePickerComponent } from '../cliente-picker/cliente-picker.component';
 
 @Component({
@@ -14,6 +15,7 @@ import { ClientePickerComponent } from '../cliente-picker/cliente-picker.compone
 export class ImplantacaoModalComponent implements OnInit {
   private implantacoesService = inject(ImplantacoesService);
   private tecnicosService = inject(TecnicosService);
+  private confirmService = inject(ConfirmService);
 
   implantacao = input<Implantacao | null>(null);
   dataInicial = input<string | null>(null);
@@ -94,7 +96,7 @@ export class ImplantacaoModalComponent implements OnInit {
   async excluirImplantacao() {
     const item = this.implantacao();
     if (!item?.id || this.excluindo()) return;
-    if (!confirm(`Cancelar a implantação de "${item.cliente_nome}"?`)) return;
+    if (!(await this.confirmService.confirmar(`Cancelar a implantação de "${item.cliente_nome}"?`))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

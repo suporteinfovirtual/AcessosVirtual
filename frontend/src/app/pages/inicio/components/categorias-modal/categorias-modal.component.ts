@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Categoria } from '../../../../core/models';
 import { CategoriasService } from '../../../../core/categorias.service';
+import { ConfirmService } from '../../../../shared/confirm.service';
 
 @Component({
   selector: 'app-categorias-modal',
@@ -11,6 +12,7 @@ import { CategoriasService } from '../../../../core/categorias.service';
 })
 export class CategoriasModalComponent implements OnInit {
   private categoriasService = inject(CategoriasService);
+  private confirmService = inject(ConfirmService);
 
   fechar = output<void>();
   alterado = output<void>();
@@ -90,7 +92,7 @@ export class CategoriasModalComponent implements OnInit {
   }
 
   async excluirCategoria(categoria: Categoria) {
-    if (!confirm(`Excluir a categoria "${categoria.nome}"? Os clientes ligados a ela ficam sem categoria.`)) return;
+    if (!(await this.confirmService.confirmar(`Excluir a categoria "${categoria.nome}"? Os clientes ligados a ela ficam sem categoria.`))) return;
 
     try {
       await firstValueFrom(this.categoriasService.remover(categoria.id!));
