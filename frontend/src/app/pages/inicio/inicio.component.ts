@@ -90,7 +90,7 @@ export class InicioComponent implements OnInit {
   lembreteFechado = signal(false);
 
   // --- área separada "Resumo" (visão geral / alertas) ---
-  mostrandoResumo = signal(false);
+  mostrandoResumo = signal(true);
 
   // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
   mostrandoClientesSistemas = signal(false);
@@ -312,7 +312,7 @@ export class InicioComponent implements OnInit {
   }
 
   voltarAoPainel() {
-    this.selecionarAba('anydesk');
+    this.abrirSecaoGestao('resumo');
   }
 
   abrirSecaoGestao(secao: 'resumo' | 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {

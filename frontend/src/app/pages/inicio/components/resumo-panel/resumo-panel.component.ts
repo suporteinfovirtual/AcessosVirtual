@@ -1,6 +1,14 @@
 import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Cliente, ClienteNegociacao, ClientePendenteFaturamento, Implantacao } from '../../../../core/models';
+import {
+  Cliente,
+  ClienteNegociacao,
+  ClientePendenteFaturamento,
+  Implantacao,
+  STATUS_NEGOCIACAO,
+  TIPOS_ACESSO,
+  TipoAcesso,
+} from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
@@ -23,6 +31,7 @@ interface NegociacaoParada {
 }
 
 const DIAS_PARADA_ALERTA = 7;
+const LIMITE_LISTA = 6;
 
 @Component({
   selector: 'app-resumo-panel',
@@ -36,6 +45,10 @@ export class ResumoPanelComponent implements OnInit {
   private faturamentoService = inject(FaturamentoService);
 
   irPara = output<SecaoGestao>();
+  irParaAba = output<TipoAcesso>();
+
+  readonly tiposAcesso = TIPOS_ACESSO;
+  readonly statusOpcoes = STATUS_NEGOCIACAO;
 
   carregando = signal(true);
 
@@ -81,6 +94,45 @@ export class ResumoPanelComponent implements OnInit {
       .sort((a, b) => a.data.localeCompare(b.data));
   });
 
+  proximasImplantacoes = computed(() => {
+    const hoje = formatarDataIso(new Date());
+    const daquiA7Dias = formatarDataIso(new Date(Date.now() + 7 * 86_400_000));
+    return this.implantacoes()
+      .filter((i) => i.data >= hoje && i.data <= daquiA7Dias)
+      .sort((a, b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora))
+      .slice(0, LIMITE_LISTA);
+  });
+
+  negociacoesRecentes = computed(() => {
+    return [...this.negociacoes()]
+      .sort((a, b) => {
+        const dataA = a.atualizado_em || a.criado_em || '';
+        const dataB = b.atualizado_em || b.criado_em || '';
+        return dataB.localeCompare(dataA);
+      })
+      .slice(0, LIMITE_LISTA);
+  });
+
+  contagemPorTipoAcesso = computed(() => {
+    const contagem: Record<TipoAcesso, number> = { anydesk: 0, acesso_web: 0, acesso_zeta: 0 };
+    for (const cliente of this.clientes()) {
+      for (const acesso of cliente.acessos || []) {
+        contagem[acesso.tipo]++;
+      }
+    }
+    return contagem;
+  });
+
+  rotuloStatus(status?: string): string {
+    return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
+  }
+
+  corStatus(status?: string): string {
+    if (status === 'fechou') return 'bg-emerald-500/15 text-emerald-400';
+    if (status === 'desistiu') return 'bg-rose-500/15 text-rose-400';
+    return 'bg-zinc-800 text-zinc-400';
+  }
+
   ngOnInit() {
     this.carregar();
   }
@@ -88,6 +140,11 @@ export class ResumoPanelComponent implements OnInit {
   formatarDataBr(dataIso: string): string {
     const [ano, mes, dia] = dataIso.split('-');
     return `${dia}/${mes}/${ano}`;
+  }
+
+  diasAtras(dataIso?: string | null): number {
+    if (!dataIso) return 0;
+    return Math.max(0, Math.floor((Date.now() - new Date(dataIso).getTime()) / 86_400_000));
   }
 
   async carregar() {

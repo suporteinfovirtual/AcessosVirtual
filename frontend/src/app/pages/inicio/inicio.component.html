@@ -281,7 +281,7 @@
 
     <main class="px-6 py-6">
       @if (mostrandoResumo()) {
-        <app-resumo-panel (irPara)="abrirSecaoGestao($event)"></app-resumo-panel>
+        <app-resumo-panel (irPara)="abrirSecaoGestao($event)" (irParaAba)="selecionarAba($event)"></app-resumo-panel>
       } @else if (mostrandoClientesSistemas()) {
         <app-clientes-sistemas></app-clientes-sistemas>
       } @else if (mostrandoEnviosContabilidade()) {
