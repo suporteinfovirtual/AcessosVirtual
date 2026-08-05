@@ -129,7 +129,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoClientesSistemas()"
           [class.text-zinc-500]="!mostrandoClientesSistemas()"
-          (click)="mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoClientesSistemas.set(true)"
+          (click)="mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoClientesSistemas.set(true)"
         >
           @if (mostrandoClientesSistemas()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -143,7 +143,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoEnviosContabilidade()"
           [class.text-zinc-500]="!mostrandoEnviosContabilidade()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoEnviosContabilidade.set(true)"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoEnviosContabilidade.set(true)"
         >
           @if (mostrandoEnviosContabilidade()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -157,7 +157,7 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoNegociacao()"
           [class.text-zinc-500]="!mostrandoNegociacao()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoImplantacao.set(false); mostrandoNegociacao.set(true)"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(false); mostrandoNegociacao.set(true)"
         >
           @if (mostrandoNegociacao()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
@@ -171,13 +171,27 @@
           class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
           [class.text-accent]="mostrandoImplantacao()"
           [class.text-zinc-500]="!mostrandoImplantacao()"
-          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(true)"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoFaturamento.set(false); mostrandoImplantacao.set(true)"
         >
           @if (mostrandoImplantacao()) {
             <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
           }
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008Z"/></svg>
           Implantação
+        </button>
+
+        <button
+          type="button"
+          class="relative flex items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-sm font-medium transition"
+          [class.text-accent]="mostrandoFaturamento()"
+          [class.text-zinc-500]="!mostrandoFaturamento()"
+          (click)="mostrandoClientesSistemas.set(false); mostrandoEnviosContabilidade.set(false); mostrandoNegociacao.set(false); mostrandoImplantacao.set(false); mostrandoFaturamento.set(true)"
+        >
+          @if (mostrandoFaturamento()) {
+            <span class="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent"></span>
+          }
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-4.5-3.75a2.25 2.25 0 0 0 2.25 2.25h4.5a2.25 2.25 0 0 0 0-4.5h-4.5a2.25 2.25 0 0 1 0-4.5h4.5a2.25 2.25 0 0 1 2.25 2.25"/></svg>
+          Faturamento
         </button>
       </div>
     </div>
@@ -187,7 +201,7 @@
     <div class="painel-glow"></div>
     <header class="sticky top-0 z-10 px-6 py-4">
       <div class="flex items-center gap-3">
-        @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao()) {
+        @if (!mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento()) {
           <div class="relative w-full max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -232,9 +246,11 @@
       } @else if (mostrandoEnviosContabilidade()) {
         <app-envios-contabilidade-panel></app-envios-contabilidade-panel>
       } @else if (mostrandoNegociacao()) {
-        <app-negociacao-panel></app-negociacao-panel>
+        <app-negociacao-panel (converter)="aoConverterNegociacao($event)"></app-negociacao-panel>
       } @else if (mostrandoImplantacao()) {
         <app-implantacao-panel></app-implantacao-panel>
+      } @else if (mostrandoFaturamento()) {
+        <app-faturamento-panel></app-faturamento-panel>
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
@@ -428,6 +444,24 @@
       (fechar)="fecharModalCliente()"
       (salvo)="aoSalvarCliente()"
     ></app-cliente-modal>
+  }
+
+  @if (clienteConversaoModalAberto()) {
+    <app-cliente-modal
+      [cliente]="clienteParaConversao()"
+      [tipoInicial]="tipoParaConversao()"
+      (fechar)="fecharModalConversaoCliente()"
+      (salvo)="aoSalvarConversaoCliente()"
+    ></app-cliente-modal>
+  }
+
+  @if (clienteSistemaConversaoModalAberto()) {
+    <app-cliente-sistema-modal
+      [cliente]="clienteSistemaParaConversao()"
+      [sistema]="sistemaParaConversao()"
+      (fechar)="fecharModalConversaoClienteSistema()"
+      (salvo)="aoSalvarConversaoClienteSistema()"
+    ></app-cliente-sistema-modal>
   }
 
   @if (categoriasModalAberto()) {

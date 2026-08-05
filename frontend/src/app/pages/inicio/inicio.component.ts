@@ -1,11 +1,23 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Categoria, Cliente, Contabilidade, LinkPessoal, TIPOS_ACESSO, TipoAcesso } from '../../core/models';
+import {
+  Acesso,
+  Categoria,
+  Cliente,
+  ClienteNegociacao,
+  ClienteSistema,
+  Contabilidade,
+  LinkPessoal,
+  Sistema,
+  TIPOS_ACESSO,
+  TipoAcesso,
+} from '../../core/models';
 import { ClientesService } from '../../core/clientes.service';
 import { CategoriasService } from '../../core/categorias.service';
 import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
+import { NegociacaoService } from '../../core/negociacao.service';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
 import { ToastService } from '../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../shared/view-mode-toggle.component';
@@ -13,6 +25,7 @@ import { ViewModeService } from '../../shared/view-mode.service';
 import { SkeletonComponent } from '../../shared/skeleton.component';
 import { LinkModalComponent } from './components/link-modal/link-modal.component';
 import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.component';
+import { ClienteSistemaModalComponent } from './components/cliente-sistema-modal/cliente-sistema-modal.component';
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
@@ -22,8 +35,16 @@ import { ClientesSistemasComponent } from './components/clientes-sistemas/client
 import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
 import { NegociacaoPanelComponent } from './components/negociacao-panel/negociacao-panel.component';
 import { ImplantacaoPanelComponent } from './components/implantacao-panel/implantacao-panel.component';
+import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
+
+// sistemas sem cadastro próprio na conversão de negociação: usam direto o cadastro
+// unificado de clientes/acessos (mesmo mapeamento de clientes-sistemas.component.ts)
+const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
+  uniplus_web: 'acesso_web',
+  zeta: 'acesso_zeta',
+};
 
 @Component({
   selector: 'app-inicio',
@@ -32,6 +53,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
     CopyFieldComponent,
     LinkModalComponent,
     ClienteModalComponent,
+    ClienteSistemaModalComponent,
     InternosPanelComponent,
     CategoriasModalComponent,
     ContabilidadesModalComponent,
@@ -41,6 +63,7 @@ type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
     EnviosContabilidadePanelComponent,
     NegociacaoPanelComponent,
     ImplantacaoPanelComponent,
+    FaturamentoPanelComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
   ],
@@ -51,6 +74,7 @@ export class InicioComponent implements OnInit {
   private categoriasService = inject(CategoriasService);
   private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
+  private negociacaoService = inject(NegociacaoService);
   private destroyRef = inject(DestroyRef);
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
@@ -66,6 +90,18 @@ export class InicioComponent implements OnInit {
 
   // --- área separada "Implantação" (agenda de treinamentos) ---
   mostrandoImplantacao = signal(false);
+
+  // --- área separada "Faturamento" ---
+  mostrandoFaturamento = signal(false);
+
+  // --- conversão de negociação em cliente (botão "Converter em cliente") ---
+  negociacaoConvertendo = signal<ClienteNegociacao | null>(null);
+  clienteConversaoModalAberto = signal(false);
+  clienteParaConversao = signal<Cliente | null>(null);
+  tipoParaConversao = signal<TipoAcesso | null>(null);
+  clienteSistemaConversaoModalAberto = signal(false);
+  clienteSistemaParaConversao = signal<ClienteSistema | null>(null);
+  sistemaParaConversao = signal<Sistema>('uniplus');
 
   // --- links pessoais ---
   links = signal<LinkPessoal[]>([]);
@@ -285,6 +321,75 @@ export class InicioComponent implements OnInit {
     this.fecharModalCliente();
     await this.carregarClientes();
     this.toast.sucesso('Cliente salvo.');
+  }
+
+  // --- conversão de negociação em cliente ---
+
+  // uniplus_web/zeta viram um Cliente comum (pré-preenchendo a aba de acesso certa);
+  // uniplus/sgbr viram um ClienteSistema (cadastro próprio de Gestão > Clientes)
+  aoConverterNegociacao(negociacao: ClienteNegociacao) {
+    const sistema = negociacao.sistema;
+    if (!sistema) return;
+
+    this.negociacaoConvertendo.set(negociacao);
+    this.mostrandoNegociacao.set(false);
+
+    const prefil = {
+      nome: negociacao.nome,
+      cnpj: negociacao.cnpj || null,
+      telefone: negociacao.telefone || null,
+      enquadramento_fiscal: negociacao.enquadramento_fiscal || null,
+      observacoes: negociacao.observacoes || null,
+    };
+
+    const tipoUnificado = TIPO_POR_SISTEMA_UNIFICADO[sistema];
+    if (tipoUnificado) {
+      this.clienteParaConversao.set(prefil as Cliente);
+      this.tipoParaConversao.set(tipoUnificado);
+      this.clienteConversaoModalAberto.set(true);
+    } else {
+      this.clienteSistemaParaConversao.set(prefil as ClienteSistema);
+      this.sistemaParaConversao.set(sistema);
+      this.clienteSistemaConversaoModalAberto.set(true);
+    }
+  }
+
+  fecharModalConversaoCliente() {
+    this.clienteConversaoModalAberto.set(false);
+    this.clienteParaConversao.set(null);
+    this.tipoParaConversao.set(null);
+    this.negociacaoConvertendo.set(null);
+  }
+
+  fecharModalConversaoClienteSistema() {
+    this.clienteSistemaConversaoModalAberto.set(false);
+    this.clienteSistemaParaConversao.set(null);
+    this.negociacaoConvertendo.set(null);
+  }
+
+  async aoSalvarConversaoCliente() {
+    this.clienteConversaoModalAberto.set(false);
+    this.clienteParaConversao.set(null);
+    this.tipoParaConversao.set(null);
+    await this.concluirConversaoNegociacao();
+    await this.carregarClientes();
+    this.mostrandoClientesSistemas.set(true);
+    this.toast.sucesso('Cliente convertido com sucesso.');
+  }
+
+  async aoSalvarConversaoClienteSistema() {
+    this.clienteSistemaConversaoModalAberto.set(false);
+    this.clienteSistemaParaConversao.set(null);
+    await this.concluirConversaoNegociacao();
+    this.mostrandoClientesSistemas.set(true);
+    this.toast.sucesso('Cliente convertido com sucesso.');
+  }
+
+  private async concluirConversaoNegociacao() {
+    const negociacao = this.negociacaoConvertendo();
+    this.negociacaoConvertendo.set(null);
+    if (!negociacao?.id) return;
+    await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
   }
 
   // abre o AnyDesk instalado já direcionado pro ID (protocolo anydesk:) e deixa a senha

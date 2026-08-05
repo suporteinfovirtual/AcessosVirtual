@@ -60,47 +60,65 @@
     } @else {
       <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
         @for (cliente of clientesFiltrados(); track cliente.id) {
-          <button
-            type="button"
-            [class]="viewMode.modo() === 'lista'
-              ? 'flex w-full flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-zinc-700'
-              : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700'"
-            (click)="abrirEdicao(cliente)"
-          >
-            <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
-              <div class="flex items-center gap-2">
-                <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
-                <span [class]="'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' + corStatus(cliente.status)">
-                  {{ rotuloStatus(cliente.status) }}
-                </span>
-              </div>
-              @if (cliente.cnpj) {
-                <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
-              }
-              @if (cliente.telefone) {
-                <p class="truncate text-xs text-zinc-500">{{ cliente.telefone }}</p>
-              }
-            </div>
-
-            <div
+          <div class="flex flex-col gap-1.5">
+            <button
+              type="button"
               [class]="viewMode.modo() === 'lista'
-                ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
-                : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
+                ? 'flex w-full flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-zinc-700'
+                : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700'"
+              (click)="abrirEdicao(cliente)"
             >
-              @if (cliente.enquadramento_fiscal) {
-                <div class="min-w-0">
-                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
-                  <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
+              <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
+                <div class="flex items-center gap-2">
+                  <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
+                  <span [class]="'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' + corStatus(cliente.status)">
+                    {{ rotuloStatus(cliente.status) }}
+                  </span>
+                  @if (cliente.convertido_em) {
+                    <span class="shrink-0 text-[11px] font-medium text-emerald-500">✓ convertido</span>
+                  }
                 </div>
-              }
-              @if (cliente.observacoes) {
-                <div class="min-w-0">
-                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Observações</span>
-                  <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
-                </div>
-              }
-            </div>
-          </button>
+                @if (cliente.cnpj) {
+                  <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
+                }
+                @if (cliente.telefone) {
+                  <p class="truncate text-xs text-zinc-500">{{ cliente.telefone }}</p>
+                }
+                @if (cliente.precisa_migrar_base) {
+                  <p class="truncate text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
+                }
+              </div>
+
+              <div
+                [class]="viewMode.modo() === 'lista'
+                  ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+                  : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
+              >
+                @if (cliente.enquadramento_fiscal) {
+                  <div class="min-w-0">
+                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
+                    <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
+                  </div>
+                }
+                @if (cliente.observacoes) {
+                  <div class="min-w-0">
+                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Observações</span>
+                    <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
+                  </div>
+                }
+              </div>
+            </button>
+
+            @if (podeConverter(cliente)) {
+              <button
+                type="button"
+                class="self-start rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/20"
+                (click)="solicitarConversao($event, cliente)"
+              >
+                Converter em cliente →
+              </button>
+            }
+          </div>
         }
       </div>
     }

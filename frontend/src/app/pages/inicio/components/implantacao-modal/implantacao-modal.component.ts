@@ -22,6 +22,7 @@ export class ImplantacaoModalComponent implements OnInit {
   data = signal('');
   hora = signal('');
   observacoes = signal('');
+  concluidaManual = signal(false);
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -31,6 +32,13 @@ export class ImplantacaoModalComponent implements OnInit {
     return !!this.implantacao()?.id;
   }
 
+  // considera concluída automaticamente quando a data já passou, mesmo sem marcação manual
+  get jaPassouData(): boolean {
+    const data = this.implantacao()?.data;
+    if (!data) return false;
+    return data < new Date().toISOString().slice(0, 10);
+  }
+
   ngOnInit() {
     const item = this.implantacao();
     if (item) {
@@ -38,6 +46,7 @@ export class ImplantacaoModalComponent implements OnInit {
       this.data.set(item.data);
       this.hora.set(item.hora);
       this.observacoes.set(item.observacoes || '');
+      this.concluidaManual.set(!!item.concluida_manual);
     } else if (this.dataInicial()) {
       this.data.set(this.dataInicial()!);
     }
@@ -57,6 +66,7 @@ export class ImplantacaoModalComponent implements OnInit {
       data: this.data(),
       hora: this.hora(),
       observacoes: this.observacoes().trim() || null,
+      concluida_manual: this.concluidaManual(),
     };
 
     try {

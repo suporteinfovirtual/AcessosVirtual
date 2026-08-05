@@ -124,14 +124,19 @@ export class ClienteModalComponent implements OnInit {
           observacoes: acesso.observacoes || '',
         };
       }
-    } else if (this.tipoInicial()) {
-      const tipo = this.tipoInicial()!;
-      this.acessosPorTipo[tipo].ativo = true;
-      if (tipo === 'acesso_web') {
-        this.acessosPorTipo[tipo].link = 'https://canal.intelidata.inf.br/acesso/';
+    }
+
+    // ativa o tipo da aba atual por padrão quando ele ainda não tem acesso configurado —
+    // cobre tanto "Novo cliente" a partir do zero (cliente=null) quanto o pré-preenchimento
+    // vindo da conversão de negociação (cliente com dados mas sem nenhum acesso ainda)
+    const tipoInicial = this.tipoInicial();
+    if (tipoInicial && !this.acessosPorTipo[tipoInicial].ativo) {
+      this.acessosPorTipo[tipoInicial].ativo = true;
+      if (tipoInicial === 'acesso_web') {
+        this.acessosPorTipo[tipoInicial].link = 'https://canal.intelidata.inf.br/acesso/';
       }
-      if (tipo === 'acesso_zeta') {
-        this.acessosPorTipo[tipo].link = 'https://zweb.com.br/#/sign-in';
+      if (tipoInicial === 'acesso_zeta') {
+        this.acessosPorTipo[tipoInicial].link = 'https://zweb.com.br/#/sign-in';
       }
     }
   }

@@ -3,12 +3,23 @@ interface Env {
 }
 
 const STATUS_VALIDOS = ['em_negociacao', 'desistiu', 'fechou'];
+const SISTEMAS_VALIDOS = ['uniplus', 'uniplus_web', 'sgbr', 'zeta'];
 
-// PUT /api/negociacao/:id -> atualiza um cliente em negociação
+// PUT /api/negociacao/:id -> atualiza um cliente em negociação (status, sistema e conversão)
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
-  let body: { nome?: string; cnpj?: string; telefone?: string; enquadramento_fiscal?: string; observacoes?: string; status?: string };
+  let body: {
+    nome?: string;
+    cnpj?: string;
+    telefone?: string;
+    enquadramento_fiscal?: string;
+    observacoes?: string;
+    status?: string;
+    sistema?: string;
+    precisa_migrar_base?: boolean;
+    convertido?: boolean;
+  };
   try {
     body = await request.json();
   } catch {
@@ -23,9 +34,19 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     return new Response(JSON.stringify({ erro: 'Status inválido' }), { status: 400 });
   }
 
+  if (body.sistema && !SISTEMAS_VALIDOS.includes(body.sistema)) {
+    return new Response(JSON.stringify({ erro: 'Sistema inválido' }), { status: 400 });
+  }
+
+  // convertido_em só é escrito quando convertido=true vem no corpo (marca "agora" no
+  // servidor); nos demais salvamentos o valor que já estava gravado é preservado.
   await env.DB
     .prepare(
-      'UPDATE clientes_negociacao SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ?, status = COALESCE(?, status) WHERE id = ?'
+      `UPDATE clientes_negociacao
+       SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ?,
+           precisa_migrar_base = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
+           convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END
+       WHERE id = ?`
     )
     .bind(
       body.nome.trim(),
@@ -33,7 +54,10 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.telefone?.trim() || null,
       body.enquadramento_fiscal?.trim() || null,
       body.observacoes?.trim() || null,
+      body.precisa_migrar_base ? 1 : 0,
       body.status || null,
+      body.sistema || null,
+      body.convertido ? 1 : 0,
       params.id
     )
     .run();

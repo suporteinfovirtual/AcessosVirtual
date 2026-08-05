@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, STATUS_NEGOCIACAO, StatusNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 
@@ -23,7 +23,11 @@ export class NegociacaoModalComponent implements OnInit {
   enquadramentoFiscal = signal('');
   observacoes = signal('');
   status = signal<StatusNegociacao>('em_negociacao');
+  sistema = signal<Sistema | null>(null);
+  precisaMigrarBase = signal(false);
+
   readonly statusOpcoes = STATUS_NEGOCIACAO;
+  readonly sistemaOpcoes = SISTEMAS;
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -46,6 +50,8 @@ export class NegociacaoModalComponent implements OnInit {
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.observacoes.set(cliente.observacoes || '');
       this.status.set(cliente.status || 'em_negociacao');
+      this.sistema.set(cliente.sistema || null);
+      this.precisaMigrarBase.set(!!cliente.precisa_migrar_base);
     }
   }
 
@@ -61,6 +67,8 @@ export class NegociacaoModalComponent implements OnInit {
       telefone: this.telefone().trim() || null,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       observacoes: this.observacoes().trim() || null,
+      sistema: this.sistema(),
+      precisa_migrar_base: this.precisaMigrarBase(),
     };
 
     try {

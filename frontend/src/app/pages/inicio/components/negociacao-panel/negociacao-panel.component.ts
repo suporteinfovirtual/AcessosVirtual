@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteNegociacao, STATUS_NEGOCIACAO, StatusNegociacao } from '../../../../core/models';
@@ -19,6 +19,10 @@ export class NegociacaoPanelComponent implements OnInit {
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
 
+  // emite o registro completo (já com sistema) pro app-inicio abrir a tela de
+  // Clientes certa, pré-preenchida — ver aoConverterNegociacao() em inicio.component.ts
+  converter = output<ClienteNegociacao>();
+
   busca = signal('');
   statusFiltro = signal<StatusNegociacao | 'todos'>('todos');
   readonly statusOpcoes = STATUS_NEGOCIACAO;
@@ -38,16 +42,6 @@ export class NegociacaoPanelComponent implements OnInit {
       return bateTermo && bateStatus;
     });
   });
-
-  rotuloStatus(status?: StatusNegociacao): string {
-    return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
-  }
-
-  corStatus(status?: StatusNegociacao): string {
-    if (status === 'fechou') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
-    if (status === 'desistiu') return 'bg-rose-500/15 text-rose-400 border border-rose-500/30';
-    return 'bg-zinc-800 text-zinc-400 border border-zinc-700';
-  }
 
   ngOnInit() {
     this.carregar();
@@ -76,6 +70,26 @@ export class NegociacaoPanelComponent implements OnInit {
   fecharModal() {
     this.modalAberto.set(false);
     this.clienteEmEdicao.set(null);
+  }
+
+  rotuloStatus(status?: StatusNegociacao): string {
+    return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
+  }
+
+  corStatus(status?: StatusNegociacao): string {
+    if (status === 'fechou') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+    if (status === 'desistiu') return 'bg-rose-500/15 text-rose-400 border border-rose-500/30';
+    return 'bg-zinc-800 text-zinc-400 border border-zinc-700';
+  }
+
+  // só aparece quando fechou, já tem sistema escolhido, e ainda não foi convertido
+  podeConverter(cliente: ClienteNegociacao): boolean {
+    return cliente.status === 'fechou' && !!cliente.sistema && !cliente.convertido_em;
+  }
+
+  solicitarConversao(event: Event, cliente: ClienteNegociacao) {
+    event.stopPropagation(); // não deixa abrir o modal de edição junto
+    this.converter.emit(cliente);
   }
 
   async aoSalvar() {

@@ -1,0 +1,90 @@
+<div>
+  <h2 class="text-lg font-semibold text-zinc-100">Faturamento</h2>
+
+  <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="relative w-full sm:max-w-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+      </svg>
+      <input
+        [(ngModel)]="busca"
+        type="text"
+        placeholder="Buscar por nome…"
+        class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+      />
+    </div>
+
+    <app-view-mode-toggle></app-view-mode-toggle>
+  </div>
+
+  <div class="mt-3 flex flex-wrap gap-2">
+    <button
+      type="button"
+      [class]="filtro() === 'pendentes'
+        ? 'rounded-full bg-accent px-3 py-1 text-xs font-medium text-zinc-950'
+        : 'rounded-full border border-zinc-800 px-3 py-1 text-xs text-zinc-400 hover:border-zinc-700'"
+      (click)="filtro.set('pendentes')"
+    >
+      Pendentes ({{ pendentes().length }})
+    </button>
+    <button
+      type="button"
+      [class]="filtro() === 'faturados'
+        ? 'rounded-full bg-accent px-3 py-1 text-xs font-medium text-zinc-950'
+        : 'rounded-full border border-zinc-800 px-3 py-1 text-xs text-zinc-400 hover:border-zinc-700'"
+      (click)="filtro.set('faturados')"
+    >
+      Faturados ({{ faturados().length }})
+    </button>
+  </div>
+
+  <div class="mt-5">
+    @if (carregando()) {
+      <app-skeleton [variante]="viewMode.modo() === 'lista' ? 'linhas' : 'cartoes'"></app-skeleton>
+    } @else if (itensFiltrados().length === 0) {
+      <p class="py-10 text-center text-sm text-zinc-600">
+        {{ filtro() === 'pendentes' ? 'Nenhum cliente pronto pra faturar no momento.' : 'Nenhum cliente faturado ainda.' }}
+      </p>
+    } @else {
+      <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
+        @for (item of itensFiltrados(); track chave(item)) {
+          <div
+            [class]="viewMode.modo() === 'lista'
+              ? 'flex w-full flex-wrap items-center justify-between gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5'
+              : 'flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4'"
+          >
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ item.cliente_nome }}</p>
+              <span class="mt-1 inline-block rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">
+                {{ rotuloSistema(item.cliente_sistema) }}
+              </span>
+              @if (filtro() === 'faturados') {
+                <span class="ml-2 text-[11px] text-zinc-500">faturado em {{ $any(item).faturado_em | date: 'dd/MM/yyyy' }}</span>
+              }
+            </div>
+
+            @if (filtro() === 'pendentes') {
+              <button
+                type="button"
+                [disabled]="marcando() === chave(item)"
+                class="shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/20 disabled:opacity-50"
+                (click)="marcarFaturado(item)"
+              >
+                {{ marcando() === chave(item) ? 'Marcando…' : 'Marcar como faturado' }}
+              </button>
+            } @else {
+              <button
+                type="button"
+                [disabled]="marcando() === chave(item)"
+                class="shrink-0 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-200 disabled:opacity-50"
+                (click)="desmarcarFaturado($any(item))"
+              >
+                {{ marcando() === chave(item) ? 'Desfazendo…' : 'Desfazer' }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

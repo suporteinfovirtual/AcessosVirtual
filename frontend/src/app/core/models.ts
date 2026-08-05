@@ -68,6 +68,7 @@ export interface Implantacao {
   data: string;
   hora: string;
   observacoes?: string | null;
+  concluida_manual?: boolean | number;
   criado_em?: string;
 }
 
@@ -87,7 +88,27 @@ export interface ClienteNegociacao {
   enquadramento_fiscal?: string | null;
   observacoes?: string | null;
   status?: StatusNegociacao;
+  sistema?: Sistema | null;
+  precisa_migrar_base?: boolean | number;
+  convertido_em?: string | null;
   criado_em?: string;
+}
+
+// cliente com implantação concluída (e sem nenhuma outra pendente no futuro), pronto
+// pra aparecer na lista de Faturamento
+export interface ClientePendenteFaturamento {
+  cliente_sistema: Sistema;
+  cliente_ref_id: number;
+  cliente_nome: string;
+}
+
+// cliente já marcado como faturado
+export interface ClienteFaturado {
+  id: number;
+  cliente_sistema: Sistema;
+  cliente_ref_id: number;
+  cliente_nome: string;
+  faturado_em: string;
 }
 
 export interface Contabilidade {

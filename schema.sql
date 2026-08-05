@@ -181,7 +181,9 @@ CREATE TABLE IF NOT EXISTS clientes_sistemas_licencas (
 CREATE INDEX IF NOT EXISTS idx_cliente_licencas_licenca ON cliente_licencas(licenca_id);
 CREATE INDEX IF NOT EXISTS idx_clientes_sistemas_licencas_licenca ON clientes_sistemas_licencas(licenca_id);
 
--- Clientes em negociação: cadastro simples pra prospects, feito só na aba Gestão > Negociação
+-- Clientes em negociação: cadastro simples pra prospects, feito só na aba Gestão > Negociação.
+-- sistema e precisa_migrar_base guiam a coleta de dados; status controla o funil; convertido_em
+-- marca quando o prospect virou um cliente de verdade em Gestão > Clientes.
 CREATE TABLE IF NOT EXISTS clientes_negociacao (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL,
@@ -189,15 +191,21 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
   telefone TEXT,
   enquadramento_fiscal TEXT,
   observacoes TEXT,
+  status TEXT NOT NULL DEFAULT 'em_negociacao',
+  sistema TEXT,
+  precisa_migrar_base INTEGER NOT NULL DEFAULT 0,
+  convertido_em TEXT,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_clientes_negociacao_nome ON clientes_negociacao(nome);
+CREATE INDEX IF NOT EXISTS idx_clientes_negociacao_status ON clientes_negociacao(status);
 
 -- Agenda de implantação: visitas de treinamento marcadas num dia/hora pra um cliente já
 -- cadastrado em Gestão > Clientes (Uniplus / Uniplus Web / SGBR / Zeta). Como esses clientes
 -- vivem em tabelas diferentes (clientes_sistemas ou clientes), guardamos qual sistema e o id
 -- de origem, mais o nome (snapshot, pra exibir sem precisar juntar as duas tabelas).
+-- concluida_manual marca conclusão manual; se a data já passou, conta como concluída também.
 CREATE TABLE IF NOT EXISTS implantacoes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   cliente_nome TEXT NOT NULL,
@@ -206,7 +214,19 @@ CREATE TABLE IF NOT EXISTS implantacoes (
   data TEXT NOT NULL, -- YYYY-MM-DD
   hora TEXT NOT NULL, -- HH:MM
   observacoes TEXT,
+  concluida_manual INTEGER NOT NULL DEFAULT 0,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_implantacoes_data ON implantacoes(data);
+
+-- Registro de quando um cliente foi marcado como faturado. A lista de "pronto pra faturar"
+-- é calculada na hora a partir de implantacoes — esta tabela só guarda quem já foi marcado.
+CREATE TABLE IF NOT EXISTS faturamento_clientes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_sistema TEXT NOT NULL CHECK (cliente_sistema IN ('uniplus', 'uniplus_web', 'sgbr', 'zeta')),
+  cliente_ref_id INTEGER NOT NULL,
+  cliente_nome TEXT NOT NULL,
+  faturado_em TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (cliente_sistema, cliente_ref_id)
+);

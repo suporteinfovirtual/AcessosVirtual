@@ -74,7 +74,9 @@
             <div class="flex flex-col gap-1">
               @for (item of implantacoesNoDia(dia.dataIso); track item.id) {
                 <span
-                  class="truncate rounded bg-accent-soft px-1.5 py-0.5 text-[11px] text-accent hover:bg-accent/25"
+                  [class]="concluida(item)
+                    ? 'truncate rounded bg-zinc-800 px-1.5 py-0.5 text-[11px] text-zinc-500 line-through hover:bg-zinc-700'
+                    : 'truncate rounded bg-accent-soft px-1.5 py-0.5 text-[11px] text-accent hover:bg-accent/25'"
                   (click)="$event.stopPropagation(); abrirEdicao(item)"
                 >
                   {{ item.hora }} · {{ item.cliente_nome }}

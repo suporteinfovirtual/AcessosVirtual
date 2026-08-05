@@ -2,7 +2,10 @@ interface Env {
   DB: D1Database;
 }
 
-// GET /api/negociacao?busca=texto&status=em_negociacao -> lista os clientes em negociação, filtrando por nome, cnpj e/ou status
+const SISTEMAS_VALIDOS = ['uniplus', 'uniplus_web', 'sgbr', 'zeta'];
+
+// GET /api/negociacao?busca=texto&status=em_negociacao -> lista os clientes em negociação,
+// filtrando por nome/cnpj e, opcionalmente, por status (em_negociacao | desistiu | fechou)
 export async function onRequestGet(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -35,7 +38,15 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
 export async function onRequestPost(context: EventContext<Env, string, unknown>) {
   const { request, env } = context;
 
-  let body: { nome?: string; cnpj?: string; telefone?: string; enquadramento_fiscal?: string; observacoes?: string };
+  let body: {
+    nome?: string;
+    cnpj?: string;
+    telefone?: string;
+    enquadramento_fiscal?: string;
+    observacoes?: string;
+    sistema?: string;
+    precisa_migrar_base?: boolean;
+  };
   try {
     body = await request.json();
   } catch {
@@ -46,14 +57,22 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     return new Response(JSON.stringify({ erro: 'Nome é obrigatório' }), { status: 400 });
   }
 
+  if (body.sistema && !SISTEMAS_VALIDOS.includes(body.sistema)) {
+    return new Response(JSON.stringify({ erro: 'Sistema inválido' }), { status: 400 });
+  }
+
   const resultado = await env.DB
-    .prepare('INSERT INTO clientes_negociacao (nome, cnpj, telefone, enquadramento_fiscal, observacoes) VALUES (?, ?, ?, ?, ?)')
+    .prepare(
+      'INSERT INTO clientes_negociacao (nome, cnpj, telefone, enquadramento_fiscal, observacoes, sistema, precisa_migrar_base) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    )
     .bind(
       body.nome.trim(),
       body.cnpj?.trim() || null,
       body.telefone?.trim() || null,
       body.enquadramento_fiscal?.trim() || null,
-      body.observacoes?.trim() || null
+      body.observacoes?.trim() || null,
+      body.sistema || null,
+      body.precisa_migrar_base ? 1 : 0
     )
     .run();
 

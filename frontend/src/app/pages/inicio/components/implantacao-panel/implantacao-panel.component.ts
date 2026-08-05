@@ -131,6 +131,11 @@ export class ImplantacaoPanelComponent implements OnInit {
     return this.implantacoesPorDia().get(dataIso) || [];
   }
 
+  // concluída manualmente ou pela data já ter passado — mesmo critério usado pro Faturamento
+  concluida(item: Implantacao): boolean {
+    return !!item.concluida_manual || item.data < formatarDataIso(new Date());
+  }
+
   abrirNovo(dataIso?: string) {
     this.implantacaoEmEdicao.set(null);
     this.dataParaNova.set(dataIso || formatarDataIso(new Date()));

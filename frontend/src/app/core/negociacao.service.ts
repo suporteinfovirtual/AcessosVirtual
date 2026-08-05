@@ -19,7 +19,9 @@ export class NegociacaoService {
     return this.http.post<{ id: number }>('/api/negociacao', cliente);
   }
 
-  atualizar(id: number, cliente: Partial<ClienteNegociacao>): Observable<{ ok: true }> {
+  // convertido: true é um "gatilho" — não é um campo do modelo, só avisa a API que
+  // deve marcar convertido_em = agora (a data de conversão é sempre definida pelo servidor)
+  atualizar(id: number, cliente: Partial<ClienteNegociacao> & { convertido?: boolean }): Observable<{ ok: true }> {
     return this.http.put<{ ok: true }>(`/api/negociacao/${id}`, cliente);
   }
 
