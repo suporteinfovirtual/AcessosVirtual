@@ -283,7 +283,7 @@ export class InicioComponent implements OnInit {
   }
 
   voltarAoPainel() {
-    this.fecharSecoesGestao();
+    this.selecionarAba('anydesk');
   }
 
   abrirSecaoGestao(secao: 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
