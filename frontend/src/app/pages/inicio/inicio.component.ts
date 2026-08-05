@@ -8,6 +8,7 @@ import {
   ClienteNegociacao,
   ClienteSistema,
   Contabilidade,
+  Implantacao,
   LinkPessoal,
   Sistema,
   TIPOS_ACESSO,
@@ -18,6 +19,7 @@ import { CategoriasService } from '../../core/categorias.service';
 import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { NegociacaoService } from '../../core/negociacao.service';
+import { ImplantacoesService } from '../../core/implantacoes.service';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
 import { ToastService } from '../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../shared/view-mode-toggle.component';
@@ -75,9 +77,14 @@ export class InicioComponent implements OnInit {
   private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
   private negociacaoService = inject(NegociacaoService);
+  private implantacoesService = inject(ImplantacoesService);
   private destroyRef = inject(DestroyRef);
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
+
+  // --- lembrete de implantações marcadas pra hoje ---
+  implantacoesHoje = signal<Implantacao[]>([]);
+  lembreteFechado = signal(false);
 
   // --- área separada "Clientes" (Uniplus / Uniplus Web / SGBR / Zeta) ---
   mostrandoClientesSistemas = signal(false);
@@ -190,7 +197,22 @@ export class InicioComponent implements OnInit {
     this.carregarClientes();
     this.carregarCategorias();
     this.carregarContabilidades();
+    this.carregarImplantacoesHoje();
     this.agendarAtualizacaoSenhaDoDia();
+  }
+
+  // --- lembrete de implantações marcadas pra hoje ---
+
+  async carregarImplantacoesHoje() {
+    const hoje = new Date();
+    const hojeIso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    const implantacoes = await firstValueFrom(this.implantacoesService.listar());
+    this.implantacoesHoje.set(implantacoes.filter((i) => i.data === hojeIso && !i.concluida_manual));
+  }
+
+  irParaImplantacoesHoje() {
+    this.lembreteFechado.set(true);
+    this.abrirSecaoGestao('implantacao');
   }
 
   // --- links pessoais ---

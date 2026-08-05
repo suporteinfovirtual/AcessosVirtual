@@ -27,6 +27,7 @@ export class NegociacaoModalComponent implements OnInit {
   status = signal<StatusNegociacao>('em_negociacao');
   sistema = signal<Sistema | null>(null);
   precisaMigrarBase = signal(false);
+  motivoDesistencia = signal('');
 
   readonly statusOpcoes = STATUS_NEGOCIACAO;
   readonly sistemaOpcoes = SISTEMAS;
@@ -54,6 +55,7 @@ export class NegociacaoModalComponent implements OnInit {
       this.status.set(cliente.status || 'em_negociacao');
       this.sistema.set(cliente.sistema || null);
       this.precisaMigrarBase.set(!!cliente.precisa_migrar_base);
+      this.motivoDesistencia.set(cliente.motivo_desistencia || '');
     }
   }
 
@@ -75,7 +77,13 @@ export class NegociacaoModalComponent implements OnInit {
 
     try {
       if (this.editando) {
-        await firstValueFrom(this.negociacaoService.atualizar(this.cliente()!.id!, { ...dados, status: this.status() }));
+        await firstValueFrom(
+          this.negociacaoService.atualizar(this.cliente()!.id!, {
+            ...dados,
+            status: this.status(),
+            motivo_desistencia: this.motivoDesistencia().trim() || null,
+          })
+        );
       } else {
         await firstValueFrom(this.negociacaoService.criar(dados));
       }

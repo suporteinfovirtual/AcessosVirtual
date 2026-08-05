@@ -18,6 +18,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     status?: string;
     sistema?: string;
     precisa_migrar_base?: boolean;
+    motivo_desistencia?: string;
     convertido?: boolean;
   };
   try {
@@ -44,7 +45,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     .prepare(
       `UPDATE clientes_negociacao
        SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ?,
-           precisa_migrar_base = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
+           precisa_migrar_base = ?, motivo_desistencia = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
            convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END
        WHERE id = ?`
     )
@@ -55,6 +56,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.enquadramento_fiscal?.trim() || null,
       body.observacoes?.trim() || null,
       body.precisa_migrar_base ? 1 : 0,
+      body.motivo_desistencia?.trim() || null,
       body.status || null,
       body.sistema || null,
       body.convertido ? 1 : 0,

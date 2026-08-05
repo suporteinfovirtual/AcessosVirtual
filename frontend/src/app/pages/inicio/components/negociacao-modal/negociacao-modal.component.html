@@ -61,6 +61,19 @@
               }
             </select>
           </div>
+
+          @if (status() === 'desistiu') {
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-zinc-300">Motivo da desistência</label>
+              <textarea
+                [(ngModel)]="motivoDesistencia"
+                name="motivoDesistencia"
+                rows="2"
+                placeholder="Por que o cliente desistiu?"
+                class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+              ></textarea>
+            </div>
+          }
         }
 
         <div>

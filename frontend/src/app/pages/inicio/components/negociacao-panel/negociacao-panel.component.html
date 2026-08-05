@@ -106,6 +106,12 @@
                     <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
                   </div>
                 }
+                @if (cliente.status === 'desistiu' && cliente.motivo_desistencia) {
+                  <div class="min-w-0">
+                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Motivo da desistência</span>
+                    <span class="block truncate text-sm text-zinc-300">{{ cliente.motivo_desistencia }}</span>
+                  </div>
+                }
               </div>
             </button>
 

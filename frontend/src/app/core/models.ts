@@ -98,6 +98,7 @@ export interface ClienteNegociacao {
   status?: StatusNegociacao;
   sistema?: Sistema | null;
   precisa_migrar_base?: boolean | number;
+  motivo_desistencia?: string | null;
   convertido_em?: string | null;
   criado_em?: string;
 }

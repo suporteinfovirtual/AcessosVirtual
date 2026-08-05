@@ -41,13 +41,24 @@
       </button>
     </div>
 
-    <button
-      type="button"
-      class="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-      (click)="irParaHoje()"
-    >
-      Hoje
-    </button>
+    <div class="flex items-center gap-2">
+      <select
+        [(ngModel)]="tecnicoFiltro"
+        class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+      >
+        <option [ngValue]="null">Todos os técnicos</option>
+        @for (tecnico of tecnicos(); track tecnico.id) {
+          <option [ngValue]="tecnico.id">{{ tecnico.nome }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+        (click)="irParaHoje()"
+      >
+        Hoje
+      </button>
+    </div>
   </div>
 
   <div class="mt-4">

@@ -1,7 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Implantacao } from '../../../../core/models';
+import { Implantacao, Tecnico } from '../../../../core/models';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
+import { TecnicosService } from '../../../../core/tecnicos.service';
 import { ImplantacaoModalComponent } from '../implantacao-modal/implantacao-modal.component';
 import { TecnicosModalComponent } from '../tecnicos-modal/tecnicos-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
@@ -31,11 +33,12 @@ function formatarDataIso(data: Date): string {
 
 @Component({
   selector: 'app-implantacao-panel',
-  imports: [ImplantacaoModalComponent, TecnicosModalComponent, SkeletonComponent],
+  imports: [FormsModule, ImplantacaoModalComponent, TecnicosModalComponent, SkeletonComponent],
   templateUrl: './implantacao-panel.component.html',
 })
 export class ImplantacaoPanelComponent implements OnInit {
   private implantacoesService = inject(ImplantacoesService);
+  private tecnicosService = inject(TecnicosService);
   private toast = inject(ToastService);
 
   readonly nomesDiaSemana = NOMES_DIA_SEMANA;
@@ -43,6 +46,9 @@ export class ImplantacaoPanelComponent implements OnInit {
   mesExibido = signal(this.primeiroDiaDoMesAtual());
   implantacoes = signal<Implantacao[]>([]);
   carregando = signal(true);
+
+  tecnicos = signal<Tecnico[]>([]);
+  tecnicoFiltro = signal<number | null>(null);
 
   modalAberto = signal(false);
   implantacaoEmEdicao = signal<Implantacao | null>(null);
@@ -56,14 +62,17 @@ export class ImplantacaoPanelComponent implements OnInit {
   });
 
   implantacoesPorDia = computed(() => {
+    const filtro = this.tecnicoFiltro();
+    const lista = filtro ? this.implantacoes().filter((i) => i.tecnico_id === filtro) : this.implantacoes();
+
     const mapa = new Map<string, Implantacao[]>();
-    for (const item of this.implantacoes()) {
-      const lista = mapa.get(item.data) || [];
-      lista.push(item);
-      mapa.set(item.data, lista);
+    for (const item of lista) {
+      const dia = mapa.get(item.data) || [];
+      dia.push(item);
+      mapa.set(item.data, dia);
     }
-    for (const lista of mapa.values()) {
-      lista.sort((a, b) => a.hora.localeCompare(b.hora));
+    for (const dia of mapa.values()) {
+      dia.sort((a, b) => a.hora.localeCompare(b.hora));
     }
     return mapa;
   });
@@ -99,6 +108,7 @@ export class ImplantacaoPanelComponent implements OnInit {
 
   ngOnInit() {
     this.carregar();
+    firstValueFrom(this.tecnicosService.listar()).then((tecnicos) => this.tecnicos.set(tecnicos));
   }
 
   async carregar() {
@@ -166,6 +176,11 @@ export class ImplantacaoPanelComponent implements OnInit {
   }
 
   async aoAlterarTecnicos() {
+    const tecnicos = await firstValueFrom(this.tecnicosService.listar());
+    this.tecnicos.set(tecnicos);
+    if (this.tecnicoFiltro() && !tecnicos.some((t) => t.id === this.tecnicoFiltro())) {
+      this.tecnicoFiltro.set(null);
+    }
     await this.carregar();
     this.toast.sucesso('Técnicos atualizados.');
   }
