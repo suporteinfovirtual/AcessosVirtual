@@ -8,6 +8,7 @@ import {
   ClienteNegociacao,
   ClienteSistema,
   Contabilidade,
+  ENQUADRAMENTOS_FISCAIS,
   Implantacao,
   LinkPessoal,
   Sistema,
@@ -150,6 +151,17 @@ export class InicioComponent implements OnInit {
   clienteEmEdicao = signal<Cliente | null>(null);
   categoriasModalAberto = signal(false);
   contabilidadesModalAberto = signal(false);
+
+  // --- seleção múltipla / edição em lote (abas de Acessos) ---
+  readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
+  modoSelecao = signal(false);
+  clientesSelecionados = signal<Set<number>>(new Set());
+  aplicandoEmLote = signal(false);
+  // undefined = campo ainda não tocado (não aplica); null é um valor válido ("sem contabilidade"/"sem categoria")
+  loteContabilidadeId = signal<number | null | undefined>(undefined);
+  loteCategoriaId = signal<number | null | undefined>(undefined);
+  loteServidor = signal('');
+  loteEnquadramentoFiscal = signal('');
 
   senhaDoDia = signal(this.calcularSenhaDoDia());
   senhaDoDiaCopiada = signal(false);
@@ -343,11 +355,122 @@ export class InicioComponent implements OnInit {
     if (valor !== 'acesso_web') this.servidorFiltro.set(null);
     if (valor !== 'acesso_zeta') this.categoriaFiltro.set(null);
     if (valor !== 'acesso_web' && valor !== 'acesso_zeta') this.contabilidadeFiltro.set(null);
+    this.modoSelecao.set(false);
+    this.limparSelecaoEmLote();
   }
 
   acessoDoTipo(cliente: Cliente, tipo: Aba) {
     if (tipo === 'internos') return undefined;
     return cliente.acessos?.find((a) => a.tipo === tipo);
+  }
+
+  // --- seleção múltipla / edição em lote ---
+
+  alternarModoSelecao() {
+    this.modoSelecao.set(!this.modoSelecao());
+    this.limparSelecaoEmLote();
+  }
+
+  alternarSelecaoCliente(id: number) {
+    const atual = new Set(this.clientesSelecionados());
+    if (atual.has(id)) atual.delete(id);
+    else atual.add(id);
+    this.clientesSelecionados.set(atual);
+  }
+
+  selecionarTodosVisiveis() {
+    this.clientesSelecionados.set(new Set(this.clientesFiltrados().map((c) => c.id!)));
+  }
+
+  limparSelecao() {
+    this.limparSelecaoEmLote();
+  }
+
+  private limparSelecaoEmLote() {
+    this.clientesSelecionados.set(new Set());
+    this.loteContabilidadeId.set(undefined);
+    this.loteCategoriaId.set(undefined);
+    this.loteServidor.set('');
+    this.loteEnquadramentoFiscal.set('');
+  }
+
+  // reaproveita nome/cnpj/etc. atuais do cliente porque o PUT /api/clientes/:id substitui
+  // o registro inteiro (não é PATCH) — sem isso, um campo omitido viraria null pros outros
+  private payloadClienteCompleto(cliente: Cliente, patch: Partial<Cliente>) {
+    return {
+      nome: cliente.nome,
+      cnpj: cliente.cnpj,
+      telefone: cliente.telefone,
+      observacoes: cliente.observacoes,
+      categoria_id: cliente.categoria_id ?? null,
+      licencas: cliente.licencas,
+      licenca_ids: (cliente.licencas_selecionadas || []).map((l) => l.id!),
+      enquadramento_fiscal: cliente.enquadramento_fiscal,
+      ...patch,
+    };
+  }
+
+  private async executarEmLote(fn: (cliente: Cliente) => Promise<unknown> | null) {
+    const ids = this.clientesSelecionados();
+    const alvos = this.clientesFiltrados().filter((c) => ids.has(c.id!));
+    if (alvos.length === 0 || this.aplicandoEmLote()) return;
+
+    this.aplicandoEmLote.set(true);
+    try {
+      const chamadas = alvos.map((c) => fn(c)).filter((p): p is Promise<unknown> => p !== null);
+      await Promise.all(chamadas);
+      await this.carregarClientes();
+      this.toast.sucesso(`${alvos.length} cliente(s) atualizado(s).`);
+    } catch {
+      this.toast.erro('Não foi possível atualizar todos os clientes selecionados.');
+    } finally {
+      this.aplicandoEmLote.set(false);
+    }
+  }
+
+  // contabilidade: disponível em Acesso Web e Acesso Zeta (mesmo acesso.contabilidade_id usado no cadastro individual)
+  async aplicarContabilidadeEmLote() {
+    const valor = this.loteContabilidadeId();
+    if (valor === undefined) return;
+    await this.executarEmLote((cliente) => {
+      const acesso = this.acessoDoTipo(cliente, this.abaAtiva());
+      if (!acesso?.id) return null;
+      return firstValueFrom(this.clientesService.atualizarAcesso(acesso.id, { ...acesso, contabilidade_id: valor }));
+    });
+    this.loteContabilidadeId.set(undefined);
+  }
+
+  // servidor: só faz sentido em Acesso Web
+  async aplicarServidorEmLote() {
+    const valor = this.loteServidor().trim();
+    if (!valor) return;
+    await this.executarEmLote((cliente) => {
+      const acesso = this.acessoDoTipo(cliente, this.abaAtiva());
+      if (!acesso?.id) return null;
+      return firstValueFrom(this.clientesService.atualizarAcesso(acesso.id, { ...acesso, servidor: valor }));
+    });
+    this.loteServidor.set('');
+  }
+
+  // categoria e enquadramento fiscal: campos do Cliente (não do Acesso), só fazem sentido em Acesso Zeta
+  async aplicarCategoriaEmLote() {
+    const valor = this.loteCategoriaId();
+    if (valor === undefined) return;
+    await this.executarEmLote((cliente) =>
+      firstValueFrom(this.clientesService.atualizar(cliente.id!, this.payloadClienteCompleto(cliente, { categoria_id: valor })))
+    );
+    this.loteCategoriaId.set(undefined);
+  }
+
+  async aplicarEnquadramentoFiscalEmLote() {
+    const valor = this.loteEnquadramentoFiscal();
+    if (!valor) return;
+    await this.executarEmLote((cliente) =>
+      firstValueFrom(
+        this.clientesService.atualizar(cliente.id!, this.payloadClienteCompleto(cliente, { enquadramento_fiscal: valor }))
+      )
+    );
+    this.loteEnquadramentoFiscal.set('');
   }
 
   statusCertificado(cliente: Cliente): 'vencido' | 'alerta' | null {
