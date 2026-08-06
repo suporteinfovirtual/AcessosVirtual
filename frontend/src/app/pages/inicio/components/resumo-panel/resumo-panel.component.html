@@ -95,6 +95,25 @@
       </button>
     </div>
 
+    @if (temAtencaoCertificados()) {
+      <div class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/5 p-4 shadow-lg shadow-black/30 backdrop-blur-md">
+        <h3 class="text-sm font-semibold text-red-400">Certificados vencendo</h3>
+        <div class="mt-3 flex flex-col gap-2">
+          @for (item of certificadosVencendo(); track item.cliente.id) {
+            <div class="flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-zinc-900/60 px-4 py-2.5">
+              <span class="min-w-0 truncate text-sm uppercase text-zinc-200">{{ item.cliente.nome }}</span>
+              <span class="flex shrink-0 items-center gap-2">
+                <span class="text-[11px] text-zinc-500">{{ formatarDataBr(item.cliente.certificado!.validade!) }}</span>
+                <span [class]="'rounded-full px-2 py-0.5 text-[11px] font-medium ' + corDiasCertificado(item.dias)">
+                  {{ rotuloDiasCertificado(item.dias) }}
+                </span>
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div>
         <h3 class="text-sm font-semibold text-zinc-200">Negociações paradas</h3>

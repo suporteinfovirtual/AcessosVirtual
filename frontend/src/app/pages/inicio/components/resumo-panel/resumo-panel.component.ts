@@ -31,6 +31,11 @@ interface NegociacaoParada {
   dias: number;
 }
 
+interface CertificadoVencendo {
+  cliente: Cliente;
+  dias: number;
+}
+
 interface SegmentoAcesso {
   tipo: TipoAcesso;
   rotulo: string;
@@ -105,6 +110,16 @@ export class ResumoPanelComponent implements OnInit {
     () => this.clientes().filter((c) => statusCertificado(c.certificado?.validade) === 'alerta').length
   );
   temAtencaoCertificados = computed(() => this.certificadosVencidos() + this.certificadosAlerta() > 0);
+
+  certificadosVencendo = computed<CertificadoVencendo[]>(() => {
+    return this.clientes()
+      .filter((c) => statusCertificado(c.certificado?.validade) !== null)
+      .map((c) => ({
+        cliente: c,
+        dias: Math.floor((new Date(c.certificado!.validade as string).getTime() - Date.now()) / 86_400_000),
+      }))
+      .sort((a, b) => a.dias - b.dias);
+  });
 
   negociacoesParadas = computed<NegociacaoParada[]>(() => {
     const agora = Date.now();
@@ -185,6 +200,19 @@ export class ResumoPanelComponent implements OnInit {
       return segmento;
     });
   });
+
+  rotuloDiasCertificado(dias: number): string {
+    if (dias < 0) {
+      const passados = -dias;
+      return `Vencido há ${passados} ${passados === 1 ? 'dia' : 'dias'}`;
+    }
+    if (dias === 0) return 'Vence hoje';
+    return `${dias} ${dias === 1 ? 'dia restante' : 'dias restantes'}`;
+  }
+
+  corDiasCertificado(dias: number): string {
+    return dias < 0 ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400';
+  }
 
   rotuloStatus(status?: string): string {
     return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
