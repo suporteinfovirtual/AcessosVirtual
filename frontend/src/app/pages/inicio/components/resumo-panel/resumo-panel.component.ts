@@ -51,7 +51,16 @@ interface SegmentoSistema {
   dashoffset: number;
 }
 
+interface BarraContabilidade {
+  nome: string;
+  valor: number;
+  percentual: number;
+}
+
 const LIMITE_LISTA = 5;
+const NAO_INFORMADO = 'Não informado';
+const OUTRAS_CONTABILIDADES = 'Outras contabilidades';
+const TOP_CONTABILIDADES = 6;
 
 // donut "Distribuição de clientes por sistema": zeta fica com o laranja de marca (maior
 // valor hoje); os outros três ficam em cinza-zinco — a atribuição é fixa por sistema, não
@@ -255,6 +264,45 @@ export class ResumoPanelComponent implements OnInit {
       acumulado += comprimento;
       return segmento;
     });
+  });
+
+  // "distribuição de clientes por contabilidade": pra cada cliente, usa a contabilidade do
+  // primeiro acesso que tiver uma vinculada (anydesk/acesso_web/acesso_zeta praticamente não
+  // se sobrepõem por cliente, então não há double-count na prática); sem nenhuma, cai em
+  // "Não informado". Mostra as top N contabilidades e agrupa o resto em "Outras" — com ~36
+  // contabilidades cadastradas e várias com só 1-2 clientes, listar todas viraria ilegível
+  contagemPorContabilidade = computed(() => {
+    const contagem = new Map<string, number>();
+    for (const cliente of this.clientes()) {
+      const acessoComContabilidade = cliente.acessos?.find((a) => a.contabilidade_id);
+      const nome = acessoComContabilidade?.contabilidade_nome || NAO_INFORMADO;
+      contagem.set(nome, (contagem.get(nome) || 0) + 1);
+    }
+    return contagem;
+  });
+
+  distribuicaoContabilidade = computed<BarraContabilidade[]>(() => {
+    const contagem = this.contagemPorContabilidade();
+    const total = this.clientes().length;
+    if (total === 0) return [];
+
+    const naoInformado = contagem.get(NAO_INFORMADO) || 0;
+    const demais = [...contagem.entries()]
+      .filter(([nome]) => nome !== NAO_INFORMADO)
+      .sort((a, b) => b[1] - a[1]);
+
+    const principais = demais.slice(0, TOP_CONTABILIDADES);
+    const outras = demais.slice(TOP_CONTABILIDADES).reduce((soma, [, valor]) => soma + valor, 0);
+
+    const linhas: [string, number][] = [...principais];
+    if (outras > 0) linhas.push([OUTRAS_CONTABILIDADES, outras]);
+    if (naoInformado > 0) linhas.push([NAO_INFORMADO, naoInformado]);
+
+    return linhas.map(([nome, valor]) => ({
+      nome,
+      valor,
+      percentual: Math.round((valor / total) * 100),
+    }));
   });
 
   // tooltip do donut: SVG puro, sem lib de gráfico, então a posição é calculada à mão
