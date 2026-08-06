@@ -27,11 +27,6 @@ function formatarDataIso(data: Date): string {
 
 export type SecaoGestao = 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento';
 
-interface NegociacaoParada {
-  cliente: ClienteNegociacao;
-  dias: number;
-}
-
 interface CertificadoVencendo {
   cliente: Cliente;
   dias: number;
@@ -47,7 +42,6 @@ interface SegmentoAcesso {
   dashoffset: number;
 }
 
-const DIAS_PARADA_ALERTA = 7;
 const LIMITE_LISTA = 5;
 
 // donut "Distribuição de acessos": zeta fica com o laranja de marca (maior valor hoje);
@@ -168,20 +162,6 @@ export class ResumoPanelComponent implements OnInit {
   certificadosVencendoProximos7Dias = computed(
     () => this.certificadosVencendo().filter((c) => c.dias >= 0 && c.dias <= 7).length
   );
-
-  negociacoesParadas = computed<NegociacaoParada[]>(() => {
-    const agora = Date.now();
-    return this.negociacoes()
-      .filter((n) => n.status === 'em_negociacao')
-      .map((n) => {
-        const ultimaAtualizacao = n.atualizado_em || n.criado_em;
-        const dias = ultimaAtualizacao ? Math.floor((agora - new Date(ultimaAtualizacao).getTime()) / 86_400_000) : 0;
-        return { cliente: n, dias };
-      })
-      .filter((n) => n.dias >= DIAS_PARADA_ALERTA)
-      .sort((a, b) => b.dias - a.dias)
-      .slice(0, LIMITE_LISTA);
-  });
 
   implantacoesAtrasadas = computed(() => {
     const hoje = formatarDataIso(new Date());
