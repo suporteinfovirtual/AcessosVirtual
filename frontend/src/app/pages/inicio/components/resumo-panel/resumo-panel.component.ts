@@ -51,10 +51,19 @@ interface SegmentoSistema {
   dashoffset: number;
 }
 
-interface BarraContabilidade {
+interface SegmentoContabilidade {
   nome: string;
   valor: number;
   percentual: number;
+  cor: string;
+  dasharray: string;
+  dashoffset: number;
+}
+
+interface TooltipDonutContabilidade {
+  seg: SegmentoContabilidade;
+  x: number;
+  y: number;
 }
 
 const LIMITE_LISTA = 5;
@@ -71,6 +80,13 @@ const CORES_SISTEMA: Record<Sistema, string> = {
   uniplus: '#71717a',
   sgbr: '#52525b',
 };
+
+// donut "Distribuição de clientes por contabilidade": a contabilidade com mais clientes
+// fica com o laranja de marca, o resto cicla por tons de cinza-zinco (do mais claro pro mais
+// escuro, sem chegar no tom do trilho de fundo) — "Não informado" sempre num cinza fixo à
+// parte, pra ficar claro que é dado faltando, não mais uma contabilidade
+const CORES_CONTABILIDADE = ['#ff7a1a', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46'];
+const COR_NAO_INFORMADO = '#3f3f46';
 
 const DONUT_TAMANHO = 140;
 const DONUT_ESPESSURA = 18;
@@ -281,9 +297,14 @@ export class ResumoPanelComponent implements OnInit {
     return contagem;
   });
 
-  distribuicaoContabilidade = computed<BarraContabilidade[]>(() => {
+  donutContabilidadeTotal = computed(() => this.clientes().length);
+
+  // arcos do donut "Distribuição de clientes por contabilidade" — mesma técnica de
+  // stroke-dasharray do donut de sistema, mas com um número variável de fatias (top N
+  // contabilidades + "Outras" + "Não informado", em vez de 4 categorias fixas)
+  donutContabilidadeSegments = computed<SegmentoContabilidade[]>(() => {
     const contagem = this.contagemPorContabilidade();
-    const total = this.clientes().length;
+    const total = this.donutContabilidadeTotal();
     if (total === 0) return [];
 
     const naoInformado = contagem.get(NAO_INFORMADO) || 0;
@@ -294,20 +315,34 @@ export class ResumoPanelComponent implements OnInit {
     const principais = demais.slice(0, TOP_CONTABILIDADES);
     const outras = demais.slice(TOP_CONTABILIDADES).reduce((soma, [, valor]) => soma + valor, 0);
 
-    const linhas: [string, number][] = [...principais];
-    if (outras > 0) linhas.push([OUTRAS_CONTABILIDADES, outras]);
-    if (naoInformado > 0) linhas.push([NAO_INFORMADO, naoInformado]);
-
-    return linhas.map(([nome, valor]) => ({
+    const linhas: [string, number, string][] = principais.map(([nome, valor], i) => [
       nome,
       valor,
-      percentual: Math.round((valor / total) * 100),
-    }));
+      CORES_CONTABILIDADE[i % CORES_CONTABILIDADE.length],
+    ]);
+    if (outras > 0) linhas.push([OUTRAS_CONTABILIDADES, outras, CORES_CONTABILIDADE[linhas.length % CORES_CONTABILIDADE.length]]);
+    if (naoInformado > 0) linhas.push([NAO_INFORMADO, naoInformado, COR_NAO_INFORMADO]);
+
+    let acumulado = 0;
+    return linhas.map(([nome, valor, cor]) => {
+      const comprimento = (valor / total) * DONUT_CIRCUNFERENCIA;
+      const segmento: SegmentoContabilidade = {
+        nome,
+        valor,
+        percentual: Math.round((valor / total) * 100),
+        cor,
+        dasharray: `${Math.max(comprimento - DONUT_ESPACO, 0)} ${DONUT_CIRCUNFERENCIA}`,
+        dashoffset: -acumulado,
+      };
+      acumulado += comprimento;
+      return segmento;
+    });
   });
 
   // tooltip do donut: SVG puro, sem lib de gráfico, então a posição é calculada à mão
   // em relação ao container (não ao <svg>, que tem a rotação -90° só de exibição)
   donutTooltip = signal<TooltipDonut | null>(null);
+  donutContabilidadeTooltip = signal<TooltipDonutContabilidade | null>(null);
 
   aoPassarMouseSegmento(event: MouseEvent, seg: SegmentoSistema) {
     const container = (event.currentTarget as SVGElement).closest('.donut-container') as HTMLElement | null;
@@ -318,6 +353,17 @@ export class ResumoPanelComponent implements OnInit {
 
   aoSairMouseSegmento() {
     this.donutTooltip.set(null);
+  }
+
+  aoPassarMouseSegmentoContabilidade(event: MouseEvent, seg: SegmentoContabilidade) {
+    const container = (event.currentTarget as SVGElement).closest('.donut-contabilidade-container') as HTMLElement | null;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    this.donutContabilidadeTooltip.set({ seg, x: event.clientX - rect.left, y: event.clientY - rect.top });
+  }
+
+  aoSairMouseSegmentoContabilidade() {
+    this.donutContabilidadeTooltip.set(null);
   }
 
   rotuloDiasCertificado(dias: number): string {
