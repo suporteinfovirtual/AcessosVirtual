@@ -13,6 +13,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
 import { FaturamentoService } from '../../../../core/faturamento.service';
+import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { statusCertificado } from '../../../../core/certificado.util';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { CardComponent } from '../../../../shared/card.component';
@@ -24,7 +25,7 @@ function formatarDataIso(data: Date): string {
   return `${ano}-${mes}-${dia}`;
 }
 
-export type SecaoGestao = 'clientesSistemas' | 'negociacao' | 'implantacao' | 'faturamento';
+export type SecaoGestao = 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento';
 
 interface NegociacaoParada {
   cliente: ClienteNegociacao;
@@ -74,6 +75,7 @@ export class ResumoPanelComponent implements OnInit {
   private negociacaoService = inject(NegociacaoService);
   private implantacoesService = inject(ImplantacoesService);
   private faturamentoService = inject(FaturamentoService);
+  private enviosContabilidadeService = inject(EnviosContabilidadeService);
 
   irPara = output<SecaoGestao>();
   irParaAba = output<TipoAcesso>();
@@ -92,6 +94,7 @@ export class ResumoPanelComponent implements OnInit {
   negociacoes = signal<ClienteNegociacao[]>([]);
   implantacoes = signal<Implantacao[]>([]);
   pendentesFaturamento = signal<ClientePendenteFaturamento[]>([]);
+  statusEnviosContabilidadeMes = signal<Map<number, boolean>>(new Map());
 
   emNegociacao = computed(() => this.negociacoes().filter((n) => n.status === 'em_negociacao').length);
 
@@ -102,6 +105,21 @@ export class ResumoPanelComponent implements OnInit {
   });
 
   prontosParaFaturar = computed(() => this.pendentesFaturamento().length);
+
+  // mesmo critério do módulo Envios contabilidade: um envio por acesso marcado com
+  // "enviar para a contabilidade", pendente quando não está marcado como enviado no mês atual
+  pendentesEnvioContabilidade = computed(() => {
+    const mapa = this.statusEnviosContabilidadeMes();
+    const clientesPendentes = new Set<number>();
+    for (const cliente of this.clientes()) {
+      for (const acesso of cliente.acessos || []) {
+        if (acesso.enviar_contabilidade && acesso.contabilidade_id && !mapa.get(acesso.id!)) {
+          clientesPendentes.add(cliente.id!);
+        }
+      }
+    }
+    return clientesPendentes.size;
+  });
 
   certificadosVencidos = computed(
     () => this.clientes().filter((c) => statusCertificado(c.certificado?.validade) === 'vencido').length
@@ -241,16 +259,19 @@ export class ResumoPanelComponent implements OnInit {
   async carregar() {
     this.carregando.set(true);
     try {
-      const [clientes, negociacoes, implantacoes, pendentesFaturamento] = await Promise.all([
+      const hoje = new Date();
+      const [clientes, negociacoes, implantacoes, pendentesFaturamento, statusEnviosContabilidade] = await Promise.all([
         firstValueFrom(this.clientesService.listar()),
         firstValueFrom(this.negociacaoService.listar()),
         firstValueFrom(this.implantacoesService.listar()),
         firstValueFrom(this.faturamentoService.listarPendentes()),
+        firstValueFrom(this.enviosContabilidadeService.listarStatusMes(hoje.getFullYear(), hoje.getMonth() + 1)),
       ]);
       this.clientes.set(clientes);
       this.negociacoes.set(negociacoes);
       this.implantacoes.set(implantacoes);
       this.pendentesFaturamento.set(pendentesFaturamento);
+      this.statusEnviosContabilidadeMes.set(new Map(statusEnviosContabilidade.map((s) => [s.acesso_id, !!s.enviado])));
     } finally {
       this.carregando.set(false);
     }
