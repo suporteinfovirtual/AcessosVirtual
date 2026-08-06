@@ -48,7 +48,7 @@ interface SegmentoAcesso {
 }
 
 const DIAS_PARADA_ALERTA = 7;
-const LIMITE_LISTA = 6;
+const LIMITE_LISTA = 5;
 
 // donut "Distribuição de acessos": zeta fica com o laranja de marca (maior valor hoje);
 // as outras duas ficam em cinza-zinco — a atribuição é fixa por sistema, não por
@@ -149,14 +149,16 @@ export class ResumoPanelComponent implements OnInit {
         return { cliente: n, dias };
       })
       .filter((n) => n.dias >= DIAS_PARADA_ALERTA)
-      .sort((a, b) => b.dias - a.dias);
+      .sort((a, b) => b.dias - a.dias)
+      .slice(0, LIMITE_LISTA);
   });
 
   implantacoesAtrasadas = computed(() => {
     const hoje = formatarDataIso(new Date());
     return this.implantacoes()
       .filter((i) => i.data < hoje && !i.concluida_manual)
-      .sort((a, b) => a.data.localeCompare(b.data));
+      .sort((a, b) => a.data.localeCompare(b.data))
+      .slice(0, LIMITE_LISTA);
   });
 
   proximasImplantacoes = computed(() => {
