@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteSistema, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
+import { ClienteSistema, ENQUADRAMENTOS_FISCAIS, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { LicencasService } from '../../../../core/licencas.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
@@ -17,6 +17,8 @@ export class ClienteSistemaModalComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private licencasService = inject(LicencasService);
   private confirmService = inject(ConfirmService);
+
+  readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
 
   cliente = input<ClienteSistema | null>(null);
   sistema = input.required<Sistema>();

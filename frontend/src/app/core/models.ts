@@ -41,6 +41,10 @@ export interface Cliente {
   certificado?: CertificadoDigital | null;
 }
 
+// opções fixas de enquadramento fiscal usadas no cadastro de cliente (unificado e por
+// sistema) — texto livre no banco (sem CHECK), mas o formulário só deixa escolher entre elas
+export const ENQUADRAMENTOS_FISCAIS = ['Simples Nacional', 'Lucro Presumido', 'Lucro Real', 'MEI'] as const;
+
 export interface Categoria {
   id?: number;
   nome: string;

@@ -2,7 +2,7 @@ import { Component, OnInit, inject, input, output, signal } from '@angular/core'
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, Licenca, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
+import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, ENQUADRAMENTOS_FISCAIS, Licenca, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
 import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
@@ -43,6 +43,7 @@ export class ClienteModalComponent implements OnInit {
   salvo = output<void>();
 
   readonly tipos = TIPOS_ACESSO;
+  readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
 
   nome = signal('');
   cnpj = signal('');
