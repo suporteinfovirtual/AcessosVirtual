@@ -284,11 +284,15 @@
         <app-resumo-panel
           (irPara)="abrirSecaoGestao($event)"
           (irParaAba)="selecionarAba($event)"
+          (irParaSistema)="aoClicarSistemaResumo($event)"
           (novoCliente)="aoClicarNovoClienteResumo()"
           (novaNegociacao)="aoClicarNovaNegociacaoResumo()"
         ></app-resumo-panel>
       } @else if (mostrandoClientesSistemas()) {
-        <app-clientes-sistemas [abrirNovoAoEntrar]="abrirNovoClienteAoEntrar()"></app-clientes-sistemas>
+        <app-clientes-sistemas
+          [abrirNovoAoEntrar]="abrirNovoClienteAoEntrar()"
+          [sistemaInicial]="sistemaParaAbrir()"
+        ></app-clientes-sistemas>
       } @else if (mostrandoEnviosContabilidade()) {
         <app-envios-contabilidade-panel></app-envios-contabilidade-panel>
       } @else if (mostrandoNegociacao()) {

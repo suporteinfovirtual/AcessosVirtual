@@ -239,19 +239,22 @@
           @if (donutTotal() === 0) {
             <p class="text-sm text-zinc-600">Nenhum cliente cadastrado ainda.</p>
           } @else {
-            <div class="flex flex-col items-center gap-6 sm:flex-row">
-              <div class="flex w-full flex-1 flex-col gap-2.5 sm:max-w-xs">
+            <div class="flex flex-col items-center gap-6">
+              <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
                 @for (seg of donutSegments(); track seg.sistema) {
-                  <div class="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-zinc-300 transition hover:bg-zinc-800/60"
+                    (click)="irParaSistema.emit(seg.sistema)"
+                  >
                     <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background-color]="seg.cor"></span>
-                    <span class="min-w-0 flex-1 truncate text-sm text-zinc-300">{{ seg.rotulo }}</span>
-                    <span class="shrink-0 text-sm font-medium text-zinc-100">{{ seg.valor }}</span>
-                    <span class="w-10 shrink-0 text-right text-xs text-zinc-500">{{ seg.percentual }}%</span>
-                  </div>
+                    {{ seg.rotulo }}
+                    <span class="font-medium text-zinc-100">{{ seg.valor }}</span>
+                  </button>
                 }
               </div>
 
-              <div class="flex flex-1 items-center justify-center">
+              <div class="flex w-full items-center justify-center">
                 <div class="donut-container relative shrink-0" [style.width.px]="donutTamanho" [style.height.px]="donutTamanho">
                   <svg
                     [attr.viewBox]="'0 0 ' + donutTamanho + ' ' + donutTamanho"

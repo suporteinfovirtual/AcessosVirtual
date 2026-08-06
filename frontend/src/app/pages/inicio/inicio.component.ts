@@ -112,6 +112,7 @@ export class InicioComponent implements OnInit {
   // visita normal (pelo menu lateral) à mesma seção ---
   abrirNovoClienteAoEntrar = signal(false);
   abrirNovaNegociacaoAoEntrar = signal(false);
+  sistemaParaAbrir = signal<Sistema | null>(null);
 
   // --- conversão de negociação em cliente (botão "Converter em cliente") ---
   negociacaoConvertendo = signal<ClienteNegociacao | null>(null);
@@ -333,6 +334,12 @@ export class InicioComponent implements OnInit {
     this.abrirNovaNegociacaoAoEntrar.set(true);
     this.abrirSecaoGestao('negociacao');
     setTimeout(() => this.abrirNovaNegociacaoAoEntrar.set(false));
+  }
+
+  aoClicarSistemaResumo(sistema: Sistema) {
+    this.sistemaParaAbrir.set(sistema);
+    this.abrirSecaoGestao('clientesSistemas');
+    setTimeout(() => this.sistemaParaAbrir.set(null));
   }
 
   abrirSecaoGestao(secao: 'resumo' | 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
