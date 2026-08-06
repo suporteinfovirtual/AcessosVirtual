@@ -352,15 +352,6 @@
               }
               <button
                 type="button"
-                [class]="modoSelecao()
-                  ? 'rounded-lg border border-accent/40 bg-accent/10 px-3 py-2.5 text-sm font-medium text-accent hover:bg-accent/20'
-                  : 'rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'"
-                (click)="alternarModoSelecao()"
-              >
-                {{ modoSelecao() ? 'Cancelar seleção' : 'Selecionar' }}
-              </button>
-              <button
-                type="button"
                 class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
                 (click)="abrirNovoCliente()"
               >
@@ -509,6 +500,7 @@
                   [class]="viewMode.modo() === 'lista'
                     ? 'rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 transition hover:border-zinc-700 sm:flex sm:items-center sm:gap-5'
                     : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-700'"
+                  (contextmenu)="aoAbrirMenuContexto($event)"
                 >
                   @if (modoSelecao()) {
                     <label
@@ -661,5 +653,22 @@
       (fechar)="contabilidadesModalAberto.set(false)"
       (alterado)="aoAlterarContabilidades()"
     ></app-contabilidades-modal>
+  }
+
+  @if (menuContexto(); as menu) {
+    <div class="fixed inset-0 z-40" (click)="fecharMenuContexto()" (contextmenu)="fecharMenuContexto(); $event.preventDefault()"></div>
+    <div
+      class="fixed z-50 min-w-[220px] rounded-lg border border-zinc-800 bg-zinc-900 py-1 shadow-2xl shadow-black/40"
+      [style.left.px]="menu.x"
+      [style.top.px]="menu.y"
+    >
+      <button
+        type="button"
+        class="block w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800"
+        (click)="aoAlternarSelecaoViaMenu()"
+      >
+        {{ modoSelecao() ? 'Desabilitar seleção múltipla' : 'Habilitar seleção múltipla' }}
+      </button>
+    </div>
   }
 </div>

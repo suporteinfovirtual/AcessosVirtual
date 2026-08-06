@@ -163,6 +163,9 @@ export class InicioComponent implements OnInit {
   loteServidor = signal('');
   loteEnquadramentoFiscal = signal('');
 
+  // menu de contexto (clique direito num cliente) — é daí que se liga/desliga a seleção múltipla
+  menuContexto = signal<{ x: number; y: number } | null>(null);
+
   senhaDoDia = signal(this.calcularSenhaDoDia());
   senhaDoDiaCopiada = signal(false);
 
@@ -365,6 +368,20 @@ export class InicioComponent implements OnInit {
   }
 
   // --- seleção múltipla / edição em lote ---
+
+  aoAbrirMenuContexto(event: MouseEvent) {
+    event.preventDefault();
+    this.menuContexto.set({ x: event.clientX, y: event.clientY });
+  }
+
+  fecharMenuContexto() {
+    this.menuContexto.set(null);
+  }
+
+  aoAlternarSelecaoViaMenu() {
+    this.alternarModoSelecao();
+    this.fecharMenuContexto();
+  }
 
   alternarModoSelecao() {
     this.modoSelecao.set(!this.modoSelecao());
