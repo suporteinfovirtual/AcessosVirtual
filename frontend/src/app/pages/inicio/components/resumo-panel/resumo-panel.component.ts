@@ -6,7 +6,6 @@ import {
   ClientePendenteFaturamento,
   Implantacao,
   SISTEMAS,
-  STATUS_NEGOCIACAO,
   Sistema,
   TIPOS_ACESSO,
   TipoAcesso,
@@ -113,7 +112,6 @@ export class ResumoPanelComponent implements OnInit {
 
   readonly tiposAcesso = TIPOS_ACESSO;
   readonly sistemas = SISTEMAS;
-  readonly statusOpcoes = STATUS_NEGOCIACAO;
   readonly donutTamanho = DONUT_TAMANHO;
   readonly donutRaio = DONUT_RAIO;
   readonly donutEspessura = DONUT_ESPESSURA;
@@ -206,25 +204,6 @@ export class ResumoPanelComponent implements OnInit {
     return this.implantacoes()
       .filter((i) => i.data < hoje && !i.concluida_manual)
       .sort((a, b) => a.data.localeCompare(b.data))
-      .slice(0, LIMITE_LISTA);
-  });
-
-  proximasImplantacoes = computed(() => {
-    const hoje = formatarDataIso(new Date());
-    const daquiA7Dias = formatarDataIso(new Date(Date.now() + 7 * 86_400_000));
-    return this.implantacoes()
-      .filter((i) => i.data >= hoje && i.data <= daquiA7Dias)
-      .sort((a, b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora))
-      .slice(0, LIMITE_LISTA);
-  });
-
-  negociacoesRecentes = computed(() => {
-    return [...this.negociacoes()]
-      .sort((a, b) => {
-        const dataA = a.atualizado_em || a.criado_em || '';
-        const dataB = b.atualizado_em || b.criado_em || '';
-        return dataB.localeCompare(dataA);
-      })
       .slice(0, LIMITE_LISTA);
   });
 
@@ -379,16 +358,6 @@ export class ResumoPanelComponent implements OnInit {
     return dias < 0 ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400';
   }
 
-  rotuloStatus(status?: string): string {
-    return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
-  }
-
-  corStatus(status?: string): string {
-    if (status === 'fechou') return 'bg-emerald-500/15 text-emerald-400';
-    if (status === 'desistiu') return 'bg-rose-500/15 text-rose-400';
-    return 'bg-zinc-800 text-zinc-400';
-  }
-
   ngOnInit() {
     this.carregar();
   }
@@ -396,11 +365,6 @@ export class ResumoPanelComponent implements OnInit {
   formatarDataBr(dataIso: string): string {
     const [ano, mes, dia] = dataIso.split('-');
     return `${dia}/${mes}/${ano}`;
-  }
-
-  diasAtras(dataIso?: string | null): number {
-    if (!dataIso) return 0;
-    return Math.max(0, Math.floor((Date.now() - new Date(dataIso).getTime()) / 86_400_000));
   }
 
   async carregar() {
