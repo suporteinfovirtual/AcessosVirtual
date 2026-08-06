@@ -5,11 +5,14 @@ import {
   ClienteNegociacao,
   ClientePendenteFaturamento,
   Implantacao,
+  SISTEMAS,
   STATUS_NEGOCIACAO,
+  Sistema,
   TIPOS_ACESSO,
   TipoAcesso,
 } from '../../../../core/models';
 import { ClientesService } from '../../../../core/clientes.service';
+import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
 import { FaturamentoService } from '../../../../core/faturamento.service';
@@ -32,8 +35,8 @@ interface CertificadoVencendo {
   dias: number;
 }
 
-interface SegmentoAcesso {
-  tipo: TipoAcesso;
+interface SegmentoSistema {
+  sistema: Sistema;
   rotulo: string;
   valor: number;
   percentual: number;
@@ -44,13 +47,14 @@ interface SegmentoAcesso {
 
 const LIMITE_LISTA = 5;
 
-// donut "Distribuição de acessos": zeta fica com o laranja de marca (maior valor hoje);
-// as outras duas ficam em cinza-zinco — a atribuição é fixa por sistema, não por
-// posição/ranking, pra cor nunca "pular" de sistema se as contagens mudarem
-const CORES_ACESSO: Record<TipoAcesso, string> = {
-  acesso_zeta: '#ff7a1a',
-  acesso_web: '#a1a1aa',
-  anydesk: '#52525b',
+// donut "Distribuição de clientes por sistema": zeta fica com o laranja de marca (maior
+// valor hoje); os outros três ficam em cinza-zinco — a atribuição é fixa por sistema, não
+// por posição/ranking, pra cor nunca "pular" de sistema se as contagens mudarem
+const CORES_SISTEMA: Record<Sistema, string> = {
+  zeta: '#ff7a1a',
+  uniplus_web: '#a1a1aa',
+  uniplus: '#71717a',
+  sgbr: '#52525b',
 };
 
 const DONUT_TAMANHO = 140;
@@ -66,6 +70,7 @@ const DONUT_ESPACO = 4;
 })
 export class ResumoPanelComponent implements OnInit {
   private clientesService = inject(ClientesService);
+  private clientesSistemasService = inject(ClientesSistemasService);
   private negociacaoService = inject(NegociacaoService);
   private implantacoesService = inject(ImplantacoesService);
   private faturamentoService = inject(FaturamentoService);
@@ -77,6 +82,7 @@ export class ResumoPanelComponent implements OnInit {
   novaNegociacao = output<void>();
 
   readonly tiposAcesso = TIPOS_ACESSO;
+  readonly sistemas = SISTEMAS;
   readonly statusOpcoes = STATUS_NEGOCIACAO;
   readonly donutTamanho = DONUT_TAMANHO;
   readonly donutRaio = DONUT_RAIO;
@@ -89,6 +95,8 @@ export class ResumoPanelComponent implements OnInit {
   implantacoes = signal<Implantacao[]>([]);
   pendentesFaturamento = signal<ClientePendenteFaturamento[]>([]);
   statusEnviosContabilidadeMes = signal<Map<number, boolean>>(new Map());
+  totalClientesUniplus = signal(0);
+  totalClientesSgbr = signal(0);
 
   emNegociacao = computed(() => this.negociacoes().filter((n) => n.status === 'em_negociacao').length);
 
@@ -200,29 +208,42 @@ export class ResumoPanelComponent implements OnInit {
     return contagem;
   });
 
-  donutTotal = computed(() => {
-    const contagem = this.contagemPorTipoAcesso();
-    return this.tiposAcesso.reduce((soma, tipo) => soma + contagem[tipo.valor], 0);
+  // uniplus_web e zeta são "unificados" com a tabela clientes/acessos (mesmo mapeamento
+  // usado em inicio.component.ts e clientes-sistemas.component.ts); uniplus e sgbr vêm
+  // da tabela clientes_sistemas, carregada à parte em carregar()
+  contagemPorSistema = computed<Record<Sistema, number>>(() => {
+    const contagemAcessos = this.contagemPorTipoAcesso();
+    return {
+      uniplus: this.totalClientesUniplus(),
+      uniplus_web: contagemAcessos.acesso_web,
+      sgbr: this.totalClientesSgbr(),
+      zeta: contagemAcessos.acesso_zeta,
+    };
   });
 
-  // arcos do donut "Distribuição de acessos" — dasharray/dashoffset em stroke-dasharray
-  // pra desenhar cada fatia como um trecho do círculo, com um respiro (DONUT_ESPACO)
-  // entre elas em vez de traçar uma borda separando as fatias
-  donutSegments = computed<SegmentoAcesso[]>(() => {
-    const contagem = this.contagemPorTipoAcesso();
+  donutTotal = computed(() => {
+    const contagem = this.contagemPorSistema();
+    return this.sistemas.reduce((soma, sistema) => soma + contagem[sistema.valor], 0);
+  });
+
+  // arcos do donut "Distribuição de clientes por sistema" — dasharray/dashoffset em
+  // stroke-dasharray pra desenhar cada fatia como um trecho do círculo, com um respiro
+  // (DONUT_ESPACO) entre elas em vez de traçar uma borda separando as fatias
+  donutSegments = computed<SegmentoSistema[]>(() => {
+    const contagem = this.contagemPorSistema();
     const total = this.donutTotal();
     if (total === 0) return [];
 
     let acumulado = 0;
-    return this.tiposAcesso.map((tipo) => {
-      const valor = contagem[tipo.valor];
+    return this.sistemas.map((sistema) => {
+      const valor = contagem[sistema.valor];
       const comprimento = (valor / total) * DONUT_CIRCUNFERENCIA;
-      const segmento: SegmentoAcesso = {
-        tipo: tipo.valor,
-        rotulo: tipo.rotulo,
+      const segmento: SegmentoSistema = {
+        sistema: sistema.valor,
+        rotulo: sistema.rotulo,
         valor,
         percentual: Math.round((valor / total) * 100),
-        cor: CORES_ACESSO[tipo.valor],
+        cor: CORES_SISTEMA[sistema.valor],
         dasharray: `${Math.max(comprimento - DONUT_ESPACO, 0)} ${DONUT_CIRCUNFERENCIA}`,
         dashoffset: -acumulado,
       };
@@ -272,18 +293,23 @@ export class ResumoPanelComponent implements OnInit {
     this.carregando.set(true);
     try {
       const hoje = new Date();
-      const [clientes, negociacoes, implantacoes, pendentesFaturamento, statusEnviosContabilidade] = await Promise.all([
-        firstValueFrom(this.clientesService.listar()),
-        firstValueFrom(this.negociacaoService.listar()),
-        firstValueFrom(this.implantacoesService.listar()),
-        firstValueFrom(this.faturamentoService.listarPendentes()),
-        firstValueFrom(this.enviosContabilidadeService.listarStatusMes(hoje.getFullYear(), hoje.getMonth() + 1)),
-      ]);
+      const [clientes, negociacoes, implantacoes, pendentesFaturamento, statusEnviosContabilidade, clientesUniplus, clientesSgbr] =
+        await Promise.all([
+          firstValueFrom(this.clientesService.listar()),
+          firstValueFrom(this.negociacaoService.listar()),
+          firstValueFrom(this.implantacoesService.listar()),
+          firstValueFrom(this.faturamentoService.listarPendentes()),
+          firstValueFrom(this.enviosContabilidadeService.listarStatusMes(hoje.getFullYear(), hoje.getMonth() + 1)),
+          firstValueFrom(this.clientesSistemasService.listar('uniplus')),
+          firstValueFrom(this.clientesSistemasService.listar('sgbr')),
+        ]);
       this.clientes.set(clientes);
       this.negociacoes.set(negociacoes);
       this.implantacoes.set(implantacoes);
       this.pendentesFaturamento.set(pendentesFaturamento);
       this.statusEnviosContabilidadeMes.set(new Map(statusEnviosContabilidade.map((s) => [s.acesso_id, !!s.enviado])));
+      this.totalClientesUniplus.set(clientesUniplus.length);
+      this.totalClientesSgbr.set(clientesSgbr.length);
     } finally {
       this.carregando.set(false);
     }
