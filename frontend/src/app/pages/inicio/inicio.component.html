@@ -213,7 +213,7 @@
 
   <div class="painel relative min-w-0 flex-1">
     <div class="painel-glow"></div>
-    <header class="sticky top-0 z-10 px-6 py-4">
+    <header class="sticky top-0 z-10 px-6 py-3">
       <div class="flex items-center gap-3">
         @if (!mostrandoResumo() && !mostrandoClientesSistemas() && !mostrandoEnviosContabilidade() && !mostrandoNegociacao() && !mostrandoImplantacao() && !mostrandoFaturamento()) {
           <div class="relative w-full max-w-sm">
@@ -279,7 +279,7 @@
       }
     </header>
 
-    <main class="px-6 py-6">
+    <main class="px-6 pb-6 pt-2">
       @if (mostrandoResumo()) {
         <app-resumo-panel
           (irPara)="abrirSecaoGestao($event)"
