@@ -35,6 +35,12 @@ interface CertificadoVencendo {
   dias: number;
 }
 
+interface TooltipDonut {
+  seg: SegmentoSistema;
+  x: number;
+  y: number;
+}
+
 interface SegmentoSistema {
   sistema: Sistema;
   rotulo: string;
@@ -251,6 +257,21 @@ export class ResumoPanelComponent implements OnInit {
       return segmento;
     });
   });
+
+  // tooltip do donut: SVG puro, sem lib de gráfico, então a posição é calculada à mão
+  // em relação ao container (não ao <svg>, que tem a rotação -90° só de exibição)
+  donutTooltip = signal<TooltipDonut | null>(null);
+
+  aoPassarMouseSegmento(event: MouseEvent, seg: SegmentoSistema) {
+    const container = (event.currentTarget as SVGElement).closest('.donut-container') as HTMLElement | null;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    this.donutTooltip.set({ seg, x: event.clientX - rect.left, y: event.clientY - rect.top });
+  }
+
+  aoSairMouseSegmento() {
+    this.donutTooltip.set(null);
+  }
 
   rotuloDiasCertificado(dias: number): string {
     if (dias < 0) {
