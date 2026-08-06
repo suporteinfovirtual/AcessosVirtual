@@ -98,12 +98,35 @@ export class ResumoPanelComponent implements OnInit {
 
   emNegociacao = computed(() => this.negociacoes().filter((n) => n.status === 'em_negociacao').length);
 
-  implantacoesSemana = computed(() => {
-    const hoje = formatarDataIso(new Date());
-    const daquiA7Dias = formatarDataIso(new Date(Date.now() + 7 * 86_400_000));
-    return this.implantacoes().filter((i) => i.data >= hoje && i.data <= daquiA7Dias).length;
+  // ClienteNegociacao tem criado_em confiável: quantos dos que estão em negociação
+  // hoje entraram (foram criados) nos últimos 7 dias
+  negociacoesNovasSemana = computed(() => {
+    const seteDiasAtras = Date.now() - 7 * 86_400_000;
+    return this.negociacoes().filter(
+      (n) => n.status === 'em_negociacao' && n.criado_em && new Date(n.criado_em).getTime() >= seteDiasAtras
+    ).length;
   });
 
+  implantacoesDaSemana = computed(() => {
+    const hoje = formatarDataIso(new Date());
+    const daquiA7Dias = formatarDataIso(new Date(Date.now() + 7 * 86_400_000));
+    return this.implantacoes().filter((i) => i.data >= hoje && i.data <= daquiA7Dias);
+  });
+
+  implantacoesSemana = computed(() => this.implantacoesDaSemana().length);
+
+  // Implantacao tem criado_em confiável: quantas das agendadas pra essa semana foram
+  // registradas nos últimos 7 dias (agenda recém-marcada, não a data do compromisso em si)
+  implantacoesSemanaAgendadasRecentemente = computed(() => {
+    const seteDiasAtras = Date.now() - 7 * 86_400_000;
+    return this.implantacoesDaSemana().filter(
+      (i) => i.criado_em && new Date(i.criado_em).getTime() >= seteDiasAtras
+    ).length;
+  });
+
+  // "Prontos pra faturar" vem de uma consulta calculada na hora (agregação sobre
+  // implantacoes), sem registro próprio — não existe criado_em confiável aqui, então
+  // não dá pra saber "quantos entraram nessa janela" sem inventar um critério
   prontosParaFaturar = computed(() => this.pendentesFaturamento().length);
 
   // mesmo critério do módulo Envios contabilidade: um envio por acesso marcado com
@@ -138,6 +161,13 @@ export class ResumoPanelComponent implements OnInit {
       }))
       .sort((a, b) => a.dias - b.dias);
   });
+
+  // certificado não tem criado_em (só atualizado_em, que muda a cada reupload/renovação e
+  // não representa "novo"); em vez de "novos essa semana", mostra os que vencem em breve —
+  // contexto que usa só a validade já existente, sem precisar de histórico
+  certificadosVencendoProximos7Dias = computed(
+    () => this.certificadosVencendo().filter((c) => c.dias >= 0 && c.dias <= 7).length
+  );
 
   negociacoesParadas = computed<NegociacaoParada[]>(() => {
     const agora = Date.now();

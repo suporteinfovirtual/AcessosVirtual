@@ -37,6 +37,7 @@
           Em negociação
         </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ emNegociacao() }}</span>
+        <span class="mt-0.5 block text-[11px] text-zinc-500">{{ negociacoesNovasSemana() }} nova(s) essa semana</span>
       </button>
 
       <button
@@ -49,6 +50,7 @@
           Implantações essa semana
         </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ implantacoesSemana() }}</span>
+        <span class="mt-0.5 block text-[11px] text-zinc-500">{{ implantacoesSemanaAgendadasRecentemente() }} agendada(s) nos últimos 7 dias</span>
       </button>
 
       <button
@@ -89,6 +91,7 @@
         <span class="mt-1 block text-2xl font-semibold" [class.text-zinc-100]="!temAtencaoCertificados()" [class.text-red-400]="temAtencaoCertificados()">
           {{ certificadosVencidos() + certificadosAlerta() }}
         </span>
+        <span class="mt-0.5 block text-[11px] text-zinc-500">{{ certificadosVencendoProximos7Dias() }} nos próximos 7 dias</span>
         @if (certificadosVencidos() > 0) {
           <span class="mt-0.5 block text-[11px] font-medium text-red-400">{{ certificadosVencidos() }} já vencido(s)</span>
         }
