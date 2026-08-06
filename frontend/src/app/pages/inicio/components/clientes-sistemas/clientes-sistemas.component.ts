@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, Cliente, ClienteSistema, SISTEMAS, Sistema, TipoAcesso } from '../../../../core/models';
@@ -41,6 +41,9 @@ export class ClientesSistemasComponent implements OnInit {
 
   readonly sistemas = SISTEMAS;
 
+  // liga true quando o Resumo manda entrar já abrindo o cadastro (botão "+ Cliente")
+  abrirNovoAoEntrar = input(false);
+
   sistemaAtivo = signal<Sistema>('uniplus');
   busca = signal('');
 
@@ -79,6 +82,7 @@ export class ClientesSistemasComponent implements OnInit {
 
   ngOnInit() {
     this.carregar();
+    if (this.abrirNovoAoEntrar()) this.abrirNovo();
   }
 
   selecionarSistema(sistema: Sistema) {

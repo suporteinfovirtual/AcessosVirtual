@@ -1,5 +1,25 @@
 <div>
-  <h2 class="text-lg font-semibold text-zinc-100">Resumo</h2>
+  <div class="flex items-center justify-between gap-3">
+    <h2 class="text-lg font-semibold text-zinc-100">Resumo</h2>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-2.5 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/20"
+        (click)="novoCliente.emit()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Cliente
+      </button>
+      <button
+        type="button"
+        class="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-2.5 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/20"
+        (click)="novaNegociacao.emit()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Negociação
+      </button>
+    </div>
+  </div>
 
   @if (carregando()) {
     <div class="mt-5">
