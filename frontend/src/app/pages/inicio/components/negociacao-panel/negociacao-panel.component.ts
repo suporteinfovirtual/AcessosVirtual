@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteNegociacao, STATUS_NEGOCIACAO, StatusNegociacao } from '../../../../core/models';
@@ -23,9 +23,6 @@ export class NegociacaoPanelComponent implements OnInit {
   // Clientes certa, pré-preenchida — ver aoConverterNegociacao() em inicio.component.ts
   converter = output<ClienteNegociacao>();
 
-  // liga true quando o Resumo manda entrar já abrindo o cadastro (botão "+ Negociação")
-  abrirNovoAoEntrar = input(false);
-
   busca = signal('');
   statusFiltro = signal<StatusNegociacao | 'todos'>('todos');
   readonly statusOpcoes = STATUS_NEGOCIACAO;
@@ -48,7 +45,6 @@ export class NegociacaoPanelComponent implements OnInit {
 
   ngOnInit() {
     this.carregar();
-    if (this.abrirNovoAoEntrar()) this.abrirNovo();
   }
 
   async carregar() {

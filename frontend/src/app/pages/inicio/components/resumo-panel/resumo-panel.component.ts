@@ -85,8 +85,6 @@ export class ResumoPanelComponent implements OnInit {
   irPara = output<SecaoGestao>();
   irParaAba = output<TipoAcesso>();
   irParaSistema = output<Sistema>();
-  novoCliente = output<void>();
-  novaNegociacao = output<void>();
 
   readonly tiposAcesso = TIPOS_ACESSO;
   readonly sistemas = SISTEMAS;

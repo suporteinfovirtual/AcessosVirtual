@@ -41,9 +41,6 @@ export class ClientesSistemasComponent implements OnInit {
 
   readonly sistemas = SISTEMAS;
 
-  // liga true quando o Resumo manda entrar já abrindo o cadastro (botão "+ Cliente")
-  abrirNovoAoEntrar = input(false);
-
   // preenchido quando o Resumo manda entrar já num sistema específico (legenda do donut)
   sistemaInicial = input<Sistema | null>(null);
 
@@ -86,7 +83,6 @@ export class ClientesSistemasComponent implements OnInit {
   ngOnInit() {
     if (this.sistemaInicial()) this.sistemaAtivo.set(this.sistemaInicial()!);
     this.carregar();
-    if (this.abrirNovoAoEntrar()) this.abrirNovo();
   }
 
   selecionarSistema(sistema: Sistema) {

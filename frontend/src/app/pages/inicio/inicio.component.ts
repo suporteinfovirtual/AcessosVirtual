@@ -107,11 +107,8 @@ export class InicioComponent implements OnInit {
   // --- área separada "Faturamento" ---
   mostrandoFaturamento = signal(false);
 
-  // --- atalhos do Resumo ("+ Cliente" / "+ Negociação"): navega pra seção já
-  // abrindo o cadastro; resetado logo em seguida pra não reabrir numa próxima
-  // visita normal (pelo menu lateral) à mesma seção ---
-  abrirNovoClienteAoEntrar = signal(false);
-  abrirNovaNegociacaoAoEntrar = signal(false);
+  // --- atalho do Resumo (legenda do donut): navega pra Gestão > Clientes já no sistema
+  // clicado; resetado logo em seguida pra não reabrir numa próxima visita normal ---
   sistemaParaAbrir = signal<Sistema | null>(null);
 
   // --- conversão de negociação em cliente (botão "Converter em cliente") ---
@@ -322,19 +319,7 @@ export class InicioComponent implements OnInit {
     this.abrirSecaoGestao('resumo');
   }
 
-  // --- atalhos do Resumo ("+ Cliente" / "+ Negociação") ---
-
-  aoClicarNovoClienteResumo() {
-    this.abrirNovoClienteAoEntrar.set(true);
-    this.abrirSecaoGestao('clientesSistemas');
-    setTimeout(() => this.abrirNovoClienteAoEntrar.set(false));
-  }
-
-  aoClicarNovaNegociacaoResumo() {
-    this.abrirNovaNegociacaoAoEntrar.set(true);
-    this.abrirSecaoGestao('negociacao');
-    setTimeout(() => this.abrirNovaNegociacaoAoEntrar.set(false));
-  }
+  // --- atalho do Resumo (legenda do donut) ---
 
   aoClicarSistemaResumo(sistema: Sistema) {
     this.sistemaParaAbrir.set(sistema);

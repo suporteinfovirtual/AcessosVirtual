@@ -285,21 +285,13 @@
           (irPara)="abrirSecaoGestao($event)"
           (irParaAba)="selecionarAba($event)"
           (irParaSistema)="aoClicarSistemaResumo($event)"
-          (novoCliente)="aoClicarNovoClienteResumo()"
-          (novaNegociacao)="aoClicarNovaNegociacaoResumo()"
         ></app-resumo-panel>
       } @else if (mostrandoClientesSistemas()) {
-        <app-clientes-sistemas
-          [abrirNovoAoEntrar]="abrirNovoClienteAoEntrar()"
-          [sistemaInicial]="sistemaParaAbrir()"
-        ></app-clientes-sistemas>
+        <app-clientes-sistemas [sistemaInicial]="sistemaParaAbrir()"></app-clientes-sistemas>
       } @else if (mostrandoEnviosContabilidade()) {
         <app-envios-contabilidade-panel></app-envios-contabilidade-panel>
       } @else if (mostrandoNegociacao()) {
-        <app-negociacao-panel
-          [abrirNovoAoEntrar]="abrirNovaNegociacaoAoEntrar()"
-          (converter)="aoConverterNegociacao($event)"
-        ></app-negociacao-panel>
+        <app-negociacao-panel (converter)="aoConverterNegociacao($event)"></app-negociacao-panel>
       } @else if (mostrandoImplantacao()) {
         <app-implantacao-panel></app-implantacao-panel>
       } @else if (mostrandoFaturamento()) {
