@@ -22,13 +22,13 @@
       </div>
     </div>
 
-    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       <button
         type="button"
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('negociacao')"
       >
-        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
           Em negociação
         </span>
@@ -41,7 +41,7 @@
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('implantacao')"
       >
-        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008Z"/></svg>
           Implantações essa semana
         </span>
@@ -54,7 +54,7 @@
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('faturamento')"
       >
-        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-4.5-3.75a2.25 2.25 0 0 0 2.25 2.25h4.5a2.25 2.25 0 0 0 0-4.5h-4.5a2.25 2.25 0 0 1 0-4.5h4.5a2.25 2.25 0 0 1 2.25 2.25"/></svg>
           Prontos pra faturar
         </span>
@@ -72,7 +72,7 @@
         [class.hover:border-red-500/50]="temAtencaoCertificados()"
         (click)="irPara.emit('clientesSistemas')"
       >
-        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -92,15 +92,13 @@
           <span class="mt-0.5 block text-[11px] font-medium text-red-400">{{ certificadosVencidos() }} já vencido(s)</span>
         }
       </button>
-    </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
       <button
         type="button"
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
         (click)="irPara.emit('enviosContabilidade')"
       >
-        <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 10l18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 6l7 -3l7 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M4 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M20 10l0 11" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l0 3" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 14l0 3" /></svg>
           Pendente envio contabilidade
         </span>
@@ -126,6 +124,84 @@
         </div>
       </div>
     }
+
+    <div class="mt-8">
+      <h3 class="text-sm font-semibold text-zinc-200">Distribuição de clientes por sistema</h3>
+      <div class="mt-3">
+        <app-card>
+          @if (donutTotal() === 0) {
+            <p class="text-sm text-zinc-600">Nenhum cliente cadastrado ainda.</p>
+          } @else {
+            <div class="flex flex-col items-center gap-6">
+              <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+                @for (seg of donutSegments(); track seg.sistema) {
+                  <button
+                    type="button"
+                    class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-zinc-300 transition hover:bg-zinc-800/60"
+                    (click)="irParaSistema.emit(seg.sistema)"
+                  >
+                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background-color]="seg.cor"></span>
+                    {{ seg.rotulo }}
+                    <span class="font-medium text-zinc-100">{{ seg.valor }}</span>
+                  </button>
+                }
+              </div>
+
+              <div class="flex w-full items-center justify-center">
+                <div class="donut-container relative shrink-0" [style.width.px]="donutTamanho" [style.height.px]="donutTamanho">
+                  <svg
+                    [attr.viewBox]="'0 0 ' + donutTamanho + ' ' + donutTamanho"
+                    [attr.width]="donutTamanho"
+                    [attr.height]="donutTamanho"
+                    class="-rotate-90"
+                  >
+                    <circle
+                      [attr.cx]="donutTamanho / 2"
+                      [attr.cy]="donutTamanho / 2"
+                      [attr.r]="donutRaio"
+                      fill="none"
+                      stroke="currentColor"
+                      class="text-zinc-800"
+                      [attr.stroke-width]="donutEspessura"
+                    />
+                    @for (seg of donutSegments(); track seg.sistema) {
+                      <circle
+                        [attr.cx]="donutTamanho / 2"
+                        [attr.cy]="donutTamanho / 2"
+                        [attr.r]="donutRaio"
+                        fill="none"
+                        [attr.stroke]="seg.cor"
+                        [attr.stroke-width]="donutEspessura"
+                        [attr.stroke-dasharray]="seg.dasharray"
+                        [attr.stroke-dashoffset]="seg.dashoffset"
+                        class="cursor-default"
+                        (mouseenter)="aoPassarMouseSegmento($event, seg)"
+                        (mousemove)="aoPassarMouseSegmento($event, seg)"
+                        (mouseleave)="aoSairMouseSegmento()"
+                      />
+                    }
+                  </svg>
+                  <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-xl font-semibold text-zinc-100">{{ donutTotal() }}</span>
+                    <span class="text-[10px] uppercase tracking-wide text-zinc-500">clientes</span>
+                  </div>
+                  @if (donutTooltip(); as tip) {
+                    <div
+                      class="pointer-events-none absolute z-10 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-xs text-zinc-100"
+                      [style.left.px]="tip.x + 12"
+                      [style.top.px]="tip.y + 12"
+                    >
+                      <span class="h-2 w-2 shrink-0 rounded-sm" [style.background-color]="tip.seg.cor"></span>
+                      {{ tip.seg.rotulo }}: {{ tip.seg.valor }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </app-card>
+      </div>
+    </div>
 
     <div class="mt-8">
       <h3 class="text-sm font-semibold text-zinc-200">Implantações atrasadas</h3>
@@ -209,84 +285,6 @@
             }
           </div>
         }
-      </div>
-    </div>
-
-    <div class="mt-8">
-      <h3 class="text-sm font-semibold text-zinc-200">Distribuição de clientes por sistema</h3>
-      <div class="mt-3">
-        <app-card>
-          @if (donutTotal() === 0) {
-            <p class="text-sm text-zinc-600">Nenhum cliente cadastrado ainda.</p>
-          } @else {
-            <div class="flex flex-col items-center gap-6">
-              <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
-                @for (seg of donutSegments(); track seg.sistema) {
-                  <button
-                    type="button"
-                    class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-zinc-300 transition hover:bg-zinc-800/60"
-                    (click)="irParaSistema.emit(seg.sistema)"
-                  >
-                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background-color]="seg.cor"></span>
-                    {{ seg.rotulo }}
-                    <span class="font-medium text-zinc-100">{{ seg.valor }}</span>
-                  </button>
-                }
-              </div>
-
-              <div class="flex w-full items-center justify-center">
-                <div class="donut-container relative shrink-0" [style.width.px]="donutTamanho" [style.height.px]="donutTamanho">
-                  <svg
-                    [attr.viewBox]="'0 0 ' + donutTamanho + ' ' + donutTamanho"
-                    [attr.width]="donutTamanho"
-                    [attr.height]="donutTamanho"
-                    class="-rotate-90"
-                  >
-                    <circle
-                      [attr.cx]="donutTamanho / 2"
-                      [attr.cy]="donutTamanho / 2"
-                      [attr.r]="donutRaio"
-                      fill="none"
-                      stroke="currentColor"
-                      class="text-zinc-800"
-                      [attr.stroke-width]="donutEspessura"
-                    />
-                    @for (seg of donutSegments(); track seg.sistema) {
-                      <circle
-                        [attr.cx]="donutTamanho / 2"
-                        [attr.cy]="donutTamanho / 2"
-                        [attr.r]="donutRaio"
-                        fill="none"
-                        [attr.stroke]="seg.cor"
-                        [attr.stroke-width]="donutEspessura"
-                        [attr.stroke-dasharray]="seg.dasharray"
-                        [attr.stroke-dashoffset]="seg.dashoffset"
-                        class="cursor-default"
-                        (mouseenter)="aoPassarMouseSegmento($event, seg)"
-                        (mousemove)="aoPassarMouseSegmento($event, seg)"
-                        (mouseleave)="aoSairMouseSegmento()"
-                      />
-                    }
-                  </svg>
-                  <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                    <span class="text-xl font-semibold text-zinc-100">{{ donutTotal() }}</span>
-                    <span class="text-[10px] uppercase tracking-wide text-zinc-500">clientes</span>
-                  </div>
-                  @if (donutTooltip(); as tip) {
-                    <div
-                      class="pointer-events-none absolute z-10 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-xs text-zinc-100"
-                      [style.left.px]="tip.x + 12"
-                      [style.top.px]="tip.y + 12"
-                    >
-                      <span class="h-2 w-2 shrink-0 rounded-sm" [style.background-color]="tip.seg.cor"></span>
-                      {{ tip.seg.rotulo }}: {{ tip.seg.valor }}
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          }
-        </app-card>
       </div>
     </div>
   }
