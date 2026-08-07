@@ -189,6 +189,25 @@ export interface Manual {
   passos?: ManualPasso[];
 }
 
+export interface WikiArtigoImagem {
+  id: number;
+  artigo_id?: number;
+  ordem?: number;
+  imagem_nome?: string | null;
+}
+
+export interface WikiArtigo {
+  id?: number;
+  titulo: string;
+  codigo?: string | null;
+  mensagem_erro?: string | null;
+  causa?: string | null;
+  solucao?: string | null;
+  imagens?: WikiArtigoImagem[];
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
 export const TIPOS_ACESSO: { valor: TipoAcesso; rotulo: string }[] = [
   { valor: 'anydesk', rotulo: 'AnyDesk' },
   { valor: 'acesso_web', rotulo: 'Acesso Web' },

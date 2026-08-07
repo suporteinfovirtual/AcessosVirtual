@@ -64,6 +64,9 @@
               @case ('manuais') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6l0 13" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 6l0 13" /></svg>
               }
+              @case ('wiki') {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 17l0 .01" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a1.5 1.5 0 0 1 1 -1.5a2.6 2.6 0 1 0 -3 -4" /></svg>
+              }
               @case ('internos') {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path stroke-linecap="round" stroke-linejoin="round" d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
               }
@@ -222,7 +225,7 @@
             <input
               [(ngModel)]="busca"
               type="text"
-              [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : mostrandoArquivos() ? 'Buscar arquivo…' : 'Buscar por nome ou CNPJ…'"
+              [placeholder]="mostrandoInternos() ? 'Buscar por serviço ou usuário…' : mostrandoManuais() ? 'Buscar manual…' : mostrandoWiki() ? 'Buscar por código ou texto do erro…' : mostrandoArquivos() ? 'Buscar arquivo…' : 'Buscar por nome ou CNPJ…'"
               class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
             />
           </div>
@@ -298,7 +301,7 @@
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
-          @if (!mostrandoInternos() && !mostrandoManuais() && !mostrandoArquivos()) {
+          @if (!mostrandoInternos() && !mostrandoManuais() && !mostrandoWiki() && !mostrandoArquivos()) {
             <div class="flex items-center gap-2">
               @if (abaAtiva() === 'acesso_web') {
                 <select
@@ -485,6 +488,8 @@
             <app-internos-panel [busca]="busca()"></app-internos-panel>
           } @else if (mostrandoManuais()) {
             <app-manuais-panel [busca]="busca()"></app-manuais-panel>
+          } @else if (mostrandoWiki()) {
+            <app-wiki-panel [busca]="busca()"></app-wiki-panel>
           } @else if (mostrandoArquivos()) {
             <app-arquivos-panel [busca]="busca()"></app-arquivos-panel>
           } @else if (carregandoClientes()) {

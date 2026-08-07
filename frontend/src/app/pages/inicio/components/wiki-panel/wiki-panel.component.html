@@ -1,0 +1,90 @@
+@if (artigoAbertoId(); as id) {
+  <app-wiki-detalhe [artigoId]="id" (voltar)="voltarParaLista()" (removido)="voltarParaLista()"></app-wiki-detalhe>
+} @else {
+  <div>
+    @if (carregando()) {
+      <div class="mt-4">
+        <app-skeleton variante="linhas"></app-skeleton>
+      </div>
+    } @else {
+      @if (busca().trim() && resultadosOrdenados().length > 0) {
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <p class="text-sm text-zinc-500">
+            {{ resultadosOrdenados().length }} resultado{{ resultadosOrdenados().length === 1 ? '' : 's' }} de pesquisa para "{{ busca() }}"
+          </p>
+          <div class="flex shrink-0 items-center gap-2">
+            <label class="text-xs text-zinc-500">Ordenar por</label>
+            <select
+              [ngModel]="ordenacao()"
+              (ngModelChange)="ordenacao.set($event)"
+              name="ordenacao"
+              class="rounded-lg border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-xs text-zinc-100 outline-none focus:border-accent"
+            >
+              <option value="relevancia">Relevância</option>
+              <option value="recentes">Mais recentes</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      @if (resultadosOrdenados().length === 0) {
+        <p class="py-10 text-center text-sm text-zinc-600">
+          {{ artigos().length === 0 ? 'Nenhum artigo cadastrado ainda.' : 'Nenhum artigo encontrado para essa busca.' }}
+        </p>
+      } @else {
+        <div class="flex flex-col divide-y divide-zinc-900">
+          @for (resultado of resultadosOrdenados(); track resultado.artigo.id) {
+            <button
+              type="button"
+              class="flex flex-col gap-1 py-4 text-left first:pt-0"
+              (click)="abrirArtigo(resultado.artigo)"
+            >
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-semibold text-zinc-100">
+                  @for (trecho of tituloDestacado(resultado.artigo.titulo); track $index) {
+                    @if (trecho.destaque) {
+                      <mark class="rounded-sm bg-accent-soft px-0.5 text-accent">{{ trecho.texto }}</mark>
+                    } @else {
+                      {{ trecho.texto }}
+                    }
+                  }
+                </h3>
+                @if (resultado.artigo.codigo) {
+                  <span class="shrink-0 rounded-md bg-zinc-800 px-1.5 py-0.5 font-mono text-[11px] text-zinc-400">{{ resultado.artigo.codigo }}</span>
+                }
+              </div>
+              @if (resultado.campoTrecho) {
+                <p class="line-clamp-2 text-xs text-zinc-500">
+                  @for (trecho of trechoDestacado(resultado.campoTrecho); track $index) {
+                    @if (trecho.destaque) {
+                      <mark class="rounded-sm bg-accent-soft px-0.5 text-accent">{{ trecho.texto }}</mark>
+                    } @else {
+                      {{ trecho.texto }}
+                    }
+                  }
+                </p>
+              }
+            </button>
+          }
+        </div>
+      }
+    }
+
+    <button
+      type="button"
+      class="mt-5 flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-accent"
+      (click)="abrirNovo()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+      Novo artigo
+    </button>
+  </div>
+
+  @if (modalAberto()) {
+    <app-wiki-modal
+      [artigo]="artigoEmEdicao()"
+      (fechar)="fecharModal()"
+      (salvo)="aoSalvar()"
+    ></app-wiki-modal>
+  }
+}

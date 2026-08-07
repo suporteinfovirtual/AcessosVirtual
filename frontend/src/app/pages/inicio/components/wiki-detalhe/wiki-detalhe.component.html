@@ -1,0 +1,110 @@
+<div>
+  <button
+    type="button"
+    class="mb-4 flex items-center gap-1 text-sm font-medium text-zinc-400 hover:text-zinc-200"
+    (click)="voltar.emit()"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+    Voltar à wiki
+  </button>
+
+  @if (carregando()) {
+    <p class="py-10 text-center text-sm text-zinc-600">Carregando…</p>
+  } @else if (artigo(); as a) {
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-lg font-semibold text-zinc-100">{{ a.titulo }}</h2>
+          @if (a.codigo) {
+            <span class="shrink-0 rounded-md bg-accent-soft px-2 py-0.5 font-mono text-xs font-medium text-accent">{{ a.codigo }}</span>
+          }
+        </div>
+      </div>
+      <button
+        type="button"
+        class="shrink-0 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+        (click)="abrirEdicao()"
+      >
+        Editar artigo
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      @if (a.mensagem_erro) {
+        <div class="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Mensagem do erro</p>
+          <p class="whitespace-pre-line break-words font-mono text-xs text-zinc-300">{{ a.mensagem_erro }}</p>
+        </div>
+      }
+
+      @if (a.causa) {
+        <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Causa</p>
+          <p class="whitespace-pre-line text-sm text-zinc-300">{{ a.causa }}</p>
+        </div>
+      }
+
+      @if (a.solucao) {
+        <div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Solução</p>
+          <p class="whitespace-pre-line text-sm text-zinc-300">{{ a.solucao }}</p>
+        </div>
+      }
+
+      @if (!a.mensagem_erro && !a.causa && !a.solucao) {
+        <p class="py-6 text-center text-sm text-zinc-600">Esse artigo ainda não tem detalhes. Clique em "Editar artigo" pra preencher.</p>
+      }
+
+      <div
+        class="rounded-xl border border-dashed border-zinc-800 p-4"
+        (dragover)="aoArrastarSobre($event)"
+        (drop)="aoSoltarImagem($event)"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Prints do erro</p>
+          <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-hover">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            Adicionar print
+            <input type="file" accept="image/*" class="hidden" (change)="aoSelecionarArquivo($event)" />
+          </label>
+        </div>
+        <p class="mt-1 text-[11px] text-zinc-500">Cole (Ctrl+V) ou arraste um print pra qualquer lugar dessa área.</p>
+
+        @if (enviandoImagem()) {
+          <p class="mt-2 text-[11px] text-zinc-500">Enviando imagem…</p>
+        }
+        @if (erroImagem()) {
+          <p class="mt-2 text-[11px] text-red-400">{{ erroImagem() }}</p>
+        }
+
+        @if (a.imagens?.length) {
+          <div class="mt-3 space-y-2">
+            @for (img of a.imagens!; track img.id) {
+              <div class="relative inline-block">
+                <a [href]="'/api/wiki/imagens/' + img.id" target="_blank">
+                  <img [src]="'/api/wiki/imagens/' + img.id" alt="Print do erro" class="max-w-md rounded-lg border border-zinc-800" />
+                </a>
+                <button
+                  type="button"
+                  class="absolute right-1.5 top-1.5 rounded-full bg-zinc-950/80 p-1 text-red-400 hover:text-red-300"
+                  title="Remover imagem"
+                  (click)="removerImagem(img.id)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@if (modalAberto()) {
+  <app-wiki-modal
+    [artigo]="artigo()"
+    (fechar)="fecharModal()"
+    (salvo)="aoSalvar()"
+  ></app-wiki-modal>
+}

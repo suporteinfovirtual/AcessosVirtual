@@ -34,6 +34,7 @@ import { InternosPanelComponent } from './components/internos-panel/internos-pan
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
+import { WikiPanelComponent } from './components/wiki-panel/wiki-panel.component';
 import { ArquivosPanelComponent } from './components/arquivos-panel/arquivos-panel.component';
 import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
 import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
@@ -42,7 +43,7 @@ import { ImplantacaoPanelComponent } from './components/implantacao-panel/implan
 import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
 import { ResumoPanelComponent } from './components/resumo-panel/resumo-panel.component';
 
-type Aba = TipoAcesso | 'internos' | 'manuais' | 'arquivos';
+type Aba = TipoAcesso | 'internos' | 'manuais' | 'wiki' | 'arquivos';
 
 // sistemas sem cadastro próprio na conversão de negociação: usam direto o cadastro
 // unificado de clientes/acessos (mesmo mapeamento de clientes-sistemas.component.ts)
@@ -63,6 +64,7 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
     CategoriasModalComponent,
     ContabilidadesModalComponent,
     ManuaisPanelComponent,
+    WikiPanelComponent,
     ArquivosPanelComponent,
     ClientesSistemasComponent,
     EnviosContabilidadePanelComponent,
@@ -131,6 +133,7 @@ export class InicioComponent implements OnInit {
   readonly abasAcessos: { valor: TipoAcesso; rotulo: string }[] = [...TIPOS_ACESSO];
   readonly abasFerramentas: { valor: Aba; rotulo: string }[] = [
     { valor: 'manuais', rotulo: 'Manuais' },
+    { valor: 'wiki', rotulo: 'Wiki' },
     { valor: 'internos', rotulo: 'Contas Internas' },
     { valor: 'arquivos', rotulo: 'Arquivos' },
   ];
@@ -171,9 +174,12 @@ export class InicioComponent implements OnInit {
 
   mostrandoInternos = computed(() => this.abaAtiva() === 'internos');
   mostrandoManuais = computed(() => this.abaAtiva() === 'manuais');
+  mostrandoWiki = computed(() => this.abaAtiva() === 'wiki');
   mostrandoArquivos = computed(() => this.abaAtiva() === 'arquivos');
   tipoInicialModal = computed<TipoAcesso | null>(() =>
-    this.mostrandoInternos() || this.mostrandoManuais() || this.mostrandoArquivos() ? null : (this.abaAtiva() as TipoAcesso)
+    this.mostrandoInternos() || this.mostrandoManuais() || this.mostrandoWiki() || this.mostrandoArquivos()
+      ? null
+      : (this.abaAtiva() as TipoAcesso)
   );
 
   clientesFiltrados = computed(() => {
@@ -182,7 +188,7 @@ export class InicioComponent implements OnInit {
     const categoriaId = this.categoriaFiltro();
     const servidor = this.servidorFiltro();
     const contabilidade = this.contabilidadeFiltro();
-    if (tipo === 'internos' || tipo === 'manuais' || tipo === 'arquivos') return [];
+    if (tipo === 'internos' || tipo === 'manuais' || tipo === 'wiki' || tipo === 'arquivos') return [];
 
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))
