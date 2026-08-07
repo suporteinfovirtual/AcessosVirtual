@@ -72,40 +72,47 @@ aside::-webkit-scrollbar {
   overflow: hidden;
 }
 
-/* fundo decorativo do painel — irmão do conteúdo, não ancestral,
-   pra não virar container de overflow/scroll na frente da sidebar sticky */
+/* fundo decorativo do painel: elemento fixo do tamanho da TELA (não do tamanho
+   do conteúdo). Usar background-attachment:fixed num elemento que cresce junto
+   com a lista de clientes é um bug conhecido do Chrome (o navegador tenta montar
+   a imagem fixa contra uma altura enorme e a renderização quebra durante o scroll,
+   sumindo botão/card). Com position:fixed a caixa em si já tem só o tamanho da
+   viewport, então não tem limite de altura pra "bugar" — não importa o tamanho
+   em pixels da imagem, ela sempre se ajusta à tela. */
 .painel-glow {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 0;
+  pointer-events: none;
   background-color: var(--bg);
   background-image: url('/fundo-painel.png');
   background-size: contain;
+  background-position: top left;
   background-repeat: no-repeat;
-  /* fixed = a imagem fica presa na tela em vez de rolar junto com o conteúdo;
-     com fixed, background-position passa a ser relativo à viewport, então
-     compensamos com a largura da sidebar pra manter o mesmo alinhamento */
-  background-attachment: fixed;
-  background-position: 0 top;
 }
 
 @media (min-width: 1024px) {
   .painel-glow {
-    background-position: 16rem top;
+    /* não cobre a sidebar (largura fixa dela) */
+    left: 16rem;
   }
 }
 
-/* brilho quente no final de verdade da página — acompanha a rolagem normal
-   (não é fixed), então só aparece quando o conteúdo realmente termina */
-.painel-glow::after {
+/* brilho quente no final de verdade da página — pseudo-elemento do .painel
+   (não do .painel-glow, que agora é fixed), então acompanha a rolagem normal
+   e só aparece quando o conteúdo realmente termina */
+.painel::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 340px;
+  z-index: 0;
+  pointer-events: none;
   background: radial-gradient(ellipse 900px 340px at 50% 100%, rgba(255, 122, 26, 0.28) 0%, rgba(255, 122, 26, 0.1) 45%, rgba(255, 122, 26, 0) 75%);
 }
 
