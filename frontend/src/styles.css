@@ -97,6 +97,18 @@ aside::-webkit-scrollbar {
   }
 }
 
+/* brilho quente no final de verdade da página — acompanha a rolagem normal
+   (não é fixed), então só aparece quando o conteúdo realmente termina */
+.painel-glow::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 340px;
+  background: radial-gradient(ellipse 900px 340px at 50% 100%, rgba(255, 122, 26, 0.28) 0%, rgba(255, 122, 26, 0.1) 45%, rgba(255, 122, 26, 0) 75%);
+}
+
 /* cards e superfícies "vidro": duas camadas de background em vez de depender só de backdrop-filter */
 .painel .card-glass,
 .painel .rounded-xl.border.border-zinc-800.bg-zinc-900\/60,
