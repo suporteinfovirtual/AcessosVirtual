@@ -63,17 +63,49 @@ body {
   overflow: hidden;
 }
 
-/* brilho decorativo no canto superior esquerdo — irmão do conteúdo, não ancestral,
+/* brilho decorativo no fundo do painel — irmão do conteúdo, não ancestral,
    pra não virar container de overflow/scroll na frente da sidebar sticky */
 .painel-glow {
   position: absolute;
-  top: -220px;
-  left: -160px;
-  width: 780px;
-  height: 780px;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 140, 0, 0.4) 0%, rgba(255, 140, 0, 0.15) 32%, rgba(255, 140, 0, 0) 68%);
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
+}
+
+/* arco brilhante no canto superior esquerdo: um anel enorme quase todo fora do container,
+   só a fatia que cai dentro fica visível (mesmo truque do blob antigo) */
+.painel-glow::before {
+  content: '';
+  position: absolute;
+  top: -885px;
+  left: 295px;
+  width: 1500px;
+  height: 1500px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 158, 68, 0.9);
+  box-shadow:
+    0 0 8px 1px rgba(255, 158, 68, 0.9),
+    0 0 40px 10px rgba(255, 122, 26, 0.4),
+    0 0 90px 30px rgba(255, 122, 26, 0.18);
+  /* o mesmo anel gigante volta a cruzar a área visível lá embaixo (é um círculo inteiro);
+     a máscara corta o traço logo depois da "ponta" visível em vez de deixar ele reaparecer */
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black 1235px, transparent 1435px);
+          mask-image: linear-gradient(to bottom, black 0, black 1235px, transparent 1435px);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+}
+
+/* brilho suave perto do rodapé, tipo horizonte */
+.painel-glow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -320px;
+  width: 1300px;
+  height: 400px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(255, 122, 26, 0.16) 0%, rgba(255, 122, 26, 0.05) 45%, rgba(255, 122, 26, 0) 72%);
 }
 
 /* cards e superfícies "vidro": duas camadas de background em vez de depender só de backdrop-filter */
