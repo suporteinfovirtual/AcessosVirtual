@@ -67,13 +67,32 @@ body {
    pra não virar container de overflow/scroll na frente da sidebar sticky */
 .painel-glow {
   position: absolute;
-  top: -220px;
-  left: -160px;
-  width: 780px;
-  height: 780px;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 140, 0, 0.4) 0%, rgba(255, 140, 0, 0.15) 32%, rgba(255, 140, 0, 0) 68%);
-  pointer-events: none;
+  top: -10%;
+  left: -10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: -20px -20px 100px 10px rgba(255, 122, 26, 0.2);
+  border-top: 2px solid rgba(255, 122, 26, 0.4);
+  border-left: 2px solid rgba(255, 122, 26, 0.15);
+  filter: blur(40px);
   z-index: 0;
+  pointer-events: none;
+  transform: rotate(-15deg);
+}
+
+/* Brilho adicional de fundo */
+.painel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 10% 10%, rgba(255, 122, 26, 0.08) 0%, transparent 50%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* cards e superfícies "vidro": duas camadas de background em vez de depender só de backdrop-filter */
