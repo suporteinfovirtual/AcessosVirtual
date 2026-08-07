@@ -35,8 +35,20 @@ body {
 body {
   background-color: var(--bg);
   color: #e4e4e7;
-  /* clipa o brilho decorativo do painel sem interferir no scroll container da sidebar sticky */
   overflow-x: hidden;
+  /* fundo decorativo fixo: aplicado direto no body (não num elemento que cresce
+     junto com o conteúdo) porque background-attachment:fixed é um caso especial
+     otimizado pelo navegador só na raiz do documento. Usar isso num elemento
+     comum que fica muito alto (ex: lista de clientes com centenas de itens) é um
+     bug conhecido do Chrome: a composição da camada fixa quebra contra uma altura
+     enorme e faz botões/cards sumirem durante o scroll. No body não tem esse
+     problema — e não importa o tamanho em pixels da imagem, o cover sempre
+     preenche a tela inteira. */
+  background-image: url('/fundo-painel.png');
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* scrollbar discreto pro tema escuro */
@@ -68,52 +80,6 @@ aside::-webkit-scrollbar {
 
 .painel {
   position: relative;
-  /* trava o brilho decorativo dentro da coluna de conteudo, sem vazar pra sidebar */
-  overflow: hidden;
-}
-
-/* fundo decorativo do painel: elemento fixo do tamanho da TELA (não do tamanho
-   do conteúdo). Usar background-attachment:fixed num elemento que cresce junto
-   com a lista de clientes é um bug conhecido do Chrome (o navegador tenta montar
-   a imagem fixa contra uma altura enorme e a renderização quebra durante o scroll,
-   sumindo botão/card). Com position:fixed a caixa em si já tem só o tamanho da
-   viewport, então não tem limite de altura pra "bugar" — não importa o tamanho
-   em pixels da imagem, ela sempre se ajusta à tela. */
-.painel-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-color: var(--bg);
-  background-image: url('/fundo-painel.png');
-  background-size: contain;
-  background-position: top left;
-  background-repeat: no-repeat;
-}
-
-@media (min-width: 1024px) {
-  .painel-glow {
-    /* não cobre a sidebar (largura fixa dela) */
-    left: 16rem;
-  }
-}
-
-/* brilho quente no final de verdade da página — pseudo-elemento do .painel
-   (não do .painel-glow, que agora é fixed), então acompanha a rolagem normal
-   e só aparece quando o conteúdo realmente termina */
-.painel::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 340px;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 900px 340px at 50% 100%, rgba(255, 122, 26, 0.28) 0%, rgba(255, 122, 26, 0.1) 45%, rgba(255, 122, 26, 0) 75%);
 }
 
 /* cards e superfícies "vidro": duas camadas de background em vez de depender só de backdrop-filter */
