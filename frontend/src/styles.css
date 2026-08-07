@@ -55,6 +55,15 @@ body {
   background-color: #52525b;
 }
 
+/* barra lateral: rolagem continua funcionando, só esconde a barrinha visual */
+aside {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+aside::-webkit-scrollbar {
+  display: none;
+}
+
 /* ---- painel de acessos de clientes: camada visual (vidro fosco + gradiente laranja) ---- */
 
 .painel {
@@ -74,8 +83,18 @@ body {
   background-color: var(--bg);
   background-image: url('/fundo-painel.png');
   background-size: contain;
-  background-position: top left;
   background-repeat: no-repeat;
+  /* fixed = a imagem fica presa na tela em vez de rolar junto com o conteúdo;
+     com fixed, background-position passa a ser relativo à viewport, então
+     compensamos com a largura da sidebar pra manter o mesmo alinhamento */
+  background-attachment: fixed;
+  background-position: 0 top;
+}
+
+@media (min-width: 1024px) {
+  .painel-glow {
+    background-position: 16rem top;
+  }
 }
 
 /* cards e superfícies "vidro": duas camadas de background em vez de depender só de backdrop-filter */
