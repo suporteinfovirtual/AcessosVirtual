@@ -1,20 +1,24 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { Instalacao, SISTEMAS, Tecnico } from '../../../../core/models';
+import { CertificadoDigital, Instalacao, SISTEMAS, Tecnico } from '../../../../core/models';
 import { InstalacoesService } from '../../../../core/instalacoes.service';
 import { TecnicosService } from '../../../../core/tecnicos.service';
+import { ClientesService } from '../../../../core/clientes.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
+import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
 
 @Component({
   selector: 'app-instalacao-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './instalacao-modal.component.html',
 })
 export class InstalacaoModalComponent implements OnInit {
   private instalacoesService = inject(InstalacoesService);
   private tecnicosService = inject(TecnicosService);
+  private clientesService = inject(ClientesService);
   private confirmService = inject(ConfirmService);
 
   instalacao = input.required<Instalacao>();
@@ -31,6 +35,19 @@ export class InstalacaoModalComponent implements OnInit {
   salvando = signal(false);
   excluindo = signal(false);
   erro = signal('');
+
+  // --- certificado digital: só p/ zeta / uniplus_web, que vivem na tabela clientes
+  // (cliente_ref_id = clientes.id) e usam os endpoints /api/clientes/:id/certificado ---
+  certificado = signal<CertificadoDigital | null>(null);
+  formCertificadoAberto = signal(false);
+  arquivoCertificado = signal<File | null>(null);
+  senhaCertificado = signal('');
+  enviandoCertificado = signal(false);
+  erroCertificado = signal('');
+
+  suportaCertificado = computed(
+    () => this.instalacao().cliente_sistema === 'zeta' || this.instalacao().cliente_sistema === 'uniplus_web'
+  );
 
   rotuloSistema = computed(() => SISTEMAS.find((s) => s.valor === this.instalacao().cliente_sistema)?.rotulo ?? '');
 
@@ -53,6 +70,12 @@ export class InstalacaoModalComponent implements OnInit {
     this.dataInstalacao.set(item.data_instalacao || '');
     this.observacoes.set(item.observacoes || '');
     this.instalado.set(!!item.instalado);
+
+    if (this.suportaCertificado()) {
+      firstValueFrom(this.clientesService.obter(item.cliente_ref_id))
+        .then((cliente) => this.certificado.set(cliente.certificado || null))
+        .catch(() => {});
+    }
   }
 
   async salvar() {
@@ -76,6 +99,65 @@ export class InstalacaoModalComponent implements OnInit {
       this.erro.set('Não foi possível salvar. Tente novamente.');
     } finally {
       this.salvando.set(false);
+    }
+  }
+
+  // --- certificado digital ---
+
+  abrirFormCertificado() {
+    this.arquivoCertificado.set(null);
+    this.senhaCertificado.set('');
+    this.erroCertificado.set('');
+    this.formCertificadoAberto.set(true);
+  }
+
+  cancelarFormCertificado() {
+    this.formCertificadoAberto.set(false);
+  }
+
+  aoSelecionarArquivoCertificado(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.arquivoCertificado.set(input.files?.[0] || null);
+  }
+
+  statusCertificado(): 'vencido' | 'alerta' | null {
+    return calcularStatusCertificado(this.certificado()?.validade);
+  }
+
+  async baixarCertificado() {
+    const nome = this.certificado()?.nome_arquivo || 'certificado.pfx';
+    this.erroCertificado.set('');
+    try {
+      const blob = await firstValueFrom(this.clientesService.baixarCertificado(this.instalacao().cliente_ref_id));
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = nome;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.erroCertificado.set('Não foi possível baixar o certificado.');
+    }
+  }
+
+  async enviarCertificado() {
+    const arquivo = this.arquivoCertificado();
+    const senha = this.senhaCertificado();
+    if (!arquivo || !senha || this.enviandoCertificado()) return;
+
+    this.enviandoCertificado.set(true);
+    this.erroCertificado.set('');
+    try {
+      const validadeIso = paraDataIso(await lerValidadeCertificado(arquivo, senha));
+      await firstValueFrom(
+        this.clientesService.enviarCertificado(this.instalacao().cliente_ref_id, arquivo, senha, validadeIso)
+      );
+      this.certificado.set({ nome_arquivo: arquivo.name, senha, validade: validadeIso });
+      this.formCertificadoAberto.set(false);
+    } catch (e) {
+      this.erroCertificado.set(e instanceof Error ? e.message : 'Não foi possível enviar o certificado.');
+    } finally {
+      this.enviandoCertificado.set(false);
     }
   }
 
