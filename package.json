@@ -1,0 +1,13 @@
+{
+  "name": "acessosvirtual",
+  "private": true,
+  "scripts": {
+    "build:frontend": "npm --prefix frontend install --no-audit --no-fund && npm --prefix frontend run build",
+    "build:worker": "wrangler pages functions build functions --outdir dist/worker --compatibility-date 2026-07-29",
+    "build": "npm run build:frontend && npm run build:worker",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.115.0"
+  }
+}

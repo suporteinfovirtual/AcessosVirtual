@@ -55,28 +55,37 @@ O que já está pronto nesta primeira etapa:
    O R2 tem plano gratuito, mas a Cloudflare pede um cartão cadastrado para habilitá-lo
    na conta (não cobra dentro da franquia).
 
-7. **Suba este código para um repositório privado no GitHub** (crie o repositório como
-   privado, sem exceção).
+7. **Configure as duas variáveis secretas** (uma vez):
+   ```
+   wrangler secret put SENHA_PAINEL
+   wrangler secret put SEGREDO_SESSAO
+   ```
+   - `SENHA_PAINEL` — a senha única que todo mundo da empresa vai usar para entrar.
+   - `SEGREDO_SESSAO` — uma string aleatória longa qualquer (só precisa ser difícil de
+     adivinhar), usada para assinar o cookie de sessão. Pode gerar uma rodando
+     `openssl rand -hex 32`.
 
-8. **Conecte o repositório à Cloudflare Pages:**
-   - No painel da Cloudflare, vá em *Workers & Pages* → *Create* → *Pages* → *Connect to Git*.
-   - Escolha este repositório.
-   - Em *Build settings*, use:
-     - Build command: `cd frontend && npm install && npm run build`
-     - Build output directory: `frontend/dist/frontend/browser`
-     (o mesmo caminho já configurado em `pages_build_output_dir` no `wrangler.toml`.)
-
-9. **Configure os bindings no projeto Pages** em *Settings* → *Functions*:
-   - *D1 database bindings* → *Add binding* → nome `DB` → selecione `painel-clientes-db`.
-   - *R2 bucket bindings* → *Add binding* → nome `BUCKET` → selecione `acessosvirtual-arquivos`.
-
-10. **Configure as duas variáveis secretas** em *Settings* → *Environment variables* (marcar
-    como *Secret*, não texto simples):
-    - `SENHA_PAINEL` — a senha única que todo mundo da empresa vai usar para entrar.
-    - `SEGREDO_SESSAO` — uma string aleatória longa qualquer (só precisa ser difícil de
-      adivinhar), usada para assinar o cookie de sessão. Pode gerar uma rodando
-      `openssl rand -hex 32`.
-
-11. Depois disso, cada `git push` no repositório publica a versão mais nova automaticamente.
+8. **Publique:**
+   ```
+   npm install
+   npm run deploy
+   ```
 
 Nenhum desses passos custa nada — tudo dentro do plano gratuito da Cloudflare.
+
+## Publicar atualizações
+
+O deploy **não** é automático no `git push`. Depois de commitar, rode na raiz do projeto:
+
+```
+npm run deploy
+```
+
+Isso faz o build do frontend (Angular), compila as `functions/` em `dist/worker/index.js`
+(`wrangler pages functions build`) e publica o Worker com `wrangler deploy`. Os bindings
+(`DB`, `BUCKET`, `ASSETS`) vêm do `wrangler.toml`, não precisa mexer no painel.
+
+Se a atualização mexeu no banco, rode antes o arquivo de migração correspondente, ex.:
+```
+wrangler d1 execute painel-clientes-db --remote --file=./migrations/0032_arquivos_r2.sql
+```
