@@ -27,6 +27,10 @@ export class ArquivosPanelComponent implements OnInit {
 
   busca = input('');
 
+  // A função lê o upload inteiro na memória (formData) antes de mandar pro R2, e o
+  // isolate do Worker tem ~128 MB. 25 MB é uma margem segura.
+  private readonly limiteBytes = 25 * 1024 * 1024;
+
   arquivos = signal<Arquivo[]>([]);
   carregando = signal(false);
   enviando = signal(false);
@@ -83,7 +87,14 @@ export class ArquivosPanelComponent implements OnInit {
   }
 
   private adicionarPendentes(lista: FileList | null | undefined) {
-    const novos = Array.from(lista ?? []).map((file) => ({ file, titulo: '' }));
+    const todos = Array.from(lista ?? []);
+    const grandes = todos.filter((file) => file.size > this.limiteBytes);
+    const novos = todos.filter((file) => file.size <= this.limiteBytes).map((file) => ({ file, titulo: '' }));
+
+    if (grandes.length > 0) {
+      const nomes = grandes.map((f) => f.name).join(', ');
+      this.toast.erro(`Acima do limite de ${this.formatarTamanho(this.limiteBytes)}: ${nomes}`);
+    }
     if (novos.length > 0) {
       this.pendentes.update((atuais) => [...atuais, ...novos]);
     }
@@ -117,6 +128,11 @@ export class ArquivosPanelComponent implements OnInit {
     const novo = input.files?.[0];
     input.value = '';
     if (!novo || !arquivo.id) return;
+
+    if (novo.size > this.limiteBytes) {
+      this.toast.erro(`Arquivo acima do limite de ${this.formatarTamanho(this.limiteBytes)}.`);
+      return;
+    }
 
     this.substituindoId.set(arquivo.id);
     try {

@@ -15,6 +15,7 @@
         <label for="arquivos-input" class="cursor-pointer font-medium text-accent hover:text-accent-hover">selecione no computador</label>
       </p>
       <input id="arquivos-input" type="file" multiple class="hidden" (change)="aoSelecionarArquivos($event)" />
+      <p class="text-xs text-zinc-600">Até 25 MB por arquivo</p>
     </div>
 
     @if (pendentes().length > 0) {

@@ -42,11 +42,23 @@ O que já está pronto nesta primeira etapa:
    ```
    wrangler d1 execute painel-clientes-db --remote --file=./schema.sql
    ```
+   Se o banco já existia antes desta versão, rode também as migrações novas, por exemplo:
+   ```
+   wrangler d1 execute painel-clientes-db --remote --file=./migrations/0032_arquivos_r2.sql
+   ```
 
-5. **Suba este código para um repositório privado no GitHub** (crie o repositório como
+5. **Crie o bucket R2** (guarda o conteúdo dos arquivos da aba *Ferramentas → Arquivos*;
+   o D1 fica só com os metadados):
+   ```
+   wrangler r2 bucket create acessosvirtual-arquivos
+   ```
+   O R2 tem plano gratuito, mas a Cloudflare pede um cartão cadastrado para habilitá-lo
+   na conta (não cobra dentro da franquia).
+
+7. **Suba este código para um repositório privado no GitHub** (crie o repositório como
    privado, sem exceção).
 
-6. **Conecte o repositório à Cloudflare Pages:**
+8. **Conecte o repositório à Cloudflare Pages:**
    - No painel da Cloudflare, vá em *Workers & Pages* → *Create* → *Pages* → *Connect to Git*.
    - Escolha este repositório.
    - Em *Build settings*, use:
@@ -54,16 +66,17 @@ O que já está pronto nesta primeira etapa:
      - Build output directory: `frontend/dist/frontend/browser`
      (o mesmo caminho já configurado em `pages_build_output_dir` no `wrangler.toml`.)
 
-7. **Configure o banco no projeto Pages:** *Settings* → *Functions* → *D1 database bindings* →
-   *Add binding* → nome `DB` → selecione `painel-clientes-db`.
+9. **Configure os bindings no projeto Pages** em *Settings* → *Functions*:
+   - *D1 database bindings* → *Add binding* → nome `DB` → selecione `painel-clientes-db`.
+   - *R2 bucket bindings* → *Add binding* → nome `BUCKET` → selecione `acessosvirtual-arquivos`.
 
-8. **Configure as duas variáveis secretas** em *Settings* → *Environment variables* (marcar
-   como *Secret*, não texto simples):
-   - `SENHA_PAINEL` — a senha única que todo mundo da empresa vai usar para entrar.
-   - `SEGREDO_SESSAO` — uma string aleatória longa qualquer (só precisa ser difícil de
-     adivinhar), usada para assinar o cookie de sessão. Pode gerar uma rodando
-     `openssl rand -hex 32`.
+10. **Configure as duas variáveis secretas** em *Settings* → *Environment variables* (marcar
+    como *Secret*, não texto simples):
+    - `SENHA_PAINEL` — a senha única que todo mundo da empresa vai usar para entrar.
+    - `SEGREDO_SESSAO` — uma string aleatória longa qualquer (só precisa ser difícil de
+      adivinhar), usada para assinar o cookie de sessão. Pode gerar uma rodando
+      `openssl rand -hex 32`.
 
-9. Depois disso, cada `git push` no repositório publica a versão mais nova automaticamente.
+11. Depois disso, cada `git push` no repositório publica a versão mais nova automaticamente.
 
 Nenhum desses passos custa nada — tudo dentro do plano gratuito da Cloudflare.

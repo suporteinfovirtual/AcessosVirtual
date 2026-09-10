@@ -170,14 +170,17 @@ CREATE TABLE IF NOT EXISTS links_pessoais (
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Arquivos genéricos guardados na aba Ferramentas > Arquivos (upload, download, substituir)
+-- Arquivos genéricos guardados na aba Ferramentas > Arquivos (upload, download, substituir).
+-- O conteúdo fica no R2 (binding BUCKET), identificado por r2_key; o D1 guarda só os metadados.
+-- A coluna arquivo (BLOB) só existe para as linhas antigas, anteriores à migração pro R2.
 CREATE TABLE IF NOT EXISTS arquivos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome_arquivo TEXT NOT NULL,
   titulo TEXT, -- nome amigável opcional, ex: "Script atalho do acesso"
   tipo TEXT,
   tamanho INTEGER NOT NULL,
-  arquivo BLOB NOT NULL,
+  arquivo BLOB, -- legado: conteúdo das linhas antigas ainda no D1
+  r2_key TEXT, -- chave do objeto no bucket R2 (arquivos novos)
   criado_em TEXT NOT NULL DEFAULT (datetime('now')),
   atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );

@@ -11,3 +11,7 @@ not_found_handling = "single-page-application"
 binding = "DB"
 database_name = "painel-clientes-db"
 database_id = "8ef81597-513d-4bc1-be12-34366d0ce916"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "acessosvirtual-arquivos"
