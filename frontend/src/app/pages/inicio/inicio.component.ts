@@ -21,6 +21,7 @@ import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { NegociacaoService } from '../../core/negociacao.service';
 import { ImplantacoesService } from '../../core/implantacoes.service';
+import { InstalacoesService } from '../../core/instalacoes.service';
 import { statusCertificado as calcularStatusCertificado } from '../../core/certificado.util';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
 import { ToastService } from '../../shared/toast.service';
@@ -39,6 +40,7 @@ import { ArquivosPanelComponent } from './components/arquivos-panel/arquivos-pan
 import { ClientesSistemasComponent } from './components/clientes-sistemas/clientes-sistemas.component';
 import { EnviosContabilidadePanelComponent } from './components/envios-contabilidade-panel/envios-contabilidade-panel.component';
 import { NegociacaoPanelComponent } from './components/negociacao-panel/negociacao-panel.component';
+import { InstalacaoPanelComponent } from './components/instalacao-panel/instalacao-panel.component';
 import { ImplantacaoPanelComponent } from './components/implantacao-panel/implantacao-panel.component';
 import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
 import { ResumoPanelComponent } from './components/resumo-panel/resumo-panel.component';
@@ -69,6 +71,7 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
     ClientesSistemasComponent,
     EnviosContabilidadePanelComponent,
     NegociacaoPanelComponent,
+    InstalacaoPanelComponent,
     ImplantacaoPanelComponent,
     FaturamentoPanelComponent,
     ResumoPanelComponent,
@@ -84,6 +87,7 @@ export class InicioComponent implements OnInit {
   private linksService = inject(LinksService);
   private negociacaoService = inject(NegociacaoService);
   private implantacoesService = inject(ImplantacoesService);
+  private instalacoesService = inject(InstalacoesService);
   private destroyRef = inject(DestroyRef);
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
@@ -103,6 +107,9 @@ export class InicioComponent implements OnInit {
 
   // --- área separada "Clientes em negociação" ---
   mostrandoNegociacao = signal(false);
+
+  // --- área separada "Instalação" (negociações fechadas aguardando/registrando a instalação) ---
+  mostrandoInstalacao = signal(false);
 
   // --- área separada "Implantação" (agenda de treinamentos) ---
   mostrandoImplantacao = signal(false);
@@ -332,6 +339,7 @@ export class InicioComponent implements OnInit {
     this.mostrandoClientesSistemas.set(false);
     this.mostrandoEnviosContabilidade.set(false);
     this.mostrandoNegociacao.set(false);
+    this.mostrandoInstalacao.set(false);
     this.mostrandoImplantacao.set(false);
     this.mostrandoFaturamento.set(false);
   }
@@ -348,12 +356,15 @@ export class InicioComponent implements OnInit {
     setTimeout(() => this.sistemaParaAbrir.set(null));
   }
 
-  abrirSecaoGestao(secao: 'resumo' | 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento') {
+  abrirSecaoGestao(
+    secao: 'resumo' | 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'instalacao' | 'implantacao' | 'faturamento'
+  ) {
     this.fecharSecoesGestao();
     if (secao === 'resumo') this.mostrandoResumo.set(true);
     if (secao === 'clientesSistemas') this.mostrandoClientesSistemas.set(true);
     if (secao === 'enviosContabilidade') this.mostrandoEnviosContabilidade.set(true);
     if (secao === 'negociacao') this.mostrandoNegociacao.set(true);
+    if (secao === 'instalacao') this.mostrandoInstalacao.set(true);
     if (secao === 'implantacao') this.mostrandoImplantacao.set(true);
     if (secao === 'faturamento') this.mostrandoFaturamento.set(true);
   }
@@ -575,29 +586,44 @@ export class InicioComponent implements OnInit {
     this.negociacaoConvertendo.set(null);
   }
 
-  async aoSalvarConversaoCliente() {
+  async aoSalvarConversaoCliente(clienteId: number) {
     this.clienteConversaoModalAberto.set(false);
     this.clienteParaConversao.set(null);
     this.tipoParaConversao.set(null);
-    await this.concluirConversaoNegociacao();
+    await this.concluirConversaoNegociacao(clienteId);
     await this.carregarClientes();
-    this.mostrandoClientesSistemas.set(true);
-    this.toast.sucesso('Cliente convertido com sucesso.');
+    this.abrirSecaoGestao('instalacao');
+    this.toast.sucesso('Cliente enviado para instalação.');
   }
 
-  async aoSalvarConversaoClienteSistema() {
+  async aoSalvarConversaoClienteSistema(clienteId: number) {
     this.clienteSistemaConversaoModalAberto.set(false);
     this.clienteSistemaParaConversao.set(null);
-    await this.concluirConversaoNegociacao();
-    this.mostrandoClientesSistemas.set(true);
-    this.toast.sucesso('Cliente convertido com sucesso.');
+    await this.concluirConversaoNegociacao(clienteId);
+    this.abrirSecaoGestao('instalacao');
+    this.toast.sucesso('Cliente enviado para instalação.');
   }
 
-  private async concluirConversaoNegociacao() {
+  // marca a negociação como convertida e cria o registro de instalação — um snapshot dos
+  // dados lançados na negociação, já ligado ao cliente recém-criado (cliente_ref_id)
+  private async concluirConversaoNegociacao(clienteId: number) {
     const negociacao = this.negociacaoConvertendo();
     this.negociacaoConvertendo.set(null);
-    if (!negociacao?.id) return;
+    if (!negociacao?.id || !negociacao.sistema) return;
+
     await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
+    await firstValueFrom(
+      this.instalacoesService.criar({
+        cliente_sistema: negociacao.sistema,
+        cliente_ref_id: clienteId,
+        cliente_nome: negociacao.nome,
+        cnpj: negociacao.cnpj ?? null,
+        telefone: negociacao.telefone ?? null,
+        enquadramento_fiscal: negociacao.enquadramento_fiscal ?? null,
+        precisa_migrar_base: !!negociacao.precisa_migrar_base,
+        negociacao_id: negociacao.id,
+      })
+    );
   }
 
   // abre o AnyDesk instalado já direcionado pro ID (protocolo anydesk:) e deixa a senha

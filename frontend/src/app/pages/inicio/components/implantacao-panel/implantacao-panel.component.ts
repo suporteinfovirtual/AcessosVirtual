@@ -1,8 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Implantacao, Tecnico } from '../../../../core/models';
+import { ClienteRef, Implantacao, Instalacao, Tecnico } from '../../../../core/models';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
+import { InstalacoesService } from '../../../../core/instalacoes.service';
 import { TecnicosService } from '../../../../core/tecnicos.service';
 import { ImplantacaoModalComponent } from '../implantacao-modal/implantacao-modal.component';
 import { TecnicosModalComponent } from '../tecnicos-modal/tecnicos-modal.component';
@@ -38,6 +39,7 @@ function formatarDataIso(data: Date): string {
 })
 export class ImplantacaoPanelComponent implements OnInit {
   private implantacoesService = inject(ImplantacoesService);
+  private instalacoesService = inject(InstalacoesService);
   private tecnicosService = inject(TecnicosService);
   private toast = inject(ToastService);
 
@@ -47,12 +49,17 @@ export class ImplantacaoPanelComponent implements OnInit {
   implantacoes = signal<Implantacao[]>([]);
   carregando = signal(true);
 
+  // clientes já instalados (aba Instalação) que ainda não têm treinamento agendado
+  pendentesAgendamento = signal<Instalacao[]>([]);
+
   tecnicos = signal<Tecnico[]>([]);
   tecnicoFiltro = signal<number | null>(null);
 
   modalAberto = signal(false);
   implantacaoEmEdicao = signal<Implantacao | null>(null);
   dataParaNova = signal<string | null>(null);
+  clientePreSelecionado = signal<ClienteRef | null>(null);
+  tecnicoPreSelecionado = signal<number | null>(null);
 
   tecnicosModalAberto = signal(false);
 
@@ -114,8 +121,12 @@ export class ImplantacaoPanelComponent implements OnInit {
   async carregar() {
     this.carregando.set(true);
     try {
-      const implantacoes = await firstValueFrom(this.implantacoesService.listar());
+      const [implantacoes, pendentes] = await Promise.all([
+        firstValueFrom(this.implantacoesService.listar()),
+        firstValueFrom(this.instalacoesService.listar(undefined, true)),
+      ]);
       this.implantacoes.set(implantacoes);
+      this.pendentesAgendamento.set(pendentes);
     } finally {
       this.carregando.set(false);
     }
@@ -151,18 +162,34 @@ export class ImplantacaoPanelComponent implements OnInit {
 
   abrirNovo(dataIso?: string) {
     this.implantacaoEmEdicao.set(null);
+    this.clientePreSelecionado.set(null);
+    this.tecnicoPreSelecionado.set(null);
     this.dataParaNova.set(dataIso || formatarDataIso(new Date()));
     this.modalAberto.set(true);
   }
 
   abrirEdicao(item: Implantacao) {
+    this.clientePreSelecionado.set(null);
+    this.tecnicoPreSelecionado.set(null);
     this.implantacaoEmEdicao.set(item);
+    this.modalAberto.set(true);
+  }
+
+  // "Agendar" na lista de instalados sem treinamento: abre o modal já com o cliente
+  // (e o técnico da instalação como sugestão)
+  agendarInstalacao(item: Instalacao) {
+    this.implantacaoEmEdicao.set(null);
+    this.dataParaNova.set(formatarDataIso(new Date()));
+    this.clientePreSelecionado.set({ sistema: item.cliente_sistema, ref_id: item.cliente_ref_id, nome: item.cliente_nome });
+    this.tecnicoPreSelecionado.set(item.tecnico_id ?? null);
     this.modalAberto.set(true);
   }
 
   fecharModal() {
     this.modalAberto.set(false);
     this.implantacaoEmEdicao.set(null);
+    this.clientePreSelecionado.set(null);
+    this.tecnicoPreSelecionado.set(null);
   }
 
   async aoSalvar() {

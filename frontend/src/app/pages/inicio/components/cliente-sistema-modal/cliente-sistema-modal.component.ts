@@ -23,7 +23,9 @@ export class ClienteSistemaModalComponent implements OnInit {
   cliente = input<ClienteSistema | null>(null);
   sistema = input.required<Sistema>();
   fechar = output<void>();
-  salvo = output<void>();
+  // emite o id do cliente salvo (útil pra quem converte uma negociação e precisa
+  // do id recém-criado); consumidores que só querem recarregar podem ignorar o valor
+  salvo = output<number>();
 
   nome = signal('');
   cnpj = signal('');
@@ -93,10 +95,11 @@ export class ClienteSistemaModalComponent implements OnInit {
     try {
       if (this.editando) {
         await firstValueFrom(this.clientesSistemasService.atualizar(this.cliente()!.id!, dados));
+        this.salvo.emit(this.cliente()!.id!);
       } else {
-        await firstValueFrom(this.clientesSistemasService.criar({ ...dados, sistema: this.sistema() }));
+        const { id } = await firstValueFrom(this.clientesSistemasService.criar({ ...dados, sistema: this.sistema() }));
+        this.salvo.emit(id);
       }
-      this.salvo.emit();
     } catch {
       this.erro.set('Não foi possível salvar. Tente novamente.');
     } finally {
@@ -114,7 +117,7 @@ export class ClienteSistemaModalComponent implements OnInit {
 
     try {
       await firstValueFrom(this.clientesSistemasService.remover(cliente.id));
-      this.salvo.emit();
+      this.salvo.emit(cliente.id);
     } catch {
       this.erro.set('Não foi possível excluir. Tente novamente.');
     } finally {

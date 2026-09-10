@@ -84,6 +84,35 @@ export interface Implantacao {
   criado_em?: string;
 }
 
+// Instalação: passo entre a negociação fechada e o agendamento do treinamento.
+// cliente_sistema/cliente_ref_id apontam pro cliente real já criado em Gestão > Clientes;
+// os demais campos são um snapshot de como o cliente foi lançado na negociação.
+export interface Instalacao {
+  id?: number;
+  cliente_sistema: Sistema;
+  cliente_ref_id: number;
+  cliente_nome: string;
+  cnpj?: string | null;
+  telefone?: string | null;
+  enquadramento_fiscal?: string | null;
+  precisa_migrar_base?: boolean | number;
+  negociacao_id?: number | null;
+  instalado?: boolean | number;
+  data_instalacao?: string | null;
+  tecnico_id?: number | null;
+  tecnico_nome?: string | null;
+  observacoes?: string | null;
+  criado_em?: string;
+  atualizado_em?: string | null;
+}
+
+export type StatusInstalacao = 'a_instalar' | 'instalado';
+
+export const STATUS_INSTALACAO: { valor: StatusInstalacao; rotulo: string }[] = [
+  { valor: 'a_instalar', rotulo: 'A instalar' },
+  { valor: 'instalado', rotulo: 'Instalado' },
+];
+
 export type StatusNegociacao = 'em_negociacao' | 'desistiu' | 'fechou';
 
 export const STATUS_NEGOCIACAO: { valor: StatusNegociacao; rotulo: string }[] = [

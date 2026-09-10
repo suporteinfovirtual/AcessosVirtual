@@ -1,0 +1,151 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
+  <div
+    class="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-100">Instalação</h2>
+      <button type="button" class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" (click)="fechar.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="border-b border-zinc-800 bg-zinc-900/60 px-6 py-4">
+      <div class="flex items-center gap-2">
+        <p class="truncate text-sm font-semibold uppercase text-zinc-100">{{ instalacao().cliente_nome }}</p>
+        <span class="shrink-0 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
+          {{ rotuloSistema() }}
+        </span>
+      </div>
+      <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+        @if (instalacao().cnpj) {
+          <div class="col-span-2 sm:col-span-1">
+            <dt class="text-[11px] uppercase tracking-wide text-zinc-500">CNPJ</dt>
+            <dd class="truncate text-sm text-zinc-300">{{ instalacao().cnpj }}</dd>
+          </div>
+        }
+        @if (instalacao().enquadramento_fiscal) {
+          <div class="col-span-2 sm:col-span-1">
+            <dt class="text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</dt>
+            <dd class="truncate text-sm text-zinc-300">{{ instalacao().enquadramento_fiscal }}</dd>
+          </div>
+        }
+      </dl>
+      @if (instalacao().precisa_migrar_base) {
+        <p class="mt-2 text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
+      }
+      @if (instalacao().observacoes && !instalado()) {
+        <p class="mt-2 text-xs text-zinc-500">{{ instalacao().observacoes }}</p>
+      }
+    </div>
+
+    <form class="px-6 py-5" (ngSubmit)="salvar()">
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">WhatsApp do cliente</label>
+          <div class="flex gap-2">
+            <input
+              type="tel"
+              inputmode="numeric"
+              [ngModel]="telefone()"
+              (ngModelChange)="aoDigitarTelefone($event)"
+              name="telefone"
+              placeholder="(47) 9 3333-6633"
+              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+            @if (linkWhatsapp()) {
+              <a
+                [href]="linkWhatsapp()"
+                target="_blank"
+                rel="noopener"
+                class="flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.01c-.24.68-1.42 1.31-1.95 1.36-.5.05-1.13.24-3.68-.77-3.09-1.22-5.06-4.37-5.22-4.58-.15-.2-1.25-1.66-1.25-3.17s.79-2.25 1.07-2.56c.28-.31.61-.38.81-.38.2 0 .41 0 .59.01.19.01.44-.07.69.53.24.6.83 2.06.9 2.21.07.15.12.32.02.52-.1.2-.15.32-.29.5-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.35 1.45.29.15.46.12.63-.07.17-.2.73-.85.93-1.14.2-.29.4-.24.67-.15.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.12.07.71-.17 1.39Z"/></svg>
+                Abrir
+              </a>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Técnico que instalou</label>
+          <select
+            [(ngModel)]="tecnicoId"
+            name="tecnicoId"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          >
+            <option [ngValue]="null">Ainda não definido</option>
+            @for (tecnico of tecnicos(); track tecnico.id) {
+              <option [ngValue]="tecnico.id">{{ tecnico.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Data da instalação</label>
+          <input
+            type="date"
+            [(ngModel)]="dataInstalacao"
+            name="dataInstalacao"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Observações da instalação</label>
+          <textarea
+            [(ngModel)]="observacoes"
+            name="observacoes"
+            rows="3"
+            class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              [(ngModel)]="instalado"
+              name="instalado"
+              class="h-4 w-4 rounded border-zinc-700 bg-zinc-950 text-accent focus:ring-accent-soft"
+            />
+            Marcar como instalado
+          </label>
+          <p class="mt-1.5 text-xs text-zinc-500">Depois de instalado, o cliente aparece em Implantação para agendar o treinamento.</p>
+        </div>
+      </div>
+
+      @if (erro()) {
+        <p class="mt-4 text-sm text-red-400">{{ erro() }}</p>
+      }
+
+      <div class="mt-6 flex items-center justify-between border-t border-zinc-800 pt-4">
+        <button
+          type="button"
+          [disabled]="excluindo()"
+          class="text-sm font-medium text-red-400 hover:text-red-300 disabled:opacity-50"
+          (click)="excluir()"
+        >
+          {{ excluindo() ? 'Removendo…' : 'Remover' }}
+        </button>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800"
+            (click)="fechar.emit()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="salvando()"
+            class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ salvando() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

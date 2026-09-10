@@ -75,7 +75,7 @@
                     {{ rotuloStatus(cliente.status) }}
                   </span>
                   @if (cliente.convertido_em) {
-                    <span class="shrink-0 text-[11px] font-medium text-emerald-500">✓ convertido</span>
+                    <span class="shrink-0 text-[11px] font-medium text-emerald-500">✓ na instalação</span>
                   }
                 </div>
                 @if (cliente.cnpj) {
@@ -121,7 +121,7 @@
                 class="self-start rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/20"
                 (click)="solicitarConversao($event, cliente)"
               >
-                Converter em cliente →
+                Enviar para instalação →
               </button>
             }
           </div>

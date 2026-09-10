@@ -40,7 +40,9 @@ export class ClienteModalComponent implements OnInit {
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
   fechar = output<void>();
-  salvo = output<void>();
+  // emite o id do cliente salvo (quem converte uma negociação usa pra ligar a instalação
+  // ao cliente recém-criado); consumidores que só recarregam podem ignorar o valor
+  salvo = output<number>();
 
   readonly tipos = TIPOS_ACESSO;
   readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
@@ -177,11 +179,13 @@ export class ClienteModalComponent implements OnInit {
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
     };
 
+    let clienteIdSalvo: number;
     try {
       if (this.editando) {
         const clienteId = this.cliente()!.id!;
         await firstValueFrom(this.clientesService.atualizar(clienteId, dadosCliente));
         await this.sincronizarAcessos(clienteId);
+        clienteIdSalvo = clienteId;
       } else {
         // valida o certificado antes de criar o cliente, pra não deixar ele criado sem certificado se a senha estiver errada
         const arquivo = this.arquivoCertificado();
@@ -204,8 +208,9 @@ export class ClienteModalComponent implements OnInit {
         if (arquivo && senha && validadeCertificado) {
           await firstValueFrom(this.clientesService.enviarCertificado(resultado.id, arquivo, senha, validadeCertificado));
         }
+        clienteIdSalvo = resultado.id;
       }
-      this.salvo.emit();
+      this.salvo.emit(clienteIdSalvo);
     } catch {
       this.erro.set('Não foi possível salvar. Tente novamente.');
     } finally {
@@ -324,7 +329,7 @@ export class ClienteModalComponent implements OnInit {
 
     try {
       await firstValueFrom(this.clientesService.remover(cliente.id));
-      this.salvo.emit();
+      this.salvo.emit(cliente.id);
     } catch {
       this.erro.set('Não foi possível excluir. Tente novamente.');
     } finally {

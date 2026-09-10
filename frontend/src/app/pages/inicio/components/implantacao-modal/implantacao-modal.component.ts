@@ -19,6 +19,9 @@ export class ImplantacaoModalComponent implements OnInit {
 
   implantacao = input<Implantacao | null>(null);
   dataInicial = input<string | null>(null);
+  // pré-seleção vinda da lista "Aguardando agendamento" da aba Implantação
+  clienteInicial = input<ClienteRef | null>(null);
+  tecnicoInicial = input<number | null>(null);
   fechar = output<void>();
   salvo = output<void>();
 
@@ -56,8 +59,10 @@ export class ImplantacaoModalComponent implements OnInit {
       this.observacoes.set(item.observacoes || '');
       this.concluidaManual.set(!!item.concluida_manual);
       this.tecnicoId.set(item.tecnico_id || null);
-    } else if (this.dataInicial()) {
-      this.data.set(this.dataInicial()!);
+    } else {
+      if (this.dataInicial()) this.data.set(this.dataInicial()!);
+      if (this.clienteInicial()) this.cliente.set(this.clienteInicial());
+      if (this.tecnicoInicial()) this.tecnicoId.set(this.tecnicoInicial());
     }
   }
 

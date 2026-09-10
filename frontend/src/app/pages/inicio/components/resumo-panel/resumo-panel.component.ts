@@ -27,7 +27,7 @@ function formatarDataIso(data: Date): string {
   return `${ano}-${mes}-${dia}`;
 }
 
-export type SecaoGestao = 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'implantacao' | 'faturamento';
+export type SecaoGestao = 'clientesSistemas' | 'enviosContabilidade' | 'negociacao' | 'instalacao' | 'implantacao' | 'faturamento';
 
 interface CertificadoVencendo {
   cliente: Cliente;
