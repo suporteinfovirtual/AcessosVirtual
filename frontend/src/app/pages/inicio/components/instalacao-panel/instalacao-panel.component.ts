@@ -21,7 +21,8 @@ export class InstalacaoPanelComponent implements OnInit {
   viewMode = inject(ViewModeService);
 
   busca = signal('');
-  statusFiltro = signal<StatusInstalacao | 'todos'>('todos');
+  // começa em "a_instalar": quem já foi instalado só aparece escolhendo o filtro "Instalado"
+  statusFiltro = signal<StatusInstalacao | 'todos'>('a_instalar');
   readonly statusOpcoes = STATUS_INSTALACAO;
 
   instalacoes = signal<Instalacao[]>([]);
