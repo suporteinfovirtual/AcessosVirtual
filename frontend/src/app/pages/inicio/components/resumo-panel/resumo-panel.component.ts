@@ -5,6 +5,7 @@ import {
   ClienteNegociacao,
   ClientePendenteFaturamento,
   Implantacao,
+  Instalacao,
   SISTEMAS,
   Sistema,
   TIPOS_ACESSO,
@@ -14,6 +15,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ImplantacoesService } from '../../../../core/implantacoes.service';
+import { InstalacoesService } from '../../../../core/instalacoes.service';
 import { FaturamentoService } from '../../../../core/faturamento.service';
 import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { statusCertificado } from '../../../../core/certificado.util';
@@ -103,6 +105,7 @@ export class ResumoPanelComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private negociacaoService = inject(NegociacaoService);
   private implantacoesService = inject(ImplantacoesService);
+  private instalacoesService = inject(InstalacoesService);
   private faturamentoService = inject(FaturamentoService);
   private enviosContabilidadeService = inject(EnviosContabilidadeService);
 
@@ -121,6 +124,7 @@ export class ResumoPanelComponent implements OnInit {
   clientes = signal<Cliente[]>([]);
   negociacoes = signal<ClienteNegociacao[]>([]);
   implantacoes = signal<Implantacao[]>([]);
+  instalacoes = signal<Instalacao[]>([]);
   pendentesFaturamento = signal<ClientePendenteFaturamento[]>([]);
   statusEnviosContabilidadeMes = signal<Map<number, boolean>>(new Map());
   totalClientesUniplus = signal(0);
@@ -134,6 +138,17 @@ export class ResumoPanelComponent implements OnInit {
     const seteDiasAtras = Date.now() - 7 * 86_400_000;
     return this.negociacoes().filter(
       (n) => n.status === 'em_negociacao' && n.criado_em && new Date(n.criado_em).getTime() >= seteDiasAtras
+    ).length;
+  });
+
+  prontosParaInstalar = computed(() => this.instalacoes().filter((i) => !i.instalado).length);
+
+  // Instalacao tem criado_em confiável: quantas das "a instalar" entraram (foram
+  // enviadas pra instalação) nos últimos 7 dias, mesmo critério de negociacoesNovasSemana
+  instalacoesNovasSemana = computed(() => {
+    const seteDiasAtras = Date.now() - 7 * 86_400_000;
+    return this.instalacoes().filter(
+      (i) => !i.instalado && i.criado_em && new Date(i.criado_em).getTime() >= seteDiasAtras
     ).length;
   });
 
@@ -371,11 +386,12 @@ export class ResumoPanelComponent implements OnInit {
     this.carregando.set(true);
     try {
       const hoje = new Date();
-      const [clientes, negociacoes, implantacoes, pendentesFaturamento, statusEnviosContabilidade, clientesUniplus, clientesSgbr] =
+      const [clientes, negociacoes, implantacoes, instalacoes, pendentesFaturamento, statusEnviosContabilidade, clientesUniplus, clientesSgbr] =
         await Promise.all([
           firstValueFrom(this.clientesService.listar()),
           firstValueFrom(this.negociacaoService.listar()),
           firstValueFrom(this.implantacoesService.listar()),
+          firstValueFrom(this.instalacoesService.listar()),
           firstValueFrom(this.faturamentoService.listarPendentes()),
           firstValueFrom(this.enviosContabilidadeService.listarStatusMes(hoje.getFullYear(), hoje.getMonth() + 1)),
           firstValueFrom(this.clientesSistemasService.listar('uniplus')),
@@ -384,6 +400,7 @@ export class ResumoPanelComponent implements OnInit {
       this.clientes.set(clientes);
       this.negociacoes.set(negociacoes);
       this.implantacoes.set(implantacoes);
+      this.instalacoes.set(instalacoes);
       this.pendentesFaturamento.set(pendentesFaturamento);
       this.statusEnviosContabilidadeMes.set(new Map(statusEnviosContabilidade.map((s) => [s.acesso_id, !!s.enviado])));
       this.totalClientesUniplus.set(clientesUniplus.length);

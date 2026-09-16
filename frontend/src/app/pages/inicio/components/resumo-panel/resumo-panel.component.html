@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       <button
         type="button"
         class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
@@ -34,6 +34,19 @@
         </span>
         <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ emNegociacao() }}</span>
         <span class="mt-0.5 block text-[11px] text-zinc-500">{{ negociacoesNovasSemana() }} nova(s) essa semana</span>
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-zinc-700"
+        (click)="irPara.emit('instalacao')"
+      >
+        <span class="flex min-h-8 items-center gap-1.5 text-[11px] uppercase tracking-wide text-zinc-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.5 20v-2a3.5 3.5 0 0 1 7 0v2"/><path stroke-linecap="round" stroke-linejoin="round" d="M17 8.5V15m3-3.25L17 15l-3-3.25"/></svg>
+          Prontos pra instalar
+        </span>
+        <span class="mt-1 block text-2xl font-semibold text-zinc-100">{{ prontosParaInstalar() }}</span>
+        <span class="mt-0.5 block text-[11px] text-zinc-500">{{ instalacoesNovasSemana() }} nova(s) essa semana</span>
       </button>
 
       <button
