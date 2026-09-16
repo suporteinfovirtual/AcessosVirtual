@@ -48,9 +48,26 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
 }
 
-// DELETE /api/instalacoes/:id -> remove a instalação
+// DELETE /api/instalacoes/:id -> remove a instalação e devolve a negociação de origem
+// pro status "em negociação" (sem perder nome, cnpj, telefone etc já preenchidos nela)
 export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
   const { env, params } = context;
+
+  const instalacao = await env.DB
+    .prepare('SELECT negociacao_id FROM instalacoes WHERE id = ?')
+    .bind(params.id)
+    .first<{ negociacao_id: number | null }>();
+
+  if (instalacao?.negociacao_id) {
+    await env.DB
+      .prepare(
+        `UPDATE clientes_negociacao
+         SET status = 'em_negociacao', convertido_em = NULL, atualizado_em = datetime('now')
+         WHERE id = ?`
+      )
+      .bind(instalacao.negociacao_id)
+      .run();
+  }
 
   await env.DB.prepare('DELETE FROM instalacoes WHERE id = ?').bind(params.id).run();
 

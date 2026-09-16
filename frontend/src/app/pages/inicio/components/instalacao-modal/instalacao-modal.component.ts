@@ -164,7 +164,11 @@ export class InstalacaoModalComponent implements OnInit {
   async excluir() {
     const item = this.instalacao();
     if (!item.id || this.excluindo()) return;
-    if (!(await this.confirmService.confirmar(`Remover a instalação de "${item.cliente_nome}"?`))) return;
+
+    const mensagem = item.negociacao_id
+      ? `Remover a instalação de "${item.cliente_nome}"? O cliente volta para a Negociação.`
+      : `Remover a instalação de "${item.cliente_nome}"?`;
+    if (!(await this.confirmService.confirmar(mensagem))) return;
 
     this.excluindo.set(true);
     this.erro.set('');
