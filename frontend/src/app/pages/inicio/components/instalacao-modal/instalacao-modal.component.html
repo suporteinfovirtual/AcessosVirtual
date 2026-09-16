@@ -36,6 +36,12 @@
             <dd class="truncate text-sm text-zinc-300">{{ instalacao().email }}</dd>
           </div>
         }
+        @if (instalacao().aliquota) {
+          <div class="col-span-2 sm:col-span-1">
+            <dt class="text-[11px] uppercase tracking-wide text-zinc-500">Alíquota</dt>
+            <dd class="truncate text-sm text-zinc-300">{{ instalacao().aliquota }}</dd>
+          </div>
+        }
       </dl>
       @if (instalacao().precisa_migrar_base) {
         <p class="mt-2 text-xs font-medium text-amber-500">⚠ precisa migrar base</p>

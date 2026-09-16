@@ -95,6 +95,7 @@ export interface Instalacao {
   cnpj?: string | null;
   telefone?: string | null;
   email?: string | null;
+  aliquota?: string | null;
   enquadramento_fiscal?: string | null;
   precisa_migrar_base?: boolean | number;
   negociacao_id?: number | null;
@@ -128,6 +129,7 @@ export interface ClienteNegociacao {
   cnpj?: string | null;
   telefone?: string | null;
   email?: string | null;
+  aliquota?: string | null;
   enquadramento_fiscal?: string | null;
   observacoes?: string | null;
   status?: StatusNegociacao;

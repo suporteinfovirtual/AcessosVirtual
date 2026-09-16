@@ -23,6 +23,7 @@ export class NegociacaoModalComponent implements OnInit {
   cnpj = signal('');
   telefone = signal('');
   email = signal('');
+  aliquota = signal('');
   enquadramentoFiscal = signal('');
   observacoes = signal('');
   status = signal<StatusNegociacao>('em_negociacao');
@@ -52,6 +53,7 @@ export class NegociacaoModalComponent implements OnInit {
       this.cnpj.set(cliente.cnpj || '');
       this.telefone.set(cliente.telefone || '');
       this.email.set(cliente.email || '');
+      this.aliquota.set(cliente.aliquota || '');
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.observacoes.set(cliente.observacoes || '');
       this.status.set(cliente.status || 'em_negociacao');
@@ -72,6 +74,7 @@ export class NegociacaoModalComponent implements OnInit {
       cnpj: somenteDigitos(this.cnpj()) || null,
       telefone: this.telefone().trim() || null,
       email: this.sistema() === 'zeta' ? this.email().trim() || null : null,
+      aliquota: this.sistema() === 'zeta' ? this.aliquota().trim() || null : null,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       observacoes: this.observacoes().trim() || null,
       sistema: this.sistema(),

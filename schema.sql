@@ -232,6 +232,7 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
   cnpj TEXT,
   telefone TEXT,
   email TEXT, -- só coletado quando sistema = zeta (usado no login do cliente)
+  aliquota TEXT, -- só coletado quando sistema = zeta (usado na configuração do sistema)
   enquadramento_fiscal TEXT,
   observacoes TEXT,
   status TEXT NOT NULL DEFAULT 'em_negociacao',
@@ -287,6 +288,7 @@ CREATE TABLE IF NOT EXISTS instalacoes (
   cnpj TEXT,
   telefone TEXT, -- WhatsApp do cliente; começa igual ao telefone da negociação, editável
   email TEXT, -- e-mail de login do Zeta, snapshot do que foi lançado na negociação
+  aliquota TEXT, -- alíquota do Zeta, snapshot do que foi lançado na negociação
   enquadramento_fiscal TEXT,
   precisa_migrar_base INTEGER NOT NULL DEFAULT 0,
   negociacao_id INTEGER REFERENCES clientes_negociacao(id) ON DELETE SET NULL,
