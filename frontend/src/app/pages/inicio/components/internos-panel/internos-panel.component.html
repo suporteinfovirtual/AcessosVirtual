@@ -14,7 +14,7 @@
       @for (conta of contasFiltradas(); track conta.id) {
         <div
           [class]="viewMode.modo() === 'lista'
-            ? 'rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 transition hover:border-zinc-700 sm:flex sm:items-center sm:gap-5'
+            ? 'rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 transition hover:border-zinc-700 sm:flex sm:items-center sm:gap-5'
             : 'rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition hover:border-zinc-700'"
         >
           <button
