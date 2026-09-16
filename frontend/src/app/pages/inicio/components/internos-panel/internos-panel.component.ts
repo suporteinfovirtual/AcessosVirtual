@@ -5,7 +5,6 @@ import { InternosService } from '../../../../core/internos.service';
 import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { InternoModalComponent } from '../interno-modal/interno-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
-import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 
 @Component({
@@ -16,7 +15,6 @@ import { SkeletonComponent } from '../../../../shared/skeleton.component';
 export class InternosPanelComponent implements OnInit {
   private internosService = inject(InternosService);
   private toast = inject(ToastService);
-  viewMode = inject(ViewModeService);
 
   busca = input('');
 

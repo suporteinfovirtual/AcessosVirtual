@@ -316,7 +316,9 @@
         <app-faturamento-panel></app-faturamento-panel>
       } @else {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-          <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
+          @if (!mostrandoInternos()) {
+            <app-view-mode-toggle class="sm:mr-auto"></app-view-mode-toggle>
+          }
           @if (!mostrandoInternos() && !mostrandoManuais() && !mostrandoWiki() && !mostrandoArquivos()) {
             <div class="flex items-center gap-2">
               @if (abaAtiva() === 'acesso_web') {
