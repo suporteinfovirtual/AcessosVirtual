@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, CertificadoDigital, Categoria, Cliente, Contabilidade, ENQUADRAMENTOS_FISCAIS, Licenca, TIPOS_ACESSO, TipoAcesso } from '../../../../core/models';
@@ -8,6 +8,7 @@ import { CategoriasService } from '../../../../core/categorias.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { LicencasService } from '../../../../core/licencas.service';
 import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
+import { calcularLucro, calcularMargemPercentual } from '../../../../core/financeiro.util';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
@@ -27,7 +28,7 @@ interface CampoAcesso {
 
 @Component({
   selector: 'app-cliente-modal',
-  imports: [FormsModule, DatePipe, LicencasSelectComponent],
+  imports: [FormsModule, DatePipe, DecimalPipe, LicencasSelectComponent],
   templateUrl: './cliente-modal.component.html',
 })
 export class ClienteModalComponent implements OnInit {
@@ -56,6 +57,8 @@ export class ClienteModalComponent implements OnInit {
   licencaIds = signal<number[]>([]);
   licencasDisponiveis = signal<Licenca[]>([]);
   enquadramentoFiscal = signal('');
+  custoMensalidade = signal<number | null>(null);
+  valorMensalidade = signal<number | null>(null);
   categorias = signal<Categoria[]>([]);
   contabilidades = signal<Contabilidade[]>([]);
 
@@ -92,6 +95,9 @@ export class ClienteModalComponent implements OnInit {
     return this.tipoInicial() === 'acesso_web';
   }
 
+  lucro = computed(() => calcularLucro(this.custoMensalidade(), this.valorMensalidade()));
+  margem = computed(() => calcularMargemPercentual(this.custoMensalidade(), this.valorMensalidade()));
+
   aoDigitarTelefone(valor: string) {
     this.telefone.set(formatarTelefone(valor));
   }
@@ -113,6 +119,8 @@ export class ClienteModalComponent implements OnInit {
       this.licencas.set(cliente.licencas || '');
       this.licencaIds.set((cliente.licencas_selecionadas || []).map((l) => l.id!));
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
+      this.custoMensalidade.set(cliente.custo_mensalidade ?? null);
+      this.valorMensalidade.set(cliente.valor_mensalidade ?? null);
       this.certificado.set(cliente.certificado || null);
 
       for (const acesso of cliente.acessos || []) {
@@ -177,6 +185,8 @@ export class ClienteModalComponent implements OnInit {
       licencas: this.licencas().trim() || null,
       licenca_ids: this.usaListaDeLicencas ? this.licencaIds() : undefined,
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
+      custo_mensalidade: this.custoMensalidade(),
+      valor_mensalidade: this.valorMensalidade(),
     };
 
     let clienteIdSalvo: number;

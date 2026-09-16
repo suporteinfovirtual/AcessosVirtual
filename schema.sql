@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
   licencas TEXT, -- usado no Acesso Zeta / Clientes > Zeta
   enquadramento_fiscal TEXT, -- usado no Acesso Zeta / Clientes > Zeta
+  custo_mensalidade REAL, -- quanto custa manter esse cliente (relatório financeiro)
+  valor_mensalidade REAL, -- quanto é cobrado do cliente (relatório financeiro)
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -158,6 +160,8 @@ CREATE TABLE IF NOT EXISTS clientes_sistemas (
   enquadramento_fiscal TEXT,
   versao_build TEXT,
   observacoes TEXT,
+  custo_mensalidade REAL, -- quanto custa manter esse cliente (relatório financeiro)
+  valor_mensalidade REAL, -- quanto é cobrado do cliente (relatório financeiro)
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

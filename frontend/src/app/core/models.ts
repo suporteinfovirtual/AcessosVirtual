@@ -36,6 +36,8 @@ export interface Cliente {
   licencas_selecionadas?: Licenca[];
   licenca_ids?: number[];
   enquadramento_fiscal?: string | null;
+  custo_mensalidade?: number | null;
+  valor_mensalidade?: number | null;
   criado_em?: string;
   acessos?: Acesso[];
   certificado?: CertificadoDigital | null;
@@ -261,6 +263,8 @@ export interface ClienteSistema {
   enquadramento_fiscal?: string | null;
   versao_build?: string | null;
   observacoes?: string | null;
+  custo_mensalidade?: number | null;
+  valor_mensalidade?: number | null;
   criado_em?: string;
   certificado?: CertificadoDigital | null;
 }

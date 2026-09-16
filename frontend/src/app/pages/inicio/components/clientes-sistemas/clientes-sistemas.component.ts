@@ -7,6 +7,7 @@ import { ClientesService } from '../../../../core/clientes.service';
 import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-sistema-modal.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 import { LicencasModalComponent } from '../licencas-modal/licencas-modal.component';
+import { RelatorioLucroModalComponent } from '../relatorio-lucro-modal/relatorio-lucro-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
@@ -28,6 +29,7 @@ const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
     ClienteSistemaModalComponent,
     ClienteModalComponent,
     LicencasModalComponent,
+    RelatorioLucroModalComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
   ],
@@ -58,6 +60,7 @@ export class ClientesSistemasComponent implements OnInit {
   clienteUnificadoEmEdicao = signal<Cliente | null>(null);
 
   licencasModalAberto = signal(false);
+  relatorioModalAberto = signal(false);
 
   tipoUnificado = computed<TipoAcesso | null>(() => TIPO_POR_SISTEMA_UNIFICADO[this.sistemaAtivo()] ?? null);
   ehUnificado = computed(() => this.tipoUnificado() !== null);
@@ -156,6 +159,10 @@ export class ClientesSistemasComponent implements OnInit {
 
   abrirLicencas() {
     this.licencasModalAberto.set(true);
+  }
+
+  abrirRelatorio() {
+    this.relatorioModalAberto.set(true);
   }
 
   async aoAlterarLicencas() {

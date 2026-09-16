@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ClienteSistema, ENQUADRAMENTOS_FISCAIS, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
@@ -6,11 +7,12 @@ import { ClientesSistemasService } from '../../../../core/clientes-sistemas.serv
 import { LicencasService } from '../../../../core/licencas.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
+import { calcularLucro, calcularMargemPercentual } from '../../../../core/financeiro.util';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
 
 @Component({
   selector: 'app-cliente-sistema-modal',
-  imports: [FormsModule, LicencasSelectComponent],
+  imports: [FormsModule, DecimalPipe, LicencasSelectComponent],
   templateUrl: './cliente-sistema-modal.component.html',
 })
 export class ClienteSistemaModalComponent implements OnInit {
@@ -36,6 +38,8 @@ export class ClienteSistemaModalComponent implements OnInit {
   enquadramentoFiscal = signal('');
   versaoBuild = signal('');
   observacoes = signal('');
+  custoMensalidade = signal<number | null>(null);
+  valorMensalidade = signal<number | null>(null);
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -52,6 +56,9 @@ export class ClienteSistemaModalComponent implements OnInit {
   get usaListaDeLicencas() {
     return this.sistema() === 'uniplus';
   }
+
+  lucro = computed(() => calcularLucro(this.custoMensalidade(), this.valorMensalidade()));
+  margem = computed(() => calcularMargemPercentual(this.custoMensalidade(), this.valorMensalidade()));
 
   aoDigitarTelefone(valor: string) {
     this.telefone.set(formatarTelefone(valor));
@@ -72,6 +79,8 @@ export class ClienteSistemaModalComponent implements OnInit {
       this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
       this.versaoBuild.set(cliente.versao_build || '');
       this.observacoes.set(cliente.observacoes || '');
+      this.custoMensalidade.set(cliente.custo_mensalidade ?? null);
+      this.valorMensalidade.set(cliente.valor_mensalidade ?? null);
     }
   }
 
@@ -90,6 +99,8 @@ export class ClienteSistemaModalComponent implements OnInit {
       enquadramento_fiscal: this.enquadramentoFiscal().trim() || null,
       versao_build: this.temVersaoBuild ? this.versaoBuild().trim() || null : null,
       observacoes: this.observacoes().trim() || null,
+      custo_mensalidade: this.custoMensalidade(),
+      valor_mensalidade: this.valorMensalidade(),
     };
 
     try {

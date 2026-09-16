@@ -53,6 +53,8 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     categoria_id?: number | null;
     licencas?: string;
     enquadramento_fiscal?: string;
+    custo_mensalidade?: number | null;
+    valor_mensalidade?: number | null;
     licenca_ids?: number[];
   };
   try {
@@ -67,7 +69,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
 
   await env.DB
     .prepare(
-      'UPDATE clientes SET nome = ?, cnpj = ?, telefone = ?, observacoes = ?, categoria_id = ?, licencas = ?, enquadramento_fiscal = ? WHERE id = ?'
+      'UPDATE clientes SET nome = ?, cnpj = ?, telefone = ?, observacoes = ?, categoria_id = ?, licencas = ?, enquadramento_fiscal = ?, custo_mensalidade = ?, valor_mensalidade = ? WHERE id = ?'
     )
     .bind(
       body.nome.trim(),
@@ -77,6 +79,8 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.categoria_id || null,
       body.licencas?.trim() || null,
       body.enquadramento_fiscal?.trim() || null,
+      body.custo_mensalidade ?? null,
+      body.valor_mensalidade ?? null,
       params.id
     )
     .run();

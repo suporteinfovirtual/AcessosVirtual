@@ -70,6 +70,46 @@
           </div>
         }
 
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Custo da mensalidade</label>
+          <input
+            type="number"
+            step="0.01"
+            [ngModel]="custoMensalidade()"
+            (ngModelChange)="custoMensalidade.set($event)"
+            name="custoMensalidade"
+            placeholder="0,00"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Valor cobrado (mensalidade)</label>
+          <input
+            type="number"
+            step="0.01"
+            [ngModel]="valorMensalidade()"
+            (ngModelChange)="valorMensalidade.set($event)"
+            name="valorMensalidade"
+            placeholder="0,00"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        @if (lucro() !== null) {
+          <div class="sm:col-span-2 flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm">
+            <span class="text-zinc-400">Lucro:</span>
+            <span [class]="lucro()! >= 0 ? 'font-semibold text-emerald-400' : 'font-semibold text-red-400'">
+              R$ {{ lucro()! | number: '1.2-2' }}
+            </span>
+            @if (margem() !== null) {
+              <span [class]="margem()! >= 0 ? 'font-semibold text-emerald-400' : 'font-semibold text-red-400'">
+                ({{ margem()! | number: '1.1-1' }}%)
+              </span>
+            }
+          </div>
+        }
+
         <div [class]="temVersaoBuild ? '' : 'sm:col-span-2'">
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Licenças</label>
           @if (usaListaDeLicencas) {

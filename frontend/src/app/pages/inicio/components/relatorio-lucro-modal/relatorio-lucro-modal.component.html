@@ -1,0 +1,101 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
+  <div
+    class="w-full max-w-4xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-100">Relatório de lucro por cliente</h2>
+      <button type="button" class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" (click)="fechar.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="max-h-[75vh] overflow-y-auto px-6 py-5">
+      @if (carregando()) {
+        <app-skeleton variante="linhas" [quantidade]="6"></app-skeleton>
+      } @else {
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
+            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Custo total</span>
+            <span class="mt-1 block text-lg font-semibold text-zinc-100">R$ {{ totalCusto() | number: '1.2-2' }}</span>
+          </div>
+          <div class="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
+            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Valor cobrado total</span>
+            <span class="mt-1 block text-lg font-semibold text-zinc-100">R$ {{ totalValor() | number: '1.2-2' }}</span>
+          </div>
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Lucro total</span>
+            <span class="mt-1 block text-lg font-semibold text-emerald-400">R$ {{ totalLucro() | number: '1.2-2' }}</span>
+          </div>
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Margem média</span>
+            <span class="mt-1 block text-lg font-semibold text-emerald-400">
+              {{ totalMargem() !== null ? (totalMargem()! | number: '1.1-1') + '%' : '—' }}
+            </span>
+          </div>
+        </div>
+
+        @if (totalSemDados() > 0) {
+          <p class="mt-2 text-xs text-zinc-500">{{ totalSemDados() }} cliente(s) sem custo/valor cadastrado, não entram nos totais.</p>
+        }
+
+        <div class="relative mt-5 w-full sm:max-w-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input
+            [(ngModel)]="busca"
+            type="text"
+            placeholder="Buscar por nome…"
+            class="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full min-w-[640px] text-left text-sm">
+            <thead>
+              <tr class="border-b border-zinc-800 text-[11px] uppercase tracking-wide text-zinc-500">
+                <th class="py-2 pr-3 font-medium">Cliente</th>
+                <th class="py-2 pr-3 font-medium">Sistema</th>
+                <th class="py-2 pr-3 text-right font-medium">Custo</th>
+                <th class="py-2 pr-3 text-right font-medium">Cobrado</th>
+                <th class="py-2 pr-3 text-right font-medium">Lucro</th>
+                <th class="py-2 text-right font-medium">Margem</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (linha of linhasFiltradas(); track linha.sistema + linha.nome) {
+                <tr class="border-b border-zinc-900">
+                  <td class="py-2 pr-3 uppercase text-zinc-200">{{ linha.nome }}</td>
+                  <td class="py-2 pr-3 text-zinc-500">{{ rotuloSistema(linha.sistema) }}</td>
+                  <td class="py-2 pr-3 text-right text-zinc-300">{{ linha.custo !== null ? ('R$ ' + (linha.custo | number: '1.2-2')) : '—' }}</td>
+                  <td class="py-2 pr-3 text-right text-zinc-300">{{ linha.valor !== null ? ('R$ ' + (linha.valor | number: '1.2-2')) : '—' }}</td>
+                  <td
+                    class="py-2 pr-3 text-right font-medium"
+                    [class.text-emerald-400]="linha.lucro !== null && linha.lucro >= 0"
+                    [class.text-red-400]="linha.lucro !== null && linha.lucro < 0"
+                    [class.text-zinc-600]="linha.lucro === null"
+                  >
+                    {{ linha.lucro !== null ? ('R$ ' + (linha.lucro | number: '1.2-2')) : '—' }}
+                  </td>
+                  <td
+                    class="py-2 text-right font-medium"
+                    [class.text-emerald-400]="linha.margem !== null && linha.margem >= 0"
+                    [class.text-red-400]="linha.margem !== null && linha.margem < 0"
+                    [class.text-zinc-600]="linha.margem === null"
+                  >
+                    {{ linha.margem !== null ? (linha.margem | number: '1.1-1') + '%' : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (linhasFiltradas().length === 0) {
+            <p class="py-10 text-center text-sm text-zinc-600">Nenhum cliente encontrado.</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

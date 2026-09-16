@@ -88,6 +88,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     categoria_id?: number | null;
     licencas?: string;
     enquadramento_fiscal?: string;
+    custo_mensalidade?: number | null;
+    valor_mensalidade?: number | null;
     licenca_ids?: number[];
     acessos?: AcessoInput[];
   };
@@ -103,7 +105,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
 
   const resultadoCliente = await env.DB
     .prepare(
-      'INSERT INTO clientes (nome, cnpj, telefone, observacoes, categoria_id, licencas, enquadramento_fiscal) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO clientes (nome, cnpj, telefone, observacoes, categoria_id, licencas, enquadramento_fiscal, custo_mensalidade, valor_mensalidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
     .bind(
       body.nome.trim(),
@@ -112,7 +114,9 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       body.observacoes?.trim() || null,
       body.categoria_id || null,
       body.licencas?.trim() || null,
-      body.enquadramento_fiscal?.trim() || null
+      body.enquadramento_fiscal?.trim() || null,
+      body.custo_mensalidade ?? null,
+      body.valor_mensalidade ?? null
     )
     .run();
 
