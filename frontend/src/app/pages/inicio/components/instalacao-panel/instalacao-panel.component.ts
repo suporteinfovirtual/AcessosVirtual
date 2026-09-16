@@ -21,8 +21,8 @@ export class InstalacaoPanelComponent implements OnInit {
   viewMode = inject(ViewModeService);
 
   busca = signal('');
-  // começa em "a_instalar": quem já foi instalado só aparece escolhendo o filtro "Instalado"
-  statusFiltro = signal<StatusInstalacao | 'todos'>('a_instalar');
+  // sem opção "Todos": ou vê quem está pendente, ou quem já foi instalado, nunca os dois juntos
+  statusFiltro = signal<StatusInstalacao>('a_instalar');
   readonly statusOpcoes = STATUS_INSTALACAO;
 
   instalacoes = signal<Instalacao[]>([]);
@@ -36,8 +36,7 @@ export class InstalacaoPanelComponent implements OnInit {
     const status = this.statusFiltro();
     return this.instalacoes().filter((i) => {
       const bateTermo = !termo || i.cliente_nome.toLowerCase().includes(termo) || (i.cnpj || '').toLowerCase().includes(termo);
-      const bateStatus =
-        status === 'todos' || (status === 'instalado' ? !!i.instalado : !i.instalado);
+      const bateStatus = status === 'instalado' ? !!i.instalado : !i.instalado;
       return bateTermo && bateStatus;
     });
   });
