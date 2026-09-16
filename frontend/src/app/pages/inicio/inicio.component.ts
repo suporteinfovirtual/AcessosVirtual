@@ -619,6 +619,7 @@ export class InicioComponent implements OnInit {
         cliente_nome: negociacao.nome,
         cnpj: negociacao.cnpj ?? null,
         telefone: negociacao.telefone ?? null,
+        email: negociacao.email ?? null,
         enquadramento_fiscal: negociacao.enquadramento_fiscal ?? null,
         precisa_migrar_base: !!negociacao.precisa_migrar_base,
         negociacao_id: negociacao.id,

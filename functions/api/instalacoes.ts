@@ -54,6 +54,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     cliente_nome?: string;
     cnpj?: string | null;
     telefone?: string | null;
+    email?: string | null;
     enquadramento_fiscal?: string | null;
     precisa_migrar_base?: boolean;
     negociacao_id?: number | null;
@@ -74,8 +75,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
   const resultado = await env.DB
     .prepare(
       `INSERT INTO instalacoes
-         (cliente_sistema, cliente_ref_id, cliente_nome, cnpj, telefone, enquadramento_fiscal, precisa_migrar_base, negociacao_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+         (cliente_sistema, cliente_ref_id, cliente_nome, cnpj, telefone, email, enquadramento_fiscal, precisa_migrar_base, negociacao_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       body.cliente_sistema,
@@ -83,6 +84,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       body.cliente_nome.trim(),
       body.cnpj?.toString().trim() || null,
       body.telefone?.toString().trim() || null,
+      body.email?.toString().trim() || null,
       body.enquadramento_fiscal?.toString().trim() || null,
       body.precisa_migrar_base ? 1 : 0,
       body.negociacao_id || null

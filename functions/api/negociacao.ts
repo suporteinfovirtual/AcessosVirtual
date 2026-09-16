@@ -42,6 +42,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     nome?: string;
     cnpj?: string;
     telefone?: string;
+    email?: string;
     enquadramento_fiscal?: string;
     observacoes?: string;
     sistema?: string;
@@ -63,12 +64,13 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
 
   const resultado = await env.DB
     .prepare(
-      'INSERT INTO clientes_negociacao (nome, cnpj, telefone, enquadramento_fiscal, observacoes, sistema, precisa_migrar_base) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO clientes_negociacao (nome, cnpj, telefone, email, enquadramento_fiscal, observacoes, sistema, precisa_migrar_base) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     )
     .bind(
       body.nome.trim(),
       body.cnpj?.trim() || null,
       body.telefone?.trim() || null,
+      body.email?.trim() || null,
       body.enquadramento_fiscal?.trim() || null,
       body.observacoes?.trim() || null,
       body.sistema || null,

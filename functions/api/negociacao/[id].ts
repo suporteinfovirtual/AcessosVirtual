@@ -13,6 +13,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     nome?: string;
     cnpj?: string;
     telefone?: string;
+    email?: string;
     enquadramento_fiscal?: string;
     observacoes?: string;
     status?: string;
@@ -44,7 +45,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   await env.DB
     .prepare(
       `UPDATE clientes_negociacao
-       SET nome = ?, cnpj = ?, telefone = ?, enquadramento_fiscal = ?, observacoes = ?,
+       SET nome = ?, cnpj = ?, telefone = ?, email = ?, enquadramento_fiscal = ?, observacoes = ?,
            precisa_migrar_base = ?, motivo_desistencia = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
            convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END,
            atualizado_em = datetime('now')
@@ -54,6 +55,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.nome.trim(),
       body.cnpj?.trim() || null,
       body.telefone?.trim() || null,
+      body.email?.trim() || null,
       body.enquadramento_fiscal?.trim() || null,
       body.observacoes?.trim() || null,
       body.precisa_migrar_base ? 1 : 0,

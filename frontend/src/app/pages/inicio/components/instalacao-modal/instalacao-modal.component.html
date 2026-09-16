@@ -30,6 +30,12 @@
             <dd class="truncate text-sm text-zinc-300">{{ instalacao().enquadramento_fiscal }}</dd>
           </div>
         }
+        @if (instalacao().email) {
+          <div class="col-span-2 sm:col-span-1">
+            <dt class="text-[11px] uppercase tracking-wide text-zinc-500">E-mail</dt>
+            <dd class="truncate text-sm text-zinc-300">{{ instalacao().email }}</dd>
+          </div>
+        }
       </dl>
       @if (instalacao().precisa_migrar_base) {
         <p class="mt-2 text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
