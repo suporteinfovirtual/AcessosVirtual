@@ -74,6 +74,11 @@
                   <span [class]="'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' + corStatus(cliente.status)">
                     {{ rotuloStatus(cliente.status) }}
                   </span>
+                  @if (cliente.sistema) {
+                    <span class="shrink-0 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
+                      {{ rotuloSistema(cliente.sistema) }}
+                    </span>
+                  }
                   @if (cliente.convertido_em) {
                     <span class="shrink-0 text-[11px] font-medium text-emerald-500">✓ na instalação</span>
                   }

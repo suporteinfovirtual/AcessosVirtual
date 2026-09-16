@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, STATUS_NEGOCIACAO, StatusNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { NegociacaoModalComponent } from '../negociacao-modal/negociacao-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
@@ -74,6 +74,10 @@ export class NegociacaoPanelComponent implements OnInit {
 
   rotuloStatus(status?: StatusNegociacao): string {
     return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
+  }
+
+  rotuloSistema(sistema?: Sistema | null): string {
+    return SISTEMAS.find((s) => s.valor === sistema)?.rotulo ?? '';
   }
 
   corStatus(status?: StatusNegociacao): string {
