@@ -1,13 +1,17 @@
 import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, SISTEMAS, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { NegociacaoModalComponent } from '../negociacao-modal/negociacao-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+
+// filtro da tela, além dos status reais: "todos" e "na_instalacao" controlam a
+// visibilidade de quem já foi convertido (ver clientesFiltrados)
+type FiltroNegociacao = StatusNegociacao | 'todos' | 'na_instalacao';
 
 @Component({
   selector: 'app-negociacao-panel',
@@ -24,8 +28,14 @@ export class NegociacaoPanelComponent implements OnInit {
   converter = output<ClienteNegociacao>();
 
   busca = signal('');
-  statusFiltro = signal<StatusNegociacao | 'todos'>('todos');
-  readonly statusOpcoes = STATUS_NEGOCIACAO;
+  statusFiltro = signal<FiltroNegociacao>('todos');
+  readonly statusOpcoes: { valor: FiltroNegociacao; rotulo: string }[] = [
+    { valor: 'todos', rotulo: 'Todos' },
+    { valor: 'em_negociacao', rotulo: 'Em negociação' },
+    { valor: 'fechou', rotulo: 'Fechou' },
+    { valor: 'desistiu', rotulo: 'Desistiu' },
+    { valor: 'na_instalacao', rotulo: 'Na instalação' },
+  ];
 
   clientes = signal<ClienteNegociacao[]>([]);
   carregando = signal(true);
@@ -33,14 +43,38 @@ export class NegociacaoPanelComponent implements OnInit {
   modalAberto = signal(false);
   clienteEmEdicao = signal<ClienteNegociacao | null>(null);
 
+  // "Todos" e os filtros de status escondem quem já foi enviado pra instalação — pra ver
+  // esses, é preciso escolher o filtro "Na instalação" explicitamente.
   clientesFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
-    const status = this.statusFiltro();
+    const filtro = this.statusFiltro();
     return this.clientes().filter((c) => {
       const bateTermo = !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo);
-      const bateStatus = status === 'todos' || c.status === status;
-      return bateTermo && bateStatus;
+      if (!bateTermo) return false;
+
+      const naInstalacao = !!c.convertido_em;
+      if (filtro === 'na_instalacao') return naInstalacao;
+      if (naInstalacao) return false;
+      return filtro === 'todos' || c.status === filtro;
     });
+  });
+
+  // agrupa o resultado filtrado por sistema (Uniplus, Uniplus Web, SGBR, Zeta), na ordem
+  // de SISTEMAS; só entra na lista quem tem pelo menos um cliente — sem linhas vazias.
+  // quem ainda não tem sistema decidido cai num grupo à parte, no fim.
+  gruposPorSistema = computed(() => {
+    const lista = this.clientesFiltrados();
+    const grupos = SISTEMAS.map((s) => ({
+      sistema: s.valor as Sistema | null,
+      rotulo: s.rotulo,
+      clientes: lista.filter((c) => c.sistema === s.valor),
+    })).filter((grupo) => grupo.clientes.length > 0);
+
+    const semSistema = lista.filter((c) => !c.sistema);
+    if (semSistema.length > 0) {
+      grupos.push({ sistema: null, rotulo: 'Sem sistema definido', clientes: semSistema });
+    }
+    return grupos;
   });
 
   ngOnInit() {
@@ -74,10 +108,6 @@ export class NegociacaoPanelComponent implements OnInit {
 
   rotuloStatus(status?: StatusNegociacao): string {
     return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
-  }
-
-  rotuloSistema(sistema?: Sistema | null): string {
-    return SISTEMAS.find((s) => s.valor === sistema)?.rotulo ?? '';
   }
 
   corStatus(status?: StatusNegociacao): string {
