@@ -1,6 +1,6 @@
 <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
   <div
-    class="w-full max-w-xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    class="w-full max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
     (click)="$event.stopPropagation()"
   >
     <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
@@ -14,7 +14,7 @@
 
     <form class="flex max-h-[70vh] flex-col" (ngSubmit)="salvarCliente()">
       <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-      <div class="space-y-4">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Nome*</label>
           <input
@@ -89,7 +89,7 @@
         }
 
         @if (usaListaDeLicencas) {
-          <div>
+          <div class="sm:col-span-2">
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Licenças</label>
             <app-licencas-select
               [disponiveis]="licencasDisponiveis()"
@@ -99,7 +99,7 @@
           </div>
         }
 
-        <div>
+        <div class="sm:col-span-2">
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Observações</label>
           <textarea
             [(ngModel)]="observacoes"
