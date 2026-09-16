@@ -20,9 +20,15 @@ export async function onRequestGet(context: EventContext<Env, { id: string }, un
     .bind(params.id)
     .all();
 
-  return new Response(JSON.stringify({ ...cliente, licencas_selecionadas: licencasSelecionadas }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const certificado = await env.DB
+    .prepare('SELECT nome_arquivo, senha, validade, atualizado_em FROM certificados_sistemas WHERE cliente_sistema_id = ?')
+    .bind(params.id)
+    .first();
+
+  return new Response(
+    JSON.stringify({ ...cliente, licencas_selecionadas: licencasSelecionadas, certificado: certificado || null }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 // PUT /api/clientes-sistemas/:id -> atualiza os dados do cliente

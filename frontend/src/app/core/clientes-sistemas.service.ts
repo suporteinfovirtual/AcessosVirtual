@@ -12,6 +12,10 @@ export class ClientesSistemasService {
     return this.http.get<ClienteSistema[]>('/api/clientes-sistemas', { params });
   }
 
+  obter(id: number): Observable<ClienteSistema> {
+    return this.http.get<ClienteSistema>(`/api/clientes-sistemas/${id}`);
+  }
+
   criar(cliente: ClienteSistema): Observable<{ id: number }> {
     return this.http.post<{ id: number }>('/api/clientes-sistemas', cliente);
   }
@@ -22,5 +26,18 @@ export class ClientesSistemasService {
 
   remover(id: number): Observable<{ ok: true }> {
     return this.http.delete<{ ok: true }>(`/api/clientes-sistemas/${id}`);
+  }
+
+  enviarCertificado(clienteId: number, arquivo: File, senha: string, validade: string | null): Observable<{ ok: true }> {
+    const form = new FormData();
+    form.append('arquivo', arquivo, arquivo.name);
+    form.append('nome_arquivo', arquivo.name);
+    form.append('senha', senha);
+    if (validade) form.append('validade', validade);
+    return this.http.post<{ ok: true }>(`/api/clientes-sistemas/${clienteId}/certificado`, form);
+  }
+
+  baixarCertificado(clienteId: number): Observable<Blob> {
+    return this.http.get(`/api/clientes-sistemas/${clienteId}/certificado`, { responseType: 'blob' });
   }
 }

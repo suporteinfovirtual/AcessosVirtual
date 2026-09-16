@@ -258,6 +258,7 @@ export interface ClienteSistema {
   versao_build?: string | null;
   observacoes?: string | null;
   criado_em?: string;
+  certificado?: CertificadoDigital | null;
 }
 
 export const SISTEMAS: { valor: Sistema; rotulo: string; temVersaoBuild: boolean }[] = [

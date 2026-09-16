@@ -6,6 +6,7 @@ import { CertificadoDigital, Instalacao, SISTEMAS, Tecnico } from '../../../../c
 import { InstalacoesService } from '../../../../core/instalacoes.service';
 import { TecnicosService } from '../../../../core/tecnicos.service';
 import { ClientesService } from '../../../../core/clientes.service';
+import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
@@ -19,6 +20,7 @@ export class InstalacaoModalComponent implements OnInit {
   private instalacoesService = inject(InstalacoesService);
   private tecnicosService = inject(TecnicosService);
   private clientesService = inject(ClientesService);
+  private clientesSistemasService = inject(ClientesSistemasService);
   private confirmService = inject(ConfirmService);
 
   instalacao = input.required<Instalacao>();
@@ -36,8 +38,9 @@ export class InstalacaoModalComponent implements OnInit {
   excluindo = signal(false);
   erro = signal('');
 
-  // --- certificado digital: só p/ zeta / uniplus_web, que vivem na tabela clientes
-  // (cliente_ref_id = clientes.id) e usam os endpoints /api/clientes/:id/certificado ---
+  // --- certificado digital: zeta/uniplus_web vivem na tabela clientes (cliente_ref_id =
+  // clientes.id, endpoints /api/clientes/:id/certificado); uniplus/sgbr vivem em
+  // clientes_sistemas (endpoints /api/clientes-sistemas/:id/certificado) ---
   certificado = signal<CertificadoDigital | null>(null);
   formCertificadoAberto = signal(false);
   arquivoCertificado = signal<File | null>(null);
@@ -45,9 +48,10 @@ export class InstalacaoModalComponent implements OnInit {
   enviandoCertificado = signal(false);
   erroCertificado = signal('');
 
-  suportaCertificado = computed(
-    () => this.instalacao().cliente_sistema === 'zeta' || this.instalacao().cliente_sistema === 'uniplus_web'
-  );
+  private ehSistemaUnificado(): boolean {
+    const sistema = this.instalacao().cliente_sistema;
+    return sistema === 'zeta' || sistema === 'uniplus_web';
+  }
 
   rotuloSistema = computed(() => SISTEMAS.find((s) => s.valor === this.instalacao().cliente_sistema)?.rotulo ?? '');
 
@@ -71,8 +75,12 @@ export class InstalacaoModalComponent implements OnInit {
     this.observacoes.set(item.observacoes || '');
     this.instalado.set(!!item.instalado);
 
-    if (this.suportaCertificado()) {
+    if (this.ehSistemaUnificado()) {
       firstValueFrom(this.clientesService.obter(item.cliente_ref_id))
+        .then((cliente) => this.certificado.set(cliente.certificado || null))
+        .catch(() => {});
+    } else {
+      firstValueFrom(this.clientesSistemasService.obter(item.cliente_ref_id))
         .then((cliente) => this.certificado.set(cliente.certificado || null))
         .catch(() => {});
     }
@@ -128,7 +136,10 @@ export class InstalacaoModalComponent implements OnInit {
     const nome = this.certificado()?.nome_arquivo || 'certificado.pfx';
     this.erroCertificado.set('');
     try {
-      const blob = await firstValueFrom(this.clientesService.baixarCertificado(this.instalacao().cliente_ref_id));
+      const clienteId = this.instalacao().cliente_ref_id;
+      const blob = await firstValueFrom(
+        this.ehSistemaUnificado() ? this.clientesService.baixarCertificado(clienteId) : this.clientesSistemasService.baixarCertificado(clienteId)
+      );
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -149,9 +160,11 @@ export class InstalacaoModalComponent implements OnInit {
     this.erroCertificado.set('');
     try {
       const validadeIso = paraDataIso(await lerValidadeCertificado(arquivo, senha));
-      await firstValueFrom(
-        this.clientesService.enviarCertificado(this.instalacao().cliente_ref_id, arquivo, senha, validadeIso)
-      );
+      const clienteId = this.instalacao().cliente_ref_id;
+      const envio = this.ehSistemaUnificado()
+        ? this.clientesService.enviarCertificado(clienteId, arquivo, senha, validadeIso)
+        : this.clientesSistemasService.enviarCertificado(clienteId, arquivo, senha, validadeIso);
+      await firstValueFrom(envio);
       this.certificado.set({ nome_arquivo: arquivo.name, senha, validade: validadeIso });
       this.formCertificadoAberto.set(false);
     } catch (e) {

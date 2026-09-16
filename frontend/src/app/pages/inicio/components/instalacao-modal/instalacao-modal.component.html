@@ -101,8 +101,7 @@
           ></textarea>
         </div>
 
-        @if (suportaCertificado()) {
-          <div>
+        <div>
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Certificado digital</label>
             <div class="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
               @if (certificado() && !formCertificadoAberto()) {
@@ -177,8 +176,7 @@
                 <p class="mt-2 text-xs text-red-400">{{ erroCertificado() }}</p>
               }
             </div>
-          </div>
-        }
+        </div>
 
         <div>
           <label class="flex items-center gap-2 text-sm text-zinc-300">
