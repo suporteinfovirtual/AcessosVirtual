@@ -1,4 +1,15 @@
 <div>
+  <div class="flex justify-end">
+    <button
+      type="button"
+      class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+      (click)="abrirNova()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+      Nova conta interna
+    </button>
+  </div>
+
   @if (carregando()) {
     <div class="mt-4">
       <app-skeleton variante="linhas"></app-skeleton>
@@ -33,15 +44,6 @@
       }
     </div>
   }
-
-  <button
-    type="button"
-    class="mt-5 flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-accent"
-    (click)="abrirNova()"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-    Nova conta interna
-  </button>
 </div>
 
 @if (modalAberto()) {
