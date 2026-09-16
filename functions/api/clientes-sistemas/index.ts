@@ -16,17 +16,21 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
   const binds: unknown[] = [];
 
   if (sistema && SISTEMAS.includes(sistema)) {
-    condicoes.push('sistema = ?');
+    condicoes.push('clientes_sistemas.sistema = ?');
     binds.push(sistema);
   }
   if (busca) {
-    condicoes.push('(nome LIKE ? OR cnpj LIKE ?)');
+    condicoes.push('(clientes_sistemas.nome LIKE ? OR clientes_sistemas.cnpj LIKE ?)');
     binds.push(`%${busca}%`, `%${busca}%`);
   }
 
   const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
   const { results: clientes } = await env.DB
-    .prepare(`SELECT * FROM clientes_sistemas ${where} ORDER BY nome`)
+    .prepare(
+      `SELECT clientes_sistemas.*, categorias.nome AS categoria_nome
+       FROM clientes_sistemas LEFT JOIN categorias ON categorias.id = clientes_sistemas.categoria_id
+       ${where} ORDER BY clientes_sistemas.nome`
+    )
     .bind(...binds)
     .all();
 
@@ -66,6 +70,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     observacoes?: string;
     custo_mensalidade?: number | null;
     valor_mensalidade?: number | null;
+    categoria_id?: number | null;
     licenca_ids?: number[];
   };
   try {
@@ -83,8 +88,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
 
   const resultado = await env.DB
     .prepare(
-      `INSERT INTO clientes_sistemas (sistema, nome, cnpj, telefone, licencas, enquadramento_fiscal, versao_build, observacoes, custo_mensalidade, valor_mensalidade)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO clientes_sistemas (sistema, nome, cnpj, telefone, licencas, enquadramento_fiscal, versao_build, observacoes, custo_mensalidade, valor_mensalidade, categoria_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       body.sistema,
@@ -96,7 +101,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       body.versao_build?.trim() || null,
       body.observacoes?.trim() || null,
       body.custo_mensalidade ?? null,
-      body.valor_mensalidade ?? null
+      body.valor_mensalidade ?? null,
+      body.categoria_id || null
     )
     .run();
 

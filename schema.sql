@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS clientes_sistemas (
   observacoes TEXT,
   custo_mensalidade REAL, -- quanto custa manter esse cliente (relatório financeiro)
   valor_mensalidade REAL, -- quanto é cobrado do cliente (relatório financeiro)
+  categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
   criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

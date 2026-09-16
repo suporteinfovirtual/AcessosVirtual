@@ -33,6 +33,23 @@
 
     <div class="flex items-center gap-2">
       <app-view-mode-toggle></app-view-mode-toggle>
+      <select
+        [(ngModel)]="categoriaFiltro"
+        class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+      >
+        <option [ngValue]="null">Todas as categorias</option>
+        @for (categoria of categorias(); track categoria.id) {
+          <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+        (click)="abrirCategorias()"
+        title="Gerenciar categorias"
+      >
+        Categorias
+      </button>
       @if (usaListaDeLicencas()) {
         <button
           type="button"
@@ -95,6 +112,12 @@
                   ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
                   : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
               >
+                @if (cliente.categoria_nome) {
+                  <div class="min-w-0">
+                    <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Categoria</span>
+                    <span class="block truncate text-sm text-zinc-300">{{ cliente.categoria_nome }}</span>
+                  </div>
+                }
                 @if (tipoUnificado() === 'acesso_zeta') {
                   @if (cliente.licencas) {
                     <div class="min-w-0">
@@ -167,6 +190,12 @@
                 ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
                 : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
             >
+              @if (cliente.categoria_nome) {
+                <div class="min-w-0">
+                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Categoria</span>
+                  <span class="block truncate text-sm text-zinc-300">{{ cliente.categoria_nome }}</span>
+                </div>
+              }
               @if (usaListaDeLicencas()) {
                 @if (cliente.licencas_selecionadas?.length) {
                   <div class="min-w-0 basis-full">
@@ -227,6 +256,13 @@
     (fechar)="licencasModalAberto.set(false)"
     (alterado)="aoAlterarLicencas()"
   ></app-licencas-modal>
+}
+
+@if (categoriasModalAberto()) {
+  <app-categorias-modal
+    (fechar)="categoriasModalAberto.set(false)"
+    (alterado)="aoAlterarCategorias()"
+  ></app-categorias-modal>
 }
 
 @if (relatorioModalAberto()) {

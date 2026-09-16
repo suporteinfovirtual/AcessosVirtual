@@ -1,12 +1,14 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, Cliente, ClienteSistema, SISTEMAS, Sistema, TipoAcesso } from '../../../../core/models';
+import { Acesso, Categoria, Cliente, ClienteSistema, SISTEMAS, Sistema, TipoAcesso } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { ClientesService } from '../../../../core/clientes.service';
+import { CategoriasService } from '../../../../core/categorias.service';
 import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-sistema-modal.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 import { LicencasModalComponent } from '../licencas-modal/licencas-modal.component';
+import { CategoriasModalComponent } from '../categorias-modal/categorias-modal.component';
 import { RelatorioLucroModalComponent } from '../relatorio-lucro-modal/relatorio-lucro-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
@@ -29,6 +31,7 @@ const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
     ClienteSistemaModalComponent,
     ClienteModalComponent,
     LicencasModalComponent,
+    CategoriasModalComponent,
     RelatorioLucroModalComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
@@ -38,6 +41,7 @@ const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
 export class ClientesSistemasComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private clientesService = inject(ClientesService);
+  private categoriasService = inject(CategoriasService);
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
 
@@ -48,6 +52,8 @@ export class ClientesSistemasComponent implements OnInit {
 
   sistemaAtivo = signal<Sistema>('uniplus');
   busca = signal('');
+  categoriaFiltro = signal<number | null>(null);
+  categorias = signal<Categoria[]>([]);
 
   clientes = signal<ClienteSistema[]>([]);
   clientesUnificados = signal<Cliente[]>([]);
@@ -60,6 +66,7 @@ export class ClientesSistemasComponent implements OnInit {
   clienteUnificadoEmEdicao = signal<Cliente | null>(null);
 
   licencasModalAberto = signal(false);
+  categoriasModalAberto = signal(false);
   relatorioModalAberto = signal(false);
 
   tipoUnificado = computed<TipoAcesso | null>(() => TIPO_POR_SISTEMA_UNIFICADO[this.sistemaAtivo()] ?? null);
@@ -69,23 +76,28 @@ export class ClientesSistemasComponent implements OnInit {
 
   clientesFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
-    if (!termo) return this.clientes();
+    const categoriaId = this.categoriaFiltro();
     return this.clientes().filter(
-      (c) => c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo)
+      (c) =>
+        (!termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo)) &&
+        (!categoriaId || c.categoria_id === categoriaId)
     );
   });
 
   clientesUnificadosFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
-    if (!termo) return this.clientesUnificados();
+    const categoriaId = this.categoriaFiltro();
     return this.clientesUnificados().filter(
-      (c) => c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo)
+      (c) =>
+        (!termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo)) &&
+        (!categoriaId || c.categoria_id === categoriaId)
     );
   });
 
   ngOnInit() {
     if (this.sistemaInicial()) this.sistemaAtivo.set(this.sistemaInicial()!);
     this.carregar();
+    firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
   }
 
   selecionarSistema(sistema: Sistema) {
@@ -159,6 +171,17 @@ export class ClientesSistemasComponent implements OnInit {
 
   abrirLicencas() {
     this.licencasModalAberto.set(true);
+  }
+
+  abrirCategorias() {
+    this.categoriasModalAberto.set(true);
+  }
+
+  async aoAlterarCategorias() {
+    const categorias = await firstValueFrom(this.categoriasService.listar());
+    this.categorias.set(categorias);
+    await this.carregar();
+    this.toast.sucesso('Categorias atualizadas.');
   }
 
   abrirRelatorio() {

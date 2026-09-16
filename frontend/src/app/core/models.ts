@@ -265,6 +265,8 @@ export interface ClienteSistema {
   observacoes?: string | null;
   custo_mensalidade?: number | null;
   valor_mensalidade?: number | null;
+  categoria_id?: number | null;
+  categoria_nome?: string | null;
   criado_em?: string;
   certificado?: CertificadoDigital | null;
 }

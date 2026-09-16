@@ -2,8 +2,9 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteSistema, ENQUADRAMENTOS_FISCAIS, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
+import { Categoria, ClienteSistema, ENQUADRAMENTOS_FISCAIS, Licenca, Sistema, SISTEMAS } from '../../../../core/models';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
+import { CategoriasService } from '../../../../core/categorias.service';
 import { LicencasService } from '../../../../core/licencas.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
@@ -17,6 +18,7 @@ import { LicencasSelectComponent } from '../licencas-select/licencas-select.comp
 })
 export class ClienteSistemaModalComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
+  private categoriasService = inject(CategoriasService);
   private licencasService = inject(LicencasService);
   private confirmService = inject(ConfirmService);
 
@@ -40,6 +42,8 @@ export class ClienteSistemaModalComponent implements OnInit {
   observacoes = signal('');
   custoMensalidade = signal<number | null>(null);
   valorMensalidade = signal<number | null>(null);
+  categoriaId = signal<number | null>(null);
+  categorias = signal<Categoria[]>([]);
 
   salvando = signal(false);
   excluindo = signal(false);
@@ -68,6 +72,7 @@ export class ClienteSistemaModalComponent implements OnInit {
     if (this.usaListaDeLicencas) {
       firstValueFrom(this.licencasService.listar()).then((licencas) => this.licencasDisponiveis.set(licencas));
     }
+    firstValueFrom(this.categoriasService.listar()).then((categorias) => this.categorias.set(categorias));
 
     const cliente = this.cliente();
     if (cliente) {
@@ -81,6 +86,7 @@ export class ClienteSistemaModalComponent implements OnInit {
       this.observacoes.set(cliente.observacoes || '');
       this.custoMensalidade.set(cliente.custo_mensalidade ?? null);
       this.valorMensalidade.set(cliente.valor_mensalidade ?? null);
+      this.categoriaId.set(cliente.categoria_id ?? null);
     }
   }
 
@@ -101,6 +107,7 @@ export class ClienteSistemaModalComponent implements OnInit {
       observacoes: this.observacoes().trim() || null,
       custo_mensalidade: this.custoMensalidade(),
       valor_mensalidade: this.valorMensalidade(),
+      categoria_id: this.categoriaId(),
     };
 
     try {

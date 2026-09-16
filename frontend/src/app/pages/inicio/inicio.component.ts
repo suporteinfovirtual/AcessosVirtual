@@ -200,7 +200,7 @@ export class InicioComponent implements OnInit {
     return this.clientes()
       .filter((c) => c.acessos?.some((a) => a.tipo === tipo))
       .filter((c) => !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo))
-      .filter((c) => tipo !== 'acesso_zeta' || !categoriaId || c.categoria_id === categoriaId)
+      .filter((c) => !categoriaId || c.categoria_id === categoriaId)
       .filter((c) => tipo !== 'acesso_web' || !servidor || c.acessos?.some((a) => a.tipo === 'acesso_web' && a.servidor === servidor))
       .filter(
         (c) =>
@@ -373,7 +373,7 @@ export class InicioComponent implements OnInit {
     this.fecharSecoesGestao();
     this.abaAtiva.set(valor);
     if (valor !== 'acesso_web') this.servidorFiltro.set(null);
-    if (valor !== 'acesso_zeta') this.categoriaFiltro.set(null);
+    if (valor !== 'acesso_web' && valor !== 'acesso_zeta' && valor !== 'anydesk') this.categoriaFiltro.set(null);
     if (valor !== 'acesso_web' && valor !== 'acesso_zeta') this.contabilidadeFiltro.set(null);
     this.modoSelecao.set(false);
     this.limparSelecaoEmLote();

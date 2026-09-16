@@ -351,7 +351,7 @@
                   Contabilidades
                 </button>
               }
-              @if (abaAtiva() === 'acesso_zeta') {
+              @if (abaAtiva() === 'anydesk' || abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
                 <select
                   [(ngModel)]="categoriaFiltro"
                   class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"

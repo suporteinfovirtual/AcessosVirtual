@@ -6,7 +6,14 @@ interface Env {
 export async function onRequestGet(context: EventContext<Env, { id: string }, unknown>) {
   const { env, params } = context;
 
-  const cliente = await env.DB.prepare('SELECT * FROM clientes_sistemas WHERE id = ?').bind(params.id).first();
+  const cliente = await env.DB
+    .prepare(
+      `SELECT clientes_sistemas.*, categorias.nome AS categoria_nome
+       FROM clientes_sistemas LEFT JOIN categorias ON categorias.id = clientes_sistemas.categoria_id
+       WHERE clientes_sistemas.id = ?`
+    )
+    .bind(params.id)
+    .first();
   if (!cliente) {
     return new Response(JSON.stringify({ erro: 'Cliente não encontrado' }), { status: 404 });
   }
@@ -45,6 +52,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     observacoes?: string;
     custo_mensalidade?: number | null;
     valor_mensalidade?: number | null;
+    categoria_id?: number | null;
     licenca_ids?: number[];
   };
   try {
@@ -60,7 +68,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
   await env.DB
     .prepare(
       `UPDATE clientes_sistemas
-       SET nome = ?, cnpj = ?, telefone = ?, licencas = ?, enquadramento_fiscal = ?, versao_build = ?, observacoes = ?, custo_mensalidade = ?, valor_mensalidade = ?
+       SET nome = ?, cnpj = ?, telefone = ?, licencas = ?, enquadramento_fiscal = ?, versao_build = ?, observacoes = ?, custo_mensalidade = ?, valor_mensalidade = ?, categoria_id = ?
        WHERE id = ?`
     )
     .bind(
@@ -73,6 +81,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       body.observacoes?.trim() || null,
       body.custo_mensalidade ?? null,
       body.valor_mensalidade ?? null,
+      body.categoria_id || null,
       params.id
     )
     .run();
