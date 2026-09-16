@@ -1,6 +1,6 @@
 <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm" (click)="fechar.emit()">
   <div
-    class="w-full max-w-xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
+    class="w-full max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40"
     (click)="$event.stopPropagation()"
   >
     <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
@@ -13,8 +13,8 @@
     </div>
 
     <form class="px-6 py-5" (ngSubmit)="salvarCliente()">
-      <div class="space-y-4">
-        <div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Nome*</label>
           <input
             [(ngModel)]="nome"
@@ -38,30 +38,6 @@
           </select>
         </div>
 
-        @if (sistema() === 'zeta') {
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-zinc-300">E-mail</label>
-            <input
-              type="email"
-              [(ngModel)]="email"
-              name="email"
-              placeholder="cliente@empresa.com.br"
-              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-            />
-            <p class="mt-1.5 text-xs text-zinc-500">Vai junto pra Instalação quando essa negociação fechar.</p>
-          </div>
-        }
-
-        <label class="flex items-center gap-2 text-sm text-zinc-300">
-          <input
-            type="checkbox"
-            [(ngModel)]="precisaMigrarBase"
-            name="precisaMigrarBase"
-            class="h-4 w-4 rounded border-zinc-700 bg-zinc-950 text-accent focus:ring-accent-soft"
-          />
-          Precisa migrar base de outro sistema
-        </label>
-
         @if (editando) {
           <div>
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Status</label>
@@ -75,19 +51,33 @@
               }
             </select>
           </div>
+        }
 
-          @if (status() === 'desistiu') {
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-zinc-300">Motivo da desistência</label>
-              <textarea
-                [(ngModel)]="motivoDesistencia"
-                name="motivoDesistencia"
-                rows="2"
-                placeholder="Por que o cliente desistiu?"
-                class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-              ></textarea>
-            </div>
-          }
+        @if (sistema() === 'zeta') {
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">E-mail</label>
+            <input
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="cliente@empresa.com.br"
+              class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            />
+            <p class="mt-1.5 text-xs text-zinc-500">Vai junto pra Instalação quando essa negociação fechar.</p>
+          </div>
+        }
+
+        @if (editando && status() === 'desistiu') {
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">Motivo da desistência</label>
+            <textarea
+              [(ngModel)]="motivoDesistencia"
+              name="motivoDesistencia"
+              rows="2"
+              placeholder="Por que o cliente desistiu?"
+              class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+            ></textarea>
+          </div>
         }
 
         <div>
@@ -119,7 +109,17 @@
           />
         </div>
 
-        <div>
+        <label class="flex items-center gap-2 self-end pb-2.5 text-sm text-zinc-300">
+          <input
+            type="checkbox"
+            [(ngModel)]="precisaMigrarBase"
+            name="precisaMigrarBase"
+            class="h-4 w-4 rounded border-zinc-700 bg-zinc-950 text-accent focus:ring-accent-soft"
+          />
+          Precisa migrar base de outro sistema
+        </label>
+
+        <div class="sm:col-span-2">
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Observações</label>
           <textarea
             [(ngModel)]="observacoes"
