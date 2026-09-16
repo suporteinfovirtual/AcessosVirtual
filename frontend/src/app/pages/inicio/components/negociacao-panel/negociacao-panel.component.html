@@ -61,8 +61,8 @@
               @for (cliente of grupo.clientes; track cliente.id) {
                 <div
                   [class]="viewMode.modo() === 'lista'
-                    ? 'flex items-stretch overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-700'
-                    : 'flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-700'"
+                    ? 'flex items-stretch overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 transition hover:border-zinc-700'
+                    : 'flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition hover:border-zinc-700'"
                 >
                   <button
                     type="button"

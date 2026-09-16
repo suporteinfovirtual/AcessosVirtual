@@ -18,8 +18,8 @@
           <button
             type="button"
             [class]="viewMode.modo() === 'lista'
-              ? 'flex w-full items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-left transition hover:border-accent/50'
-              : 'rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-accent/50'"
+              ? 'flex w-full items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-left transition hover:border-accent/50'
+              : 'rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left transition hover:border-accent/50'"
             (click)="abrirManual(manual)"
           >
             <p [class]="viewMode.modo() === 'lista' ? 'shrink-0 truncate text-sm font-medium text-zinc-100 sm:w-48' : 'truncate text-sm font-medium text-zinc-100'">{{ manual.titulo }}</p>
