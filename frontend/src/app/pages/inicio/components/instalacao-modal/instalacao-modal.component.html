@@ -4,19 +4,20 @@
     (click)="$event.stopPropagation()"
   >
     <div class="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
-      <h2 class="text-base font-semibold text-zinc-100">Instalação</h2>
+      <div class="flex items-center gap-3">
+        <h2 class="text-base font-semibold text-zinc-100">Instalação</h2>
+        <!-- sistema em destaque no topo: é o que define como a instalação vai ser feita -->
+        <span class="rounded-lg border border-accent/40 bg-accent/15 px-3 py-1 text-sm font-semibold text-accent">
+          {{ rotuloSistema() }}
+        </span>
+      </div>
       <button type="button" class="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" (click)="fechar.emit()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
 
     <div class="border-b border-zinc-800 bg-zinc-900/60 px-6 py-4">
-      <div class="flex items-center gap-2">
-        <p class="truncate text-sm font-semibold uppercase text-zinc-100">{{ instalacao().cliente_nome }}</p>
-        <span class="shrink-0 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
-          {{ rotuloSistema() }}
-        </span>
-      </div>
+      <p class="truncate text-sm font-semibold uppercase text-zinc-100">{{ instalacao().cliente_nome }}</p>
       @if (instalacao().cnpj || instalacao().enquadramento_fiscal) {
         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           @if (instalacao().cnpj) {
