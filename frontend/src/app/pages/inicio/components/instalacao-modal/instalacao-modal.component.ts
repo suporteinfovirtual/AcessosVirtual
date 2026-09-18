@@ -223,7 +223,8 @@ export class InstalacaoModalComponent implements OnInit {
 
     if (this.instalado() && !this.instalacao().instalado && this.tipoAcesso() && !this.acessoAberto()) {
       const seguir = await this.confirmService.confirmar(
-        `O ${this.rotuloAcesso()} ainda não foi cadastrado. Marcar como instalado mesmo assim?`
+        `O ${this.rotuloAcesso()} ainda não foi cadastrado. Marcar como instalado mesmo assim?`,
+        { confirmarTexto: 'Marcar como instalado', perigo: false }
       );
       if (!seguir) return;
     }

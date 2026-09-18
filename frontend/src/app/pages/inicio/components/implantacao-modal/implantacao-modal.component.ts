@@ -101,7 +101,7 @@ export class ImplantacaoModalComponent implements OnInit {
   async excluirImplantacao() {
     const item = this.implantacao();
     if (!item?.id || this.excluindo()) return;
-    if (!(await this.confirmService.confirmar(`Cancelar a implantação de "${item.cliente_nome}"?`))) return;
+    if (!(await this.confirmService.confirmar(`Cancelar a implantação de "${item.cliente_nome}"?`, { confirmarTexto: 'Cancelar implantação' }))) return;
 
     this.excluindo.set(true);
     this.erro.set('');

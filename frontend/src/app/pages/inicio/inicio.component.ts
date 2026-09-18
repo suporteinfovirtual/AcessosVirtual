@@ -569,7 +569,7 @@ export class InicioComponent implements OnInit {
   async aoConverterNegociacao(negociacao: ClienteNegociacao) {
     const sistema = negociacao.sistema;
     if (!sistema || !negociacao.id || this.convertendoNegociacao()) return;
-    if (!(await this.confirmService.confirmar(`Enviar "${negociacao.nome}" para instalação?`))) return;
+    if (!(await this.confirmService.confirmar(`Enviar "${negociacao.nome}" para instalação?`, { confirmarTexto: 'Enviar', perigo: false }))) return;
 
     const dados = {
       nome: negociacao.nome,
