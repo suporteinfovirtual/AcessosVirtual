@@ -49,6 +49,10 @@ export class InstalacaoModalComponent implements OnInit {
   telefone = signal('');
   email = signal('');
   aliquota = signal('');
+  // enquadramento atual do cadastro do cliente — pode ter sido preenchido/alterado depois
+  // da conversão; o da instalação é só o snapshot da negociação e serve de reserva
+  private enquadramentoDoCliente = signal<string | null>(null);
+  enquadramento = computed(() => this.enquadramentoDoCliente() || this.instalacao().enquadramento_fiscal || null);
   // categoria mora no cadastro do cliente (veio da negociação na conversão)
   categoriaId = signal<number | null>(null);
   private categoriaOriginal: number | null = null;
@@ -124,6 +128,7 @@ export class InstalacaoModalComponent implements OnInit {
         .then((cliente) => {
           this.certificado.set(cliente.certificado || null);
           this.definirCategoriaCarregada(cliente.categoria_id ?? null);
+          this.enquadramentoDoCliente.set(cliente.enquadramento_fiscal || null);
           const acesso = cliente.acessos?.find((a) => a.tipo === this.tipoAcesso());
           if (acesso) this.preencherAcesso(acesso);
         })
@@ -133,6 +138,7 @@ export class InstalacaoModalComponent implements OnInit {
         .then((cliente) => {
           this.certificado.set(cliente.certificado || null);
           this.definirCategoriaCarregada(cliente.categoria_id ?? null);
+          this.enquadramentoDoCliente.set(cliente.enquadramento_fiscal || null);
         })
         .catch(() => {});
     }
