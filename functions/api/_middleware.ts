@@ -23,7 +23,18 @@ export async function onRequest(context: EventContext<Env, string, unknown>) {
     });
   }
 
-  return next();
+  const resposta = await next();
+
+  // qualquer gravação bem-sucedida avisa os outros computadores que os dados mudaram
+  if (request.method !== 'GET' && request.method !== 'HEAD' && resposta.ok) {
+    context.waitUntil(
+      env.DB.prepare('UPDATE sincronizacao SET versao = versao + 1 WHERE id = 1')
+        .run()
+        .catch(() => {})
+    );
+  }
+
+  return resposta;
 }
 
 function extrairCookie(cookieHeader: string, nome: string): string | null {

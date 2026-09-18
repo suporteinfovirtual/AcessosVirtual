@@ -8,6 +8,7 @@ import { WikiDetalheComponent } from '../wiki-detalhe/wiki-detalhe.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { TrechoBusca, destacarTrechos, extrairTrecho } from '../../../../core/busca.util';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 type Ordenacao = 'relevancia' | 'recentes';
 
@@ -76,12 +77,15 @@ export class WikiPanelComponent implements OnInit {
     return lista.sort((a, b) => b.pontuacao - a.pontuacao || a.artigo.titulo.localeCompare(b.artigo.titulo));
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const artigos = await firstValueFrom(this.wikiService.listar());
       this.artigos.set(artigos);

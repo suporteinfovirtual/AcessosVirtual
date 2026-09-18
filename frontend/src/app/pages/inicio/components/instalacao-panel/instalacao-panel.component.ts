@@ -9,6 +9,7 @@ import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.com
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { somenteDigitos } from '../../../../core/texto.util';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 @Component({
   selector: 'app-instalacao-panel',
@@ -41,12 +42,15 @@ export class InstalacaoPanelComponent implements OnInit {
     });
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const instalacoes = await firstValueFrom(this.instalacoesService.listar());
       this.instalacoes.set(instalacoes);

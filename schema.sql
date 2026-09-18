@@ -318,3 +318,10 @@ CREATE TABLE IF NOT EXISTS faturamento_clientes (
   faturado_em TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (cliente_sistema, cliente_ref_id)
 );
+
+-- Contador global de alterações, usado pra atualizar os outros computadores sem F5.
+CREATE TABLE IF NOT EXISTS sincronizacao (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  versao INTEGER NOT NULL DEFAULT 0
+);
+INSERT OR IGNORE INTO sincronizacao (id, versao) VALUES (1, 0);

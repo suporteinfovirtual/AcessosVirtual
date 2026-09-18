@@ -8,6 +8,7 @@ import { ToastService } from '../../../../shared/toast.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 interface Pendente {
   file: File;
@@ -50,12 +51,15 @@ export class ArquivosPanelComponent implements OnInit {
     );
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const arquivos = await firstValueFrom(this.arquivosService.listar());
       this.arquivos.set(arquivos);

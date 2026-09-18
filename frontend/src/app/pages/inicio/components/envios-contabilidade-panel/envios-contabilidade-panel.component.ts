@@ -12,6 +12,7 @@ import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component'
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { EnvioArquivosComponent } from '../../../../features/envio-arquivos/envio-arquivos.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 interface Envio {
   cliente: Cliente;
@@ -113,13 +114,16 @@ export class EnviosContabilidadePanelComponent implements OnInit {
       .sort((a, b) => a.cliente.nome.localeCompare(b.cliente.nome) || a.acesso.tipo.localeCompare(b.acesso.tipo));
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => Promise.all([this.carregar(true), this.carregarStatusMes(true)]));
+
   ngOnInit() {
     this.carregar();
     this.carregarStatusMes();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const [contabilidades, clientes] = await Promise.all([
         firstValueFrom(this.contabilidadesService.listar()),
@@ -137,9 +141,9 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
   }
 
-  async carregarStatusMes() {
+  async carregarStatusMes(silencioso = false) {
     const { ano, mes } = this.mesSelecionado();
-    this.carregandoStatusMes.set(true);
+    if (!silencioso) this.carregandoStatusMes.set(true);
     try {
       const lista = await firstValueFrom(this.enviosContabilidadeService.listarStatusMes(ano, mes));
       this.statusEnviosMes.set(new Map(lista.map((s) => [s.acesso_id, !!s.enviado])));

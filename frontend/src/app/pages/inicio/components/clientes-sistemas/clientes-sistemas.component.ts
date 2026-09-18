@@ -14,6 +14,7 @@ import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 // sistemas sem cadastro proprio: usam direto a tabela clientes/acessos, filtrando pelo tipo de acesso correspondente
 const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
@@ -94,6 +95,9 @@ export class ClientesSistemasComponent implements OnInit {
     );
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     if (this.sistemaInicial()) this.sistemaAtivo.set(this.sistemaInicial()!);
     this.carregar();
@@ -106,8 +110,8 @@ export class ClientesSistemasComponent implements OnInit {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const tipo = this.tipoUnificado();
       if (tipo) {

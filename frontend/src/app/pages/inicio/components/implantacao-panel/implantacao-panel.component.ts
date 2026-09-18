@@ -9,6 +9,7 @@ import { ImplantacaoModalComponent } from '../implantacao-modal/implantacao-moda
 import { TecnicosModalComponent } from '../tecnicos-modal/tecnicos-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 const NOMES_MES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -113,13 +114,16 @@ export class ImplantacaoPanelComponent implements OnInit {
     return dias;
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
     firstValueFrom(this.tecnicosService.listar()).then((tecnicos) => this.tecnicos.set(tecnicos));
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const [implantacoes, pendentes] = await Promise.all([
         firstValueFrom(this.implantacoesService.listar()),

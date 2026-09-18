@@ -21,6 +21,7 @@ import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
 import { NegociacaoService } from '../../core/negociacao.service';
 import { ImplantacoesService } from '../../core/implantacoes.service';
+import { SincronizacaoService, aoSincronizar } from '../../core/sincronizacao.service';
 import { InstalacoesService } from '../../core/instalacoes.service';
 import { statusCertificado as calcularStatusCertificado } from '../../core/certificado.util';
 import { CopyFieldComponent } from '../../shared/copy-field.component';
@@ -230,7 +231,22 @@ export class InicioComponent implements OnInit {
     return contagem;
   });
 
+  private sincronizacao = inject(SincronizacaoService);
+
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() =>
+    Promise.all([
+      this.carregarLinks(true),
+      this.carregarClientes(true),
+      this.carregarCategorias(),
+      this.carregarContabilidades(),
+      this.carregarImplantacoesHoje(),
+    ])
+  );
+
   ngOnInit() {
+    this.sincronizacao.iniciar();
+    this.destroyRef.onDestroy(() => this.sincronizacao.parar());
     this.carregarLinks();
     this.carregarClientes();
     this.carregarCategorias();
@@ -255,8 +271,8 @@ export class InicioComponent implements OnInit {
 
   // --- links pessoais ---
 
-  async carregarLinks() {
-    this.carregandoLinks.set(true);
+  async carregarLinks(silencioso = false) {
+    if (!silencioso) this.carregandoLinks.set(true);
     try {
       const links = await firstValueFrom(this.linksService.listar());
       this.links.set(links);
@@ -288,14 +304,18 @@ export class InicioComponent implements OnInit {
 
   // --- painel de clientes ---
 
-  async carregarClientes() {
-    this.carregandoClientes.set(true);
-    this.erro.set('');
+  async carregarClientes(silencioso = false) {
+    if (!silencioso) {
+      this.carregandoClientes.set(true);
+      this.erro.set('');
+    }
     try {
       const clientes = await firstValueFrom(this.clientesService.listar());
       this.clientes.set(clientes);
+      this.erro.set('');
     } catch {
-      this.erro.set('Não foi possível carregar os clientes.');
+      // numa recarga silenciosa mantém a lista atual em vez de trocar por erro
+      if (!silencioso) this.erro.set('Não foi possível carregar os clientes.');
     } finally {
       this.carregandoClientes.set(false);
     }

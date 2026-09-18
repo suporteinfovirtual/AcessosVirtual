@@ -8,6 +8,7 @@ import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 // filtro da tela, além dos status reais: "todos" e "na_instalacao" controlam a
 // visibilidade de quem já foi convertido (ver clientesFiltrados)
@@ -77,12 +78,15 @@ export class NegociacaoPanelComponent implements OnInit {
     return grupos;
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const clientes = await firstValueFrom(this.negociacaoService.listar());
       this.clientes.set(clientes);

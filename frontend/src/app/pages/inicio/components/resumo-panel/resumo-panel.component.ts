@@ -21,6 +21,7 @@ import { EnviosContabilidadeService } from '../../../../core/envios-contabilidad
 import { statusCertificado } from '../../../../core/certificado.util';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { CardComponent } from '../../../../shared/card.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 function formatarDataIso(data: Date): string {
   const ano = data.getFullYear();
@@ -373,6 +374,9 @@ export class ResumoPanelComponent implements OnInit {
     return dias < 0 ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400';
   }
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
@@ -382,8 +386,8 @@ export class ResumoPanelComponent implements OnInit {
     return `${dia}/${mes}/${ano}`;
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const hoje = new Date();
       const [clientes, negociacoes, implantacoes, instalacoes, pendentesFaturamento, statusEnviosContabilidade, clientesUniplus, clientesSgbr] =

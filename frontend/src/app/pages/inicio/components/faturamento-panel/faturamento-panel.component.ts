@@ -8,6 +8,7 @@ import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 type Filtro = 'pendentes' | 'faturados';
 
@@ -38,12 +39,15 @@ export class FaturamentoPanelComponent implements OnInit {
     return lista.filter((c) => !termo || c.cliente_nome.toLowerCase().includes(termo));
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const [pendentes, faturados] = await Promise.all([
         firstValueFrom(this.faturamentoService.listarPendentes()),

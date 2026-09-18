@@ -7,6 +7,7 @@ import { ManualDetalheComponent } from '../manual-detalhe/manual-detalhe.compone
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 @Component({
   selector: 'app-manuais-panel',
@@ -36,12 +37,15 @@ export class ManuaisPanelComponent implements OnInit {
     );
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const manuais = await firstValueFrom(this.manuaisService.listar());
       this.manuais.set(manuais);

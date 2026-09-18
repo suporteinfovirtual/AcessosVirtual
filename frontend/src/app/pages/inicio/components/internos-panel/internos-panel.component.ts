@@ -6,6 +6,7 @@ import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 import { InternoModalComponent } from '../interno-modal/interno-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 @Component({
   selector: 'app-internos-panel',
@@ -32,12 +33,15 @@ export class InternosPanelComponent implements OnInit {
     );
   });
 
+  // recarrega quando outro computador grava algo, sem F5
+  private readonly sincronizar = aoSincronizar(() => this.carregar(true));
+
   ngOnInit() {
     this.carregar();
   }
 
-  async carregar() {
-    this.carregando.set(true);
+  async carregar(silencioso = false) {
+    if (!silencioso) this.carregando.set(true);
     try {
       const contas = await firstValueFrom(this.internosService.listar());
       this.contas.set(contas);
