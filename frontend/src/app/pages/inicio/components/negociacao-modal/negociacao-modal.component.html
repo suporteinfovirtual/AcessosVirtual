@@ -112,11 +112,19 @@
 
         <div>
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Enquadramento fiscal</label>
-          <input
+          <select
             [(ngModel)]="enquadramentoFiscal"
             name="enquadramentoFiscal"
             class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-          />
+          >
+            <option value="">Não informado</option>
+            @for (opcao of enquadramentosFiscais; track opcao) {
+              <option [value]="opcao">{{ opcao }}</option>
+            }
+            @if (enquadramentoFiscal() && !enquadramentosFiscais.includes(enquadramentoFiscal())) {
+              <option [value]="enquadramentoFiscal()">{{ enquadramentoFiscal() }}</option>
+            }
+          </select>
         </div>
 
         <label class="flex items-center gap-2 self-end pb-2.5 text-sm text-zinc-300">

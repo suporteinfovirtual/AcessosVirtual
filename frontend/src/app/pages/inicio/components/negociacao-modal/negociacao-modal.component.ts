@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, ENQUADRAMENTOS_FISCAIS, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
@@ -24,6 +24,7 @@ export class NegociacaoModalComponent implements OnInit {
   telefone = signal('');
   email = signal('');
   aliquota = signal('');
+  readonly enquadramentosFiscais: readonly string[] = ENQUADRAMENTOS_FISCAIS;
   enquadramentoFiscal = signal('');
   observacoes = signal('');
   status = signal<StatusNegociacao>('em_negociacao');
@@ -54,7 +55,7 @@ export class NegociacaoModalComponent implements OnInit {
       this.telefone.set(cliente.telefone || '');
       this.email.set(cliente.email || '');
       this.aliquota.set(cliente.aliquota || '');
-      this.enquadramentoFiscal.set(cliente.enquadramento_fiscal || '');
+      this.enquadramentoFiscal.set(normalizarEnquadramento(cliente.enquadramento_fiscal));
       this.observacoes.set(cliente.observacoes || '');
       this.status.set(cliente.status || 'em_negociacao');
       this.sistema.set(cliente.sistema || null);
@@ -118,4 +119,19 @@ export class NegociacaoModalComponent implements OnInit {
       this.excluindo.set(false);
     }
   }
+}
+
+// valores antigos eram digitados à mão ("SIMPLES", "presumido"...); casa com a opção fixa
+// equivalente e, se não reconhecer, mantém o texto original pra não perder a informação
+function normalizarEnquadramento(valor: string | null | undefined): string {
+  const texto = (valor || '').trim();
+  if (!texto) return '';
+  const minusculo = texto.toLowerCase();
+  const exata = ENQUADRAMENTOS_FISCAIS.find((opcao) => opcao.toLowerCase() === minusculo);
+  if (exata) return exata;
+  if (minusculo.includes('simples')) return 'Simples Nacional';
+  if (minusculo.includes('presumido')) return 'Lucro Presumido';
+  if (minusculo.includes('real')) return 'Lucro Real';
+  if (minusculo === 'mei' || minusculo.includes('microempreendedor')) return 'MEI';
+  return texto;
 }
