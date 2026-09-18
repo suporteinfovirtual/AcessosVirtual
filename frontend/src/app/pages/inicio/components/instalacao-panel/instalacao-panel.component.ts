@@ -42,6 +42,20 @@ export class InstalacaoPanelComponent implements OnInit {
     });
   });
 
+  // separa por sistema, na ordem de SISTEMAS; sistemas sem nenhum item não aparecem
+  instalacoesPorSistema = computed(() => {
+    const grupos = new Map<string, Instalacao[]>();
+    for (const item of this.instalacoesFiltradas()) {
+      const lista = grupos.get(item.cliente_sistema) || [];
+      lista.push(item);
+      grupos.set(item.cliente_sistema, lista);
+    }
+    const ordem = SISTEMAS.map((s) => s.valor as string);
+    return [...grupos.entries()]
+      .sort(([a], [b]) => (ordem.indexOf(a) + 1 || Infinity) - (ordem.indexOf(b) + 1 || Infinity))
+      .map(([sistema, itens]) => ({ sistema, rotulo: this.rotuloSistema(sistema), itens }));
+  });
+
   // recarrega quando outro computador grava algo, sem F5
   private readonly sincronizar = aoSincronizar(() => this.carregar(true));
 

@@ -39,58 +39,67 @@
         {{ instalacoes().length === 0 ? 'Nenhuma instalação ainda. Feche uma negociação e envie para instalação.' : 'Nenhuma instalação encontrada.' }}
       </p>
     } @else {
-      <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
-        @for (item of instalacoesFiltradas(); track item.id) {
-          <button
-            type="button"
-            [class]="viewMode.modo() === 'lista'
-              ? 'flex w-full flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-left transition hover:border-zinc-700'
-              : 'rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left transition hover:border-zinc-700'"
-            (click)="abrirDetalhe(item)"
-          >
-            <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
-              <div class="flex items-center gap-2">
-                <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ item.cliente_nome }}</p>
-                <span [class]="item.instalado
-                  ? 'shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400'
-                  : 'shrink-0 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-400'">
-                  {{ item.instalado ? 'Instalado' : 'A instalar' }}
-                </span>
-              </div>
-              <p class="truncate text-xs text-zinc-500">{{ rotuloSistema(item.cliente_sistema) }}</p>
-              @if (item.cnpj) {
-                <p class="truncate text-xs text-zinc-500">{{ item.cnpj }}</p>
-              }
-              @if (item.precisa_migrar_base) {
-                <p class="truncate text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
-              }
-            </div>
+      <div class="space-y-6">
+        @for (grupo of instalacoesPorSistema(); track grupo.sistema) {
+          <section>
+            <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+              {{ grupo.rotulo }}
+              <span class="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] font-medium text-zinc-500">{{ grupo.itens.length }}</span>
+            </h3>
+          <div [class]="viewMode.modo() === 'lista' ? 'flex flex-col gap-2' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'">
+            @for (item of grupo.itens; track item.id) {
+              <button
+                type="button"
+                [class]="viewMode.modo() === 'lista'
+                  ? 'flex w-full flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-left transition hover:border-zinc-700'
+                  : 'rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left transition hover:border-zinc-700'"
+                (click)="abrirDetalhe(item)"
+              >
+                <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
+                  <div class="flex items-center gap-2">
+                    <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ item.cliente_nome }}</p>
+                    <span [class]="item.instalado
+                      ? 'shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400'
+                      : 'shrink-0 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-400'">
+                      {{ item.instalado ? 'Instalado' : 'A instalar' }}
+                    </span>
+                  </div>
+                  @if (item.cnpj) {
+                    <p class="truncate text-xs text-zinc-500">{{ item.cnpj }}</p>
+                  }
+                  @if (item.precisa_migrar_base) {
+                    <p class="truncate text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
+                  }
+                </div>
 
-            <div
-              [class]="viewMode.modo() === 'lista'
-                ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
-                : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
-            >
-              @if (item.telefone) {
-                <div class="min-w-0">
-                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">WhatsApp</span>
-                  <span class="block truncate text-sm text-zinc-300">{{ item.telefone }}</span>
+                <div
+                  [class]="viewMode.modo() === 'lista'
+                    ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+                    : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
+                >
+                  @if (item.telefone) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">WhatsApp</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ item.telefone }}</span>
+                    </div>
+                  }
+                  @if (item.instalado && item.tecnico_nome) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Instalado por</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ item.tecnico_nome }}</span>
+                    </div>
+                  }
+                  @if (item.instalado && item.data_instalacao) {
+                    <div class="min-w-0">
+                      <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Data</span>
+                      <span class="block truncate text-sm text-zinc-300">{{ formatarData(item.data_instalacao) }}</span>
+                    </div>
+                  }
                 </div>
-              }
-              @if (item.instalado && item.tecnico_nome) {
-                <div class="min-w-0">
-                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Instalado por</span>
-                  <span class="block truncate text-sm text-zinc-300">{{ item.tecnico_nome }}</span>
-                </div>
-              }
-              @if (item.instalado && item.data_instalacao) {
-                <div class="min-w-0">
-                  <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Data</span>
-                  <span class="block truncate text-sm text-zinc-300">{{ formatarData(item.data_instalacao) }}</span>
-                </div>
-              }
-            </div>
-          </button>
+              </button>
+            }
+          </div>
+          </section>
         }
       </div>
     }
