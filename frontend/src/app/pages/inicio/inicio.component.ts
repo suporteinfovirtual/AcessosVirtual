@@ -16,6 +16,8 @@ import {
   TipoAcesso,
 } from '../../core/models';
 import { ClientesService } from '../../core/clientes.service';
+import { ClientesSistemasService } from '../../core/clientes-sistemas.service';
+import { ConfirmService } from '../../shared/confirm.service';
 import { CategoriasService } from '../../core/categorias.service';
 import { ContabilidadesService } from '../../core/contabilidades.service';
 import { LinksService } from '../../core/links.service';
@@ -31,7 +33,6 @@ import { ViewModeService } from '../../shared/view-mode.service';
 import { SkeletonComponent } from '../../shared/skeleton.component';
 import { LinkModalComponent } from './components/link-modal/link-modal.component';
 import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.component';
-import { ClienteSistemaModalComponent } from './components/cliente-sistema-modal/cliente-sistema-modal.component';
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
 import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
 import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
@@ -62,7 +63,6 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
     CopyFieldComponent,
     LinkModalComponent,
     ClienteModalComponent,
-    ClienteSistemaModalComponent,
     InternosPanelComponent,
     CategoriasModalComponent,
     ContabilidadesModalComponent,
@@ -83,6 +83,8 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
 })
 export class InicioComponent implements OnInit {
   private clientesService = inject(ClientesService);
+  private clientesSistemasService = inject(ClientesSistemasService);
+  private confirmService = inject(ConfirmService);
   private categoriasService = inject(CategoriasService);
   private contabilidadesService = inject(ContabilidadesService);
   private linksService = inject(LinksService);
@@ -123,13 +125,7 @@ export class InicioComponent implements OnInit {
   sistemaParaAbrir = signal<Sistema | null>(null);
 
   // --- conversão de negociação em cliente (botão "Converter em cliente") ---
-  negociacaoConvertendo = signal<ClienteNegociacao | null>(null);
-  clienteConversaoModalAberto = signal(false);
-  clienteParaConversao = signal<Cliente | null>(null);
-  tipoParaConversao = signal<TipoAcesso | null>(null);
-  clienteSistemaConversaoModalAberto = signal(false);
-  clienteSistemaParaConversao = signal<ClienteSistema | null>(null);
-  sistemaParaConversao = signal<Sistema>('uniplus');
+  convertendoNegociacao = signal(false);
 
   // --- links pessoais ---
   links = signal<LinkPessoal[]>([]);
@@ -564,16 +560,16 @@ export class InicioComponent implements OnInit {
 
   // --- conversão de negociação em cliente ---
 
-  // uniplus_web/zeta viram um Cliente comum (pré-preenchendo a aba de acesso certa);
-  // uniplus/sgbr viram um ClienteSistema (cadastro próprio de Gestão > Clientes)
-  aoConverterNegociacao(negociacao: ClienteNegociacao) {
+  // Ao fechar a negociação o cliente é cadastrado direto com os dados dela, sem acesso:
+  // o acesso ao sistema (Acesso Zeta / Acesso Web) é cadastrado depois, na tela de Instalação,
+  // quando o técnico já criou o cliente no sistema dele.
+  // uniplus_web/zeta viram um Cliente comum; uniplus/sgbr viram um ClienteSistema.
+  async aoConverterNegociacao(negociacao: ClienteNegociacao) {
     const sistema = negociacao.sistema;
-    if (!sistema) return;
+    if (!sistema || !negociacao.id || this.convertendoNegociacao()) return;
+    if (!(await this.confirmService.confirmar(`Enviar "${negociacao.nome}" para instalação?`))) return;
 
-    this.negociacaoConvertendo.set(negociacao);
-    this.mostrandoNegociacao.set(false);
-
-    const prefil = {
+    const dados = {
       nome: negociacao.nome,
       cnpj: negociacao.cnpj || null,
       telefone: negociacao.telefone || null,
@@ -581,55 +577,25 @@ export class InicioComponent implements OnInit {
       observacoes: negociacao.observacoes || null,
     };
 
-    const tipoUnificado = TIPO_POR_SISTEMA_UNIFICADO[sistema];
-    if (tipoUnificado) {
-      this.clienteParaConversao.set(prefil as Cliente);
-      this.tipoParaConversao.set(tipoUnificado);
-      this.clienteConversaoModalAberto.set(true);
-    } else {
-      this.clienteSistemaParaConversao.set(prefil as ClienteSistema);
-      this.sistemaParaConversao.set(sistema);
-      this.clienteSistemaConversaoModalAberto.set(true);
+    this.convertendoNegociacao.set(true);
+    try {
+      const { id: clienteId } = TIPO_POR_SISTEMA_UNIFICADO[sistema]
+        ? await firstValueFrom(this.clientesService.criar({ ...dados, acessos: [] } as Cliente))
+        : await firstValueFrom(this.clientesSistemasService.criar({ ...dados, sistema } as ClienteSistema));
+      await this.concluirConversaoNegociacao(negociacao, clienteId);
+      this.abrirSecaoGestao('instalacao');
+      this.toast.sucesso('Cliente enviado para instalação.');
+    } catch {
+      this.toast.erro('Não foi possível enviar o cliente para instalação.');
+    } finally {
+      this.convertendoNegociacao.set(false);
     }
-  }
-
-  fecharModalConversaoCliente() {
-    this.clienteConversaoModalAberto.set(false);
-    this.clienteParaConversao.set(null);
-    this.tipoParaConversao.set(null);
-    this.negociacaoConvertendo.set(null);
-  }
-
-  fecharModalConversaoClienteSistema() {
-    this.clienteSistemaConversaoModalAberto.set(false);
-    this.clienteSistemaParaConversao.set(null);
-    this.negociacaoConvertendo.set(null);
-  }
-
-  async aoSalvarConversaoCliente(clienteId: number) {
-    this.clienteConversaoModalAberto.set(false);
-    this.clienteParaConversao.set(null);
-    this.tipoParaConversao.set(null);
-    await this.concluirConversaoNegociacao(clienteId);
-    await this.carregarClientes();
-    this.abrirSecaoGestao('instalacao');
-    this.toast.sucesso('Cliente enviado para instalação.');
-  }
-
-  async aoSalvarConversaoClienteSistema(clienteId: number) {
-    this.clienteSistemaConversaoModalAberto.set(false);
-    this.clienteSistemaParaConversao.set(null);
-    await this.concluirConversaoNegociacao(clienteId);
-    this.abrirSecaoGestao('instalacao');
-    this.toast.sucesso('Cliente enviado para instalação.');
   }
 
   // marca a negociação como convertida e cria o registro de instalação — um snapshot dos
   // dados lançados na negociação, já ligado ao cliente recém-criado (cliente_ref_id)
-  private async concluirConversaoNegociacao(clienteId: number) {
-    const negociacao = this.negociacaoConvertendo();
-    this.negociacaoConvertendo.set(null);
-    if (!negociacao?.id || !negociacao.sistema) return;
+  private async concluirConversaoNegociacao(negociacao: ClienteNegociacao, clienteId: number) {
+    if (!negociacao.id || !negociacao.sistema) return;
 
     await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
     await firstValueFrom(

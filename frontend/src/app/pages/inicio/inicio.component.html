@@ -646,24 +646,6 @@
     ></app-cliente-modal>
   }
 
-  @if (clienteConversaoModalAberto()) {
-    <app-cliente-modal
-      [cliente]="clienteParaConversao()"
-      [tipoInicial]="tipoParaConversao()"
-      (fechar)="fecharModalConversaoCliente()"
-      (salvo)="aoSalvarConversaoCliente($event)"
-    ></app-cliente-modal>
-  }
-
-  @if (clienteSistemaConversaoModalAberto()) {
-    <app-cliente-sistema-modal
-      [cliente]="clienteSistemaParaConversao()"
-      [sistema]="sistemaParaConversao()"
-      (fechar)="fecharModalConversaoClienteSistema()"
-      (salvo)="aoSalvarConversaoClienteSistema($event)"
-    ></app-cliente-sistema-modal>
-  }
-
   @if (categoriasModalAberto()) {
     <app-categorias-modal
       (fechar)="categoriasModalAberto.set(false)"

@@ -24,8 +24,8 @@ export class NegociacaoPanelComponent implements OnInit {
   private toast = inject(ToastService);
   viewMode = inject(ViewModeService);
 
-  // emite o registro completo (já com sistema) pro app-inicio abrir a tela de
-  // Clientes certa, pré-preenchida — ver aoConverterNegociacao() em inicio.component.ts
+  // emite o registro completo (já com sistema) pro app-inicio cadastrar o cliente e
+  // enviar pra Instalação — ver aoConverterNegociacao() em inicio.component.ts
   converter = output<ClienteNegociacao>();
 
   busca = signal('');

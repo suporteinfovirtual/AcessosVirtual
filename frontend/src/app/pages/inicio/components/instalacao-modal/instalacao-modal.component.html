@@ -30,12 +30,6 @@
             <dd class="truncate text-sm text-zinc-300">{{ instalacao().enquadramento_fiscal }}</dd>
           </div>
         }
-        @if (instalacao().email) {
-          <div class="col-span-2 sm:col-span-1">
-            <dt class="text-[11px] uppercase tracking-wide text-zinc-500">E-mail</dt>
-            <dd class="truncate text-sm text-zinc-300">{{ instalacao().email }}</dd>
-          </div>
-        }
         @if (instalacao().aliquota) {
           <div class="col-span-2 sm:col-span-1">
             <dt class="text-[11px] uppercase tracking-wide text-zinc-500">Alíquota</dt>
@@ -80,6 +74,21 @@
         </div>
 
         <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">E-mail do cliente</label>
+          <input
+            type="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            name="email"
+            placeholder="cliente@empresa.com.br"
+            class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
+          />
+          @if (tipoAcesso() === 'acesso_zeta') {
+            <p class="mt-1 text-xs text-zinc-500">No Zeta, é também o login do acesso.</p>
+          }
+        </div>
+
+        <div>
           <label class="mb-1.5 block text-sm font-medium text-zinc-300">Técnico que instalou</label>
           <select
             [(ngModel)]="tecnicoId"
@@ -112,6 +121,100 @@
             class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
           ></textarea>
         </div>
+
+        @if (tipoAcesso()) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-zinc-300">{{ rotuloAcesso() }}</label>
+            <div class="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+              @if (!acessoAberto()) {
+                <button type="button" class="text-sm font-medium text-accent hover:text-accent-hover" (click)="abrirAcesso()">
+                  + Cadastrar {{ rotuloAcesso() }}
+                </button>
+                <p class="mt-1 text-xs text-zinc-500">Depois de criar o cliente no sistema, registre o acesso aqui.</p>
+              } @else {
+                <div class="grid grid-cols-2 gap-2">
+                  @if (tipoAcesso() === 'acesso_zeta') {
+                    <div class="col-span-2">
+                      <label class="mb-1 block text-xs text-zinc-500">Login (e-mail do cliente)</label>
+                      <p class="w-full truncate rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-sm text-zinc-400">
+                        {{ email() || 'Preencha o e-mail acima' }}
+                      </p>
+                    </div>
+                    <div class="col-span-2">
+                      <label class="mb-1 block text-xs text-zinc-500">Senha</label>
+                      <input
+                        [ngModel]="acessoSenha()"
+                        (ngModelChange)="acessoSenha.set($event)"
+                        name="acessoSenha"
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                      />
+                    </div>
+                  }
+                  <div class="col-span-2">
+                    <label class="mb-1 block text-xs text-zinc-500">Link</label>
+                    <input
+                      [ngModel]="acessoLink()"
+                      (ngModelChange)="acessoLink.set($event)"
+                      name="acessoLink"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
+                    <select
+                      [ngModel]="acessoContabilidadeId()"
+                      (ngModelChange)="acessoContabilidadeId.set($event)"
+                      name="acessoContabilidadeId"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                    >
+                      <option [ngValue]="null">Sem contabilidade</option>
+                      @for (contabilidade of contabilidades(); track contabilidade.id) {
+                        <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (tipoAcesso() === 'acesso_web') {
+                    <div>
+                      <label class="mb-1 block text-xs text-zinc-500">Servidor</label>
+                      <input
+                        [ngModel]="acessoServidor()"
+                        (ngModelChange)="acessoServidor.set($event)"
+                        name="acessoServidor"
+                        placeholder="Ex: 1"
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
+                      />
+                    </div>
+                  } @else {
+                    <div>
+                      <label class="mb-1 block text-xs text-zinc-500">E-mail Contabilidade</label>
+                      <p class="w-full truncate rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-sm text-zinc-400">
+                        {{ emailContabilidade() || '—' }}
+                      </p>
+                    </div>
+                  }
+                  <label class="col-span-2 flex items-center gap-2 text-sm text-zinc-300">
+                    <input
+                      type="checkbox"
+                      [ngModel]="acessoEnviarContabilidade()"
+                      (ngModelChange)="acessoEnviarContabilidade.set($event)"
+                      name="acessoEnviarContabilidade"
+                      class="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-accent outline-none focus:ring-2 focus:ring-accent-soft"
+                    />
+                    Enviar para a contabilidade
+                  </label>
+                  @if (!acessoOriginal()) {
+                    <div class="col-span-2">
+                      <button type="button" class="text-xs font-medium text-zinc-400 hover:text-zinc-200" (click)="cancelarAcesso()">
+                        Cancelar cadastro do acesso
+                      </button>
+                    </div>
+                  }
+                </div>
+                <p class="mt-2 text-xs text-zinc-500">O acesso é salvo junto quando você clicar em Salvar.</p>
+              }
+            </div>
+          </div>
+        }
 
         <div>
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Certificado digital</label>
