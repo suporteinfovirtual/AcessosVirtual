@@ -600,7 +600,8 @@ export class InicioComponent implements OnInit {
   private async concluirConversaoNegociacao(negociacao: ClienteNegociacao, clienteId: number) {
     if (!negociacao.id || !negociacao.sistema) return;
 
-    await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
+    // cria a instalação antes de marcar a negociação como convertida: se falhar, a negociação
+    // continua em "Todos" pra tentar de novo, em vez de sumir sem ter ido pra Instalação
     await firstValueFrom(
       this.instalacoesService.criar({
         cliente_sistema: negociacao.sistema,
@@ -617,6 +618,7 @@ export class InicioComponent implements OnInit {
         observacoes: negociacao.observacoes ?? null,
       })
     );
+    await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
   }
 
   // abre o AnyDesk instalado já direcionado pro ID (protocolo anydesk:) e deixa a senha
