@@ -40,6 +40,8 @@ export class ClienteModalComponent implements OnInit {
 
   cliente = input<Cliente | null>(null);
   tipoInicial = input<TipoAcesso | null>(null);
+  // custo/valor cobrado/lucro: só na aba Clientes, nunca nos Acessos
+  mostrarFinanceiro = input(false);
   fechar = output<void>();
   // emite o id do cliente salvo (quem converte uma negociação usa pra ligar a instalação
   // ao cliente recém-criado); consumidores que só recarregam podem ignorar o valor

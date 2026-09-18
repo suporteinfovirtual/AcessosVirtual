@@ -25,6 +25,8 @@ export class ClienteSistemaModalComponent implements OnInit {
   readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
 
   cliente = input<ClienteSistema | null>(null);
+  // custo/valor cobrado/lucro: só na aba Clientes
+  mostrarFinanceiro = input(false);
   sistema = input.required<Sistema>();
   fechar = output<void>();
   // emite o id do cliente salvo (útil pra quem converte uma negociação e precisa

@@ -237,6 +237,7 @@
   <app-cliente-sistema-modal
     [cliente]="clienteEmEdicao()"
     [sistema]="sistemaAtivo()"
+    [mostrarFinanceiro]="true"
     (fechar)="fecharModal()"
     (salvo)="aoSalvar()"
   ></app-cliente-sistema-modal>
@@ -246,6 +247,7 @@
   <app-cliente-modal
     [cliente]="clienteUnificadoEmEdicao()"
     [tipoInicial]="tipoUnificado()"
+    [mostrarFinanceiro]="true"
     (fechar)="fecharModalUnificado()"
     (salvo)="aoSalvarUnificado()"
   ></app-cliente-modal>
