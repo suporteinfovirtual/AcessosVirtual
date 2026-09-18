@@ -75,6 +75,11 @@ export class NegociacaoModalComponent implements OnInit {
 
   async salvarCliente() {
     if (!this.nome().trim() || this.salvando()) return;
+    // enquadramento é obrigatório na negociação (vai pra Instalação e pro cadastro do cliente)
+    if (!this.enquadramentoFiscal()) {
+      this.erro.set('Escolha o enquadramento fiscal.');
+      return;
+    }
 
     this.salvando.set(true);
     this.erro.set('');

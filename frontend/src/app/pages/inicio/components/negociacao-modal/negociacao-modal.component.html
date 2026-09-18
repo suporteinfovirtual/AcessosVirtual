@@ -116,13 +116,13 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Enquadramento fiscal</label>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Enquadramento fiscal*</label>
           <select
             [(ngModel)]="enquadramentoFiscal"
             name="enquadramentoFiscal"
             class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
           >
-            <option value="">Não informado</option>
+            <option value="" disabled>Selecione…</option>
             @for (opcao of enquadramentosFiscais; track opcao) {
               <option [value]="opcao">{{ opcao }}</option>
             }
@@ -130,6 +130,9 @@
               <option [value]="enquadramentoFiscal()">{{ enquadramentoFiscal() }}</option>
             }
           </select>
+          @if (!enquadramentoFiscal()) {
+            <p class="mt-1 text-xs text-zinc-500">Obrigatório — escolha uma opção para salvar.</p>
+          }
         </div>
 
         <label class="flex items-center gap-2 self-end pb-2.5 text-sm text-zinc-300">
@@ -181,7 +184,7 @@
           </button>
           <button
             type="submit"
-            [disabled]="!nome().trim() || salvando()"
+            [disabled]="!nome().trim() || !enquadramentoFiscal() || salvando()"
             class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{ salvando() ? 'Salvando…' : 'Salvar' }}
