@@ -613,6 +613,8 @@ export class InicioComponent implements OnInit {
         enquadramento_fiscal: negociacao.enquadramento_fiscal ?? null,
         precisa_migrar_base: !!negociacao.precisa_migrar_base,
         negociacao_id: negociacao.id,
+        // as observações da negociação já entram como observações da instalação (editáveis lá)
+        observacoes: negociacao.observacoes ?? null,
       })
     );
   }
