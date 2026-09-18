@@ -405,20 +405,7 @@
                   <div>
                     <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
                     <div class="flex gap-1.5">
-                      <div class="relative">
-                        <select
-                          [ngModel]="loteContabilidadeId()"
-                          (ngModelChange)="loteContabilidadeId.set($event)"
-                          class="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-2 text-sm text-zinc-100 outline-none focus:border-accent pr-14"
-                        >
-                          <option [ngValue]="undefined" disabled>Selecione…</option>
-                          <option [ngValue]="null">Sem contabilidade</option>
-                          @for (contabilidade of contabilidades(); track contabilidade.id) {
-                            <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
-                          }
-                        </select>
-                        <app-cadastro-rapido tipo="contabilidade" (criado)="aoCriarContabilidadeLote($event)"></app-cadastro-rapido>
-                      </div>
+                      <app-select-cadastro class="block w-56" tipo="contabilidade" tamanho="sm" textoVazio="Sem contabilidade" [valor]="loteContabilidadeId()" (valorChange)="loteContabilidadeId.set($event)" [itens]="contabilidades()" (itensChange)="contabilidades.set($event)"></app-select-cadastro>
                       <button
                         type="button"
                         class="rounded-lg bg-accent px-3 py-2 text-xs font-medium text-zinc-950 hover:bg-accent-hover disabled:opacity-50"
@@ -453,20 +440,7 @@
                   <div>
                     <label class="mb-1 block text-xs text-zinc-500">Categoria</label>
                     <div class="flex gap-1.5">
-                      <div class="relative">
-                        <select
-                          [ngModel]="loteCategoriaId()"
-                          (ngModelChange)="loteCategoriaId.set($event)"
-                          class="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-2 text-sm text-zinc-100 outline-none focus:border-accent pr-14"
-                        >
-                          <option [ngValue]="undefined" disabled>Selecione…</option>
-                          <option [ngValue]="null">Sem categoria</option>
-                          @for (categoria of categorias(); track categoria.id) {
-                            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-                          }
-                        </select>
-                        <app-cadastro-rapido tipo="categoria" (criado)="aoCriarCategoriaLote($event)"></app-cadastro-rapido>
-                      </div>
+                      <app-select-cadastro class="block w-56" tipo="categoria" tamanho="sm" textoVazio="Sem categoria" [valor]="loteCategoriaId()" (valorChange)="loteCategoriaId.set($event)" [itens]="categorias()" (itensChange)="categorias.set($event)"></app-select-cadastro>
                       <button
                         type="button"
                         class="rounded-lg bg-accent px-3 py-2 text-xs font-medium text-zinc-950 hover:bg-accent-hover disabled:opacity-50"

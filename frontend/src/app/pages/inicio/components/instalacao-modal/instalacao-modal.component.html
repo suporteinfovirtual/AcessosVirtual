@@ -161,20 +161,7 @@
                   </div>
                   <div>
                     <label class="mb-1 block text-xs text-zinc-500">Contabilidade</label>
-                    <div class="relative">
-                      <select
-                        [ngModel]="acessoContabilidadeId()"
-                        (ngModelChange)="acessoContabilidadeId.set($event)"
-                        name="acessoContabilidadeId"
-                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent pr-14"
-                      >
-                        <option [ngValue]="null">Sem contabilidade</option>
-                        @for (contabilidade of contabilidades(); track contabilidade.id) {
-                          <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
-                        }
-                      </select>
-                      <app-cadastro-rapido tipo="contabilidade" (criado)="aoCriarContabilidade($event)"></app-cadastro-rapido>
-                    </div>
+                    <app-select-cadastro tipo="contabilidade" tamanho="sm" textoVazio="Sem contabilidade" [valor]="acessoContabilidadeId()" (valorChange)="acessoContabilidadeId.set($event ?? null)" [itens]="contabilidades()" (itensChange)="contabilidades.set($event)"></app-select-cadastro>
                   </div>
                   @if (tipoAcesso() === 'acesso_web') {
                     <div>

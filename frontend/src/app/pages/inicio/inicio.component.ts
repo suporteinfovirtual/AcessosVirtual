@@ -46,7 +46,7 @@ import { InstalacaoPanelComponent } from './components/instalacao-panel/instalac
 import { ImplantacaoPanelComponent } from './components/implantacao-panel/implantacao-panel.component';
 import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
 import { ResumoPanelComponent } from './components/resumo-panel/resumo-panel.component';
-import { CadastroRapidoComponent, ItemCadastrado, incluirOrdenado } from '../../shared/cadastro-rapido.component';
+import { SelectCadastroComponent } from '../../shared/select-cadastro.component';
 
 type Aba = TipoAcesso | 'internos' | 'manuais' | 'wiki' | 'arquivos';
 
@@ -61,7 +61,7 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
   selector: 'app-inicio',
   imports: [
     FormsModule,
-    CadastroRapidoComponent,
+    SelectCadastroComponent,
     CopyFieldComponent,
     LinkModalComponent,
     ClienteModalComponent,
@@ -512,17 +512,6 @@ export class InicioComponent implements OnInit {
       firstValueFrom(this.clientesService.atualizar(cliente.id!, this.payloadClienteCompleto(cliente, { categoria_id: valor })))
     );
     this.loteCategoriaId.set(undefined);
-  }
-
-  // cadastro rápido pelo "+" dentro dos selects da edição em lote
-  aoCriarContabilidadeLote(item: ItemCadastrado) {
-    this.contabilidades.update((lista) => incluirOrdenado(lista, item));
-    this.loteContabilidadeId.set(item.id);
-  }
-
-  aoCriarCategoriaLote(item: ItemCadastrado) {
-    this.categorias.update((lista) => incluirOrdenado(lista, item));
-    this.loteCategoriaId.set(item.id);
   }
 
   async aplicarEnquadramentoFiscalEmLote() {

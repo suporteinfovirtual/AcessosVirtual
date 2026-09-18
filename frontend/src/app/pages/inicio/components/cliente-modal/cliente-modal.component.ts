@@ -12,7 +12,7 @@ import { calcularLucro, calcularMargemPercentual } from '../../../../core/financ
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
-import { CadastroRapidoComponent, ItemCadastrado, incluirOrdenado } from '../../../../shared/cadastro-rapido.component';
+import { SelectCadastroComponent } from '../../../../shared/select-cadastro.component';
 
 interface CampoAcesso {
   ativo: boolean;
@@ -29,7 +29,7 @@ interface CampoAcesso {
 
 @Component({
   selector: 'app-cliente-modal',
-  imports: [FormsModule, DatePipe, DecimalPipe, LicencasSelectComponent, CadastroRapidoComponent],
+  imports: [FormsModule, DatePipe, DecimalPipe, LicencasSelectComponent, SelectCadastroComponent],
   templateUrl: './cliente-modal.component.html',
 })
 export class ClienteModalComponent implements OnInit {
@@ -155,17 +155,6 @@ export class ClienteModalComponent implements OnInit {
         this.acessosPorTipo[tipoInicial].link = 'https://zweb.com.br/#/sign-in';
       }
     }
-  }
-
-  // cadastro rápido pelo "+" dentro dos selects
-  aoCriarCategoria(item: ItemCadastrado) {
-    this.categorias.update((lista) => incluirOrdenado(lista, item));
-    this.categoriaId.set(item.id);
-  }
-
-  aoCriarContabilidade(tipo: TipoAcesso, item: ItemCadastrado) {
-    this.contabilidades.update((lista) => incluirOrdenado(lista, item));
-    this.acessosPorTipo[tipo].contabilidadeId = item.id;
   }
 
   private acessosVazios(): Record<TipoAcesso, CampoAcesso> {
