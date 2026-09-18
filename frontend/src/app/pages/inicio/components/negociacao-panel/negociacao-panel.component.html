@@ -74,8 +74,8 @@
                     <div [class]="viewMode.modo() === 'lista' ? 'min-w-0 sm:w-56 sm:shrink-0' : ''">
                       <div class="flex items-center gap-2">
                         <p class="truncate text-sm font-medium uppercase text-zinc-100">{{ cliente.nome }}</p>
-                        <span [class]="'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' + corStatus(cliente.status)">
-                          {{ rotuloStatus(cliente.status) }}
+                        <span [class]="'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' + corStatus(cliente)">
+                          {{ rotuloStatus(cliente) }}
                         </span>
                       </div>
                       @if (cliente.precisa_migrar_base) {

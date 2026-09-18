@@ -28,7 +28,8 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
 
   const { results } = await env.DB
     .prepare(
-      `SELECT n.*, categorias.nome AS categoria_nome
+      `SELECT n.*, categorias.nome AS categoria_nome,
+              (SELECT MAX(instalado) FROM instalacoes WHERE instalacoes.negociacao_id = n.id) AS instalado
        FROM clientes_negociacao n LEFT JOIN categorias ON categorias.id = n.categoria_id
        ${where} ORDER BY n.nome`
     )

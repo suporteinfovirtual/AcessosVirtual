@@ -140,6 +140,7 @@ export interface ClienteNegociacao {
   motivo_desistencia?: string | null;
   categoria_id?: number | null;
   categoria_nome?: string | null; // só leitura, vem do JOIN na listagem
+  instalado?: number | null; // só leitura: 1 quando a instalação vinda desta negociação já foi concluída
   convertido_em?: string | null;
   atualizado_em?: string | null;
   criado_em?: string;

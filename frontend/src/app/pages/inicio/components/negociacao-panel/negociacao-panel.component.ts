@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, SISTEMAS, Sistema, StatusNegociacao } from '../../../../core/models';
+import { ClienteNegociacao, SISTEMAS, STATUS_NEGOCIACAO, Sistema } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { NegociacaoModalComponent } from '../negociacao-modal/negociacao-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
@@ -10,9 +10,9 @@ import { ViewModeService } from '../../../../shared/view-mode.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
-// filtro da tela, além dos status reais: "todos" e "na_instalacao" controlam a
-// visibilidade de quem já foi convertido (ver clientesFiltrados)
-type FiltroNegociacao = StatusNegociacao | 'todos' | 'na_instalacao';
+// filtros da tela (ver clientesFiltrados). Quem já foi enviado pra Instalação sai de
+// "Todos" e só aparece em "Na instalação" (ainda não instalado) e "Fechados conosco".
+type FiltroNegociacao = 'todos' | 'em_negociacao' | 'na_instalacao' | 'fechados' | 'desistiu';
 
 @Component({
   selector: 'app-negociacao-panel',
@@ -33,9 +33,9 @@ export class NegociacaoPanelComponent implements OnInit {
   readonly statusOpcoes: { valor: FiltroNegociacao; rotulo: string }[] = [
     { valor: 'todos', rotulo: 'Todos' },
     { valor: 'em_negociacao', rotulo: 'Em negociação' },
-    { valor: 'fechou', rotulo: 'Fechou' },
-    { valor: 'desistiu', rotulo: 'Desistiu' },
     { valor: 'na_instalacao', rotulo: 'Na instalação' },
+    { valor: 'fechados', rotulo: 'Fechados conosco' },
+    { valor: 'desistiu', rotulo: 'Desistiu' },
   ];
 
   clientes = signal<ClienteNegociacao[]>([]);
@@ -44,8 +44,8 @@ export class NegociacaoPanelComponent implements OnInit {
   modalAberto = signal(false);
   clienteEmEdicao = signal<ClienteNegociacao | null>(null);
 
-  // "Todos" e os filtros de status escondem quem já foi enviado pra instalação — pra ver
-  // esses, é preciso escolher o filtro "Na instalação" explicitamente.
+  // Todos: o que ainda está em andamento (em negociação, sem sistema, ou fechou e está
+  // pronto pra enviar) — sem desistências e sem quem já foi enviado pra Instalação.
   clientesFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
     const filtro = this.statusFiltro();
@@ -53,10 +53,19 @@ export class NegociacaoPanelComponent implements OnInit {
       const bateTermo = !termo || c.nome.toLowerCase().includes(termo) || (c.cnpj || '').toLowerCase().includes(termo);
       if (!bateTermo) return false;
 
-      const naInstalacao = !!c.convertido_em;
-      if (filtro === 'na_instalacao') return naInstalacao;
-      if (naInstalacao) return false;
-      return filtro === 'todos' || c.status === filtro;
+      const enviado = !!c.convertido_em;
+      switch (filtro) {
+        case 'todos':
+          return !enviado && c.status !== 'desistiu';
+        case 'em_negociacao':
+          return !enviado && c.status === 'em_negociacao';
+        case 'na_instalacao':
+          return enviado && !c.instalado;
+        case 'fechados':
+          return enviado;
+        case 'desistiu':
+          return c.status === 'desistiu';
+      }
     });
   });
 
@@ -110,11 +119,15 @@ export class NegociacaoPanelComponent implements OnInit {
     this.clienteEmEdicao.set(null);
   }
 
-  rotuloStatus(status?: StatusNegociacao): string {
-    return this.statusOpcoes.find((s) => s.valor === status)?.rotulo ?? '';
+  // quem já foi enviado mostra onde está (Na instalação / Instalado) em vez de "Fechou"
+  rotuloStatus(cliente: ClienteNegociacao): string {
+    if (cliente.convertido_em) return cliente.instalado ? 'Instalado' : 'Na instalação';
+    return STATUS_NEGOCIACAO.find((s) => s.valor === cliente.status)?.rotulo ?? '';
   }
 
-  corStatus(status?: StatusNegociacao): string {
+  corStatus(cliente: ClienteNegociacao): string {
+    const status = cliente.status;
+    if (cliente.convertido_em) return 'bg-accent/15 text-accent border border-accent/30';
     if (status === 'fechou') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
     if (status === 'desistiu') return 'bg-rose-500/15 text-rose-400 border border-rose-500/30';
     return 'bg-zinc-800 text-zinc-400 border border-zinc-700';
