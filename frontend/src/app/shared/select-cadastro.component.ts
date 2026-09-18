@@ -114,8 +114,8 @@ export class SelectCadastroComponent {
 
   classeCampo = computed(() =>
     this.tamanho() === 'sm'
-      ? 'w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent'
-      : 'w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft'
+      ? 'campo-select w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent'
+      : 'campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft'
   );
 
   classeOpcao(selecionada: boolean) {

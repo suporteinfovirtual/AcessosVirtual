@@ -132,10 +132,12 @@ aside::-webkit-scrollbar {
   box-shadow: var(--shadow-hover);
 }
 
-/* inputs, selects e textareas: mesmo tratamento de vidro dos cards */
+/* inputs, selects e textareas: mesmo tratamento de vidro dos cards
+   (.campo-select = gatilho do app-select-cadastro, que é um <button>) */
 .painel input:not([type='checkbox']):not([type='radio']),
 .painel select,
-.painel textarea {
+.painel textarea,
+.painel .campo-select {
   background: var(--card-sheen), var(--surface-card-base);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -145,7 +147,8 @@ aside::-webkit-scrollbar {
 
 .painel input:not([type='checkbox']):not([type='radio']):focus,
 .painel select:focus,
-.painel textarea:focus {
+.painel textarea:focus,
+.painel .campo-select:focus {
   border-color: var(--accent-1);
   box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.15);
 }
