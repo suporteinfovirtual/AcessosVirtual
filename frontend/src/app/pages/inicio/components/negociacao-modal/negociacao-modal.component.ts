@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Categoria, ClienteNegociacao, ENQUADRAMENTOS_FISCAIS, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
@@ -41,6 +41,16 @@ export class NegociacaoModalComponent implements OnInit {
   readonly statusOpcoes = STATUS_NEGOCIACAO;
   readonly sistemaOpcoes = SISTEMAS;
 
+  // obrigatórios na negociação: vão pra Instalação e pro cadastro do cliente
+  camposFaltando = computed(() => {
+    const faltando: string[] = [];
+    if (!this.nome().trim()) faltando.push('Nome');
+    if (!somenteDigitos(this.cnpj())) faltando.push('CNPJ');
+    if (!somenteDigitos(this.telefone())) faltando.push('Telefone');
+    if (!this.enquadramentoFiscal()) faltando.push('Enquadramento fiscal');
+    return faltando;
+  });
+
   salvando = signal(false);
   excluindo = signal(false);
   erro = signal('');
@@ -74,10 +84,9 @@ export class NegociacaoModalComponent implements OnInit {
   }
 
   async salvarCliente() {
-    if (!this.nome().trim() || this.salvando()) return;
-    // enquadramento é obrigatório na negociação (vai pra Instalação e pro cadastro do cliente)
-    if (!this.enquadramentoFiscal()) {
-      this.erro.set('Escolha o enquadramento fiscal.');
+    if (this.salvando()) return;
+    if (this.camposFaltando().length) {
+      this.erro.set(`Falta preencher: ${this.camposFaltando().join(', ')}.`);
       return;
     }
 
