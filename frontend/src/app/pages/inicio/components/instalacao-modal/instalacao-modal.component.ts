@@ -14,6 +14,7 @@ import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
 import { SelectCadastroComponent } from '../../../../shared/select-cadastro.component';
+import { CopyFieldComponent } from '../../../../shared/copy-field.component';
 
 // sistemas unificados com os Acessos: o acesso ao sistema é cadastrado aqui na Instalação
 const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, 'acesso_web' | 'acesso_zeta'>> = {
@@ -28,7 +29,7 @@ const LINK_PADRAO: Record<'acesso_web' | 'acesso_zeta', string> = {
 
 @Component({
   selector: 'app-instalacao-modal',
-  imports: [FormsModule, DatePipe, SelectCadastroComponent],
+  imports: [FormsModule, DatePipe, SelectCadastroComponent, CopyFieldComponent],
   templateUrl: './instalacao-modal.component.html',
 })
 export class InstalacaoModalComponent implements OnInit {
