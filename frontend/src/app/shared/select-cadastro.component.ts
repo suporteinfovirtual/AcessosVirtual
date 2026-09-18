@@ -26,7 +26,7 @@ export interface ItemLista {
         #gatilho
         type="button"
         [class]="classeCampo()"
-        (click)="alternar(gatilho)"
+        (click)="alternar(gatilho, origem)"
         (keydown.escape)="fecharTudo()"
       >
         <span class="block truncate" [class.text-zinc-500]="valor() === undefined">{{ rotuloSelecionado() }}</span>
@@ -34,6 +34,10 @@ export interface ItemLista {
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
       <app-cadastro-rapido [tipo]="tipo()" (criado)="aoCriar($event)"></app-cadastro-rapido>
     </div>
+
+    <!-- marca onde fica o (0,0) do "fixed" aqui dentro: modais com transform/backdrop-filter
+         mudam essa origem, então as posições abaixo são corrigidas por ela -->
+    <div #origem class="pointer-events-none fixed left-0 top-0 h-0 w-0"></div>
 
     <!-- fixed: não é cortado pela rolagem dos modais -->
     @if (aberto()) {
@@ -53,7 +57,7 @@ export interface ItemLista {
                 type="button"
                 [class]="classeOpcao(valor() === item.id)"
                 (click)="escolher(item.id!)"
-                (contextmenu)="abrirMenu($event, item)"
+                (contextmenu)="abrirMenu($event, item, origem)"
               >
                 {{ item.nome }}
               </button>
@@ -66,17 +70,17 @@ export interface ItemLista {
 
     @if (menu(); as m) {
       <div
-        class="fixed z-[56] min-w-36 rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl shadow-black/40"
+        class="fixed z-[56] max-w-xs rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl shadow-black/40"
         [style.top.px]="m.y"
         [style.left.px]="m.x"
       >
         <button
           type="button"
-          class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-400 hover:bg-zinc-800"
+          class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-red-400 hover:bg-zinc-800"
           (click)="excluir(m.item)"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-          Excluir "{{ m.item.nome }}"
+          <span class="truncate">Excluir "{{ m.item.nome }}"</span>
         </button>
       </div>
     }
@@ -120,16 +124,17 @@ export class SelectCadastroComponent {
       : 'block w-full truncate px-3 py-1.5 text-left text-zinc-200 hover:bg-zinc-800';
   }
 
-  alternar(gatilho: HTMLElement) {
+  alternar(gatilho: HTMLElement, origem: HTMLElement) {
     if (this.aberto()) {
       this.fecharTudo();
       return;
     }
     const r = gatilho.getBoundingClientRect();
+    const o = origem.getBoundingClientRect();
     // abre pra cima se não couber embaixo (lista tem no máximo ~15rem + rodapé)
     const altura = 280;
     const top = r.bottom + altura > window.innerHeight ? Math.max(8, r.top - altura - 4) : r.bottom + 4;
-    this.posicao.set({ top, left: r.left, width: r.width });
+    this.posicao.set({ top: top - o.top, left: r.left - o.left, width: r.width });
     this.aberto.set(true);
   }
 
@@ -138,9 +143,10 @@ export class SelectCadastroComponent {
     this.fecharTudo();
   }
 
-  abrirMenu(evento: MouseEvent, item: ItemLista) {
+  abrirMenu(evento: MouseEvent, item: ItemLista, origem: HTMLElement) {
     evento.preventDefault();
-    this.menu.set({ x: evento.clientX, y: evento.clientY, item });
+    const o = origem.getBoundingClientRect();
+    this.menu.set({ x: evento.clientX - o.left, y: evento.clientY - o.top, item });
   }
 
   fecharTudo = () => {
