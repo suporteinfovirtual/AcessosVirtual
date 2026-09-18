@@ -12,6 +12,7 @@ import { ContabilidadesService } from '../../../../core/contabilidades.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
+import { CadastroRapidoComponent, ItemCadastrado, incluirOrdenado } from '../../../../shared/cadastro-rapido.component';
 
 // sistemas unificados com os Acessos: o acesso ao sistema é cadastrado aqui na Instalação
 const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, 'acesso_web' | 'acesso_zeta'>> = {
@@ -26,7 +27,7 @@ const LINK_PADRAO: Record<'acesso_web' | 'acesso_zeta', string> = {
 
 @Component({
   selector: 'app-instalacao-modal',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, CadastroRapidoComponent],
   templateUrl: './instalacao-modal.component.html',
 })
 export class InstalacaoModalComponent implements OnInit {
@@ -149,6 +150,12 @@ export class InstalacaoModalComponent implements OnInit {
         // sem padrão: o técnico digita a senha
       }
     }
+  }
+
+  // cadastro rápido pelo "+" dentro do select de contabilidade
+  aoCriarContabilidade(item: ItemCadastrado) {
+    this.contabilidades.update((lista) => incluirOrdenado(lista, item));
+    this.acessoContabilidadeId.set(item.id);
   }
 
   cancelarAcesso() {

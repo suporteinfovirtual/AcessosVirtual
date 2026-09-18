@@ -10,10 +10,11 @@ import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { calcularLucro, calcularMargemPercentual } from '../../../../core/financeiro.util';
 import { LicencasSelectComponent } from '../licencas-select/licencas-select.component';
+import { CadastroRapidoComponent, ItemCadastrado, incluirOrdenado } from '../../../../shared/cadastro-rapido.component';
 
 @Component({
   selector: 'app-cliente-sistema-modal',
-  imports: [FormsModule, DecimalPipe, LicencasSelectComponent],
+  imports: [FormsModule, DecimalPipe, LicencasSelectComponent, CadastroRapidoComponent],
   templateUrl: './cliente-sistema-modal.component.html',
 })
 export class ClienteSistemaModalComponent implements OnInit {
@@ -90,6 +91,12 @@ export class ClienteSistemaModalComponent implements OnInit {
       this.valorMensalidade.set(cliente.valor_mensalidade ?? null);
       this.categoriaId.set(cliente.categoria_id ?? null);
     }
+  }
+
+  // cadastro rápido pelo "+" dentro do select de categoria
+  aoCriarCategoria(item: ItemCadastrado) {
+    this.categorias.update((lista) => incluirOrdenado(lista, item));
+    this.categoriaId.set(item.id);
   }
 
   async salvarCliente() {
