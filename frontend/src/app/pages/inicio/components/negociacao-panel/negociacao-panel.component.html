@@ -78,47 +78,37 @@
                           {{ rotuloStatus(cliente.status) }}
                         </span>
                       </div>
-                      @if (cliente.cnpj) {
-                        <p class="truncate text-xs text-zinc-500">{{ cliente.cnpj }}</p>
-                      }
-                      @if (cliente.telefone) {
-                        <p class="truncate text-xs text-zinc-500">{{ cliente.telefone }}</p>
-                      }
                       @if (cliente.precisa_migrar_base) {
                         <p class="truncate text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
                       }
                     </div>
 
-                    <div
-                      [class]="viewMode.modo() === 'lista'
-                        ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
-                        : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
-                    >
-                      @if (cliente.categoria_nome) {
-                        <div class="min-w-0">
-                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Categoria</span>
-                          <span class="block truncate text-sm text-zinc-300">{{ cliente.categoria_nome }}</span>
-                        </div>
-                      }
-                      @if (cliente.enquadramento_fiscal) {
-                        <div class="min-w-0">
-                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>
-                          <span class="block truncate text-sm text-zinc-300">{{ cliente.enquadramento_fiscal }}</span>
-                        </div>
-                      }
-                      @if (cliente.observacoes) {
-                        <div class="min-w-0">
-                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Observações</span>
-                          <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
-                        </div>
-                      }
-                      @if (cliente.status === 'desistiu' && cliente.motivo_desistencia) {
-                        <div class="min-w-0">
-                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Motivo da desistência</span>
-                          <span class="block truncate text-sm text-zinc-300">{{ cliente.motivo_desistencia }}</span>
-                        </div>
-                      }
-                    </div>
+                    @if (cliente.categoria_nome || cliente.observacoes || (cliente.status === 'desistiu' && cliente.motivo_desistencia)) {
+                      <div
+                        [class]="viewMode.modo() === 'lista'
+                          ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
+                          : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
+                      >
+                        @if (cliente.categoria_nome) {
+                          <div class="min-w-0">
+                            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Categoria</span>
+                            <span class="block truncate text-sm text-zinc-300">{{ cliente.categoria_nome }}</span>
+                          </div>
+                        }
+                        @if (cliente.observacoes) {
+                          <div class="min-w-0">
+                            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Observações</span>
+                            <span class="block truncate text-sm text-zinc-300">{{ cliente.observacoes }}</span>
+                          </div>
+                        }
+                        @if (cliente.status === 'desistiu' && cliente.motivo_desistencia) {
+                          <div class="min-w-0">
+                            <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Motivo da desistência</span>
+                            <span class="block truncate text-sm text-zinc-300">{{ cliente.motivo_desistencia }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
                   </button>
 
                   @if (podeConverter(cliente)) {
