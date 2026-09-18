@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { Acesso, CertificadoDigital, Contabilidade, Instalacao, SISTEMAS, Sistema, Tecnico } from '../../../../core/models';
@@ -35,6 +36,7 @@ export class InstalacaoModalComponent implements OnInit {
   private clientesSistemasService = inject(ClientesSistemasService);
   private contabilidadesService = inject(ContabilidadesService);
   private confirmService = inject(ConfirmService);
+  private http = inject(HttpClient);
 
   instalacao = input.required<Instalacao>();
   fechar = output<void>();
@@ -133,11 +135,20 @@ export class InstalacaoModalComponent implements OnInit {
     if (this.tipoAcesso() === 'acesso_zeta' && acesso.identificador) this.email.set(acesso.identificador);
   }
 
-  abrirAcesso() {
+  async abrirAcesso() {
     const tipo = this.tipoAcesso();
     if (!tipo) return;
     this.acessoLink.set(LINK_PADRAO[tipo]);
     this.acessoAberto.set(true);
+    // o Zeta cria o cliente com uma senha padrão: vem preenchida, mas continua editável
+    if (tipo === 'acesso_zeta' && !this.acessoSenha()) {
+      try {
+        const padroes = await firstValueFrom(this.http.get<{ senha_padrao_zeta: string | null }>('/api/padroes'));
+        if (padroes.senha_padrao_zeta && !this.acessoSenha()) this.acessoSenha.set(padroes.senha_padrao_zeta);
+      } catch {
+        // sem padrão: o técnico digita a senha
+      }
+    }
   }
 
   cancelarAcesso() {

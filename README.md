@@ -61,6 +61,7 @@ O que já está pronto nesta primeira etapa:
    wrangler secret put SEGREDO_SESSAO
    ```
    - `SENHA_PAINEL` — a senha única que todo mundo da empresa vai usar para entrar.
+   - `SENHA_PADRAO_ZETA` (opcional) — senha que já vem preenchida ao cadastrar o Acesso Zeta na Instalação (`wrangler secret put SENHA_PADRAO_ZETA`).
    - `SEGREDO_SESSAO` — uma string aleatória longa qualquer (só precisa ser difícil de
      adivinhar), usada para assinar o cookie de sessão. Pode gerar uma rodando
      `openssl rand -hex 32`.
