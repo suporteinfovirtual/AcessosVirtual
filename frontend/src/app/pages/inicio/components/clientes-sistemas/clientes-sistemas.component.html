@@ -18,7 +18,7 @@
     }
   </div>
 
-  <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
     <div class="relative w-full sm:max-w-sm">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -31,7 +31,7 @@
       />
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
       <app-view-mode-toggle></app-view-mode-toggle>
       <select
         [(ngModel)]="categoriaFiltro"
@@ -44,7 +44,7 @@
       </select>
       <button
         type="button"
-        class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+        class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
         (click)="abrirCategorias()"
         title="Gerenciar categorias"
       >
@@ -53,7 +53,7 @@
       @if (usaListaDeLicencas()) {
         <button
           type="button"
-          class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+          class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
           (click)="abrirLicencas()"
           title="Gerenciar licenças"
         >
@@ -62,7 +62,7 @@
       }
       <button
         type="button"
-        class="rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+        class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
         (click)="abrirRelatorio()"
         title="Relatório de lucro por cliente"
       >
@@ -70,7 +70,7 @@
       </button>
       <button
         type="button"
-        class="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
+        class="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
         (click)="abrirNovo()"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
