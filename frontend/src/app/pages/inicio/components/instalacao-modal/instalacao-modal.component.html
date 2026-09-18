@@ -82,6 +82,11 @@
           }
         </div>
 
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-zinc-300">Categoria</label>
+          <app-select-cadastro tipo="categoria" textoVazio="Sem categoria" [valor]="categoriaId()" (valorChange)="categoriaId.set($event ?? null)" [itens]="categorias()" (itensChange)="categorias.set($event)"></app-select-cadastro>
+        </div>
+
         @if (instalacao().cliente_sistema === 'zeta') {
           <div>
             <label class="mb-1.5 block text-sm font-medium text-zinc-300">Alíquota</label>

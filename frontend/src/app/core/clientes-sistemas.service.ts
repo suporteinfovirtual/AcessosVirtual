@@ -37,6 +37,10 @@ export class ClientesSistemasService {
     return this.http.post<{ ok: true }>(`/api/clientes-sistemas/${clienteId}/certificado`, form);
   }
 
+  atualizarCategoria(clienteId: number, categoriaId: number | null): Observable<{ ok: true }> {
+    return this.http.put<{ ok: true }>(`/api/clientes-sistemas/${clienteId}/categoria`, { categoria_id: categoriaId });
+  }
+
   baixarCertificado(clienteId: number): Observable<Blob> {
     return this.http.get(`/api/clientes-sistemas/${clienteId}/certificado`, { responseType: 'blob' });
   }

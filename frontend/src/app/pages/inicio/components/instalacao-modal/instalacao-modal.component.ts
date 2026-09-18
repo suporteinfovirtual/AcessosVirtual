@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { Acesso, CertificadoDigital, Contabilidade, Instalacao, SISTEMAS, Sistema, Tecnico } from '../../../../core/models';
+import { Acesso, Categoria, CertificadoDigital, Contabilidade, Instalacao, SISTEMAS, Sistema, Tecnico } from '../../../../core/models';
 import { InstalacoesService } from '../../../../core/instalacoes.service';
 import { TecnicosService } from '../../../../core/tecnicos.service';
 import { ClientesService } from '../../../../core/clientes.service';
 import { ClientesSistemasService } from '../../../../core/clientes-sistemas.service';
 import { ContabilidadesService } from '../../../../core/contabilidades.service';
+import { CategoriasService } from '../../../../core/categorias.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 import { lerValidadeCertificado, paraDataIso, statusCertificado as calcularStatusCertificado } from '../../../../core/certificado.util';
@@ -36,6 +37,7 @@ export class InstalacaoModalComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private clientesSistemasService = inject(ClientesSistemasService);
   private contabilidadesService = inject(ContabilidadesService);
+  private categoriasService = inject(CategoriasService);
   private confirmService = inject(ConfirmService);
   private http = inject(HttpClient);
 
@@ -46,6 +48,10 @@ export class InstalacaoModalComponent implements OnInit {
   telefone = signal('');
   email = signal('');
   aliquota = signal('');
+  // categoria mora no cadastro do cliente (veio da negociação na conversão)
+  categoriaId = signal<number | null>(null);
+  private categoriaOriginal: number | null = null;
+  categorias = signal<Categoria[]>([]);
   tecnicoId = signal<number | null>(null);
   dataInstalacao = signal('');
   observacoes = signal('');
@@ -100,6 +106,7 @@ export class InstalacaoModalComponent implements OnInit {
 
   ngOnInit() {
     firstValueFrom(this.tecnicosService.listar()).then((tecnicos) => this.tecnicos.set(tecnicos));
+    firstValueFrom(this.categoriasService.listar()).then((lista) => this.categorias.set(lista));
 
     const item = this.instalacao();
     this.telefone.set(item.telefone || '');
@@ -115,15 +122,37 @@ export class InstalacaoModalComponent implements OnInit {
       firstValueFrom(this.clientesService.obter(item.cliente_ref_id))
         .then((cliente) => {
           this.certificado.set(cliente.certificado || null);
+          this.definirCategoriaCarregada(cliente.categoria_id ?? null);
           const acesso = cliente.acessos?.find((a) => a.tipo === this.tipoAcesso());
           if (acesso) this.preencherAcesso(acesso);
         })
         .catch(() => {});
     } else {
       firstValueFrom(this.clientesSistemasService.obter(item.cliente_ref_id))
-        .then((cliente) => this.certificado.set(cliente.certificado || null))
+        .then((cliente) => {
+          this.certificado.set(cliente.certificado || null);
+          this.definirCategoriaCarregada(cliente.categoria_id ?? null);
+        })
         .catch(() => {});
     }
+  }
+
+  private definirCategoriaCarregada(categoriaId: number | null) {
+    this.categoriaOriginal = categoriaId;
+    this.categoriaId.set(categoriaId);
+  }
+
+  // só grava se mudou (a categoria é do cadastro do cliente, não da instalação)
+  private async salvarCategoria() {
+    const categoriaId = this.categoriaId();
+    if (categoriaId === this.categoriaOriginal) return;
+    const clienteId = this.instalacao().cliente_ref_id;
+    await firstValueFrom(
+      this.ehSistemaUnificado()
+        ? this.clientesService.atualizarCategoria(clienteId, categoriaId)
+        : this.clientesSistemasService.atualizarCategoria(clienteId, categoriaId)
+    );
+    this.categoriaOriginal = categoriaId;
   }
 
   private preencherAcesso(acesso: Acesso) {
@@ -207,6 +236,7 @@ export class InstalacaoModalComponent implements OnInit {
 
     try {
       await this.salvarAcesso();
+      await this.salvarCategoria();
       await firstValueFrom(this.instalacoesService.atualizar(this.instalacao().id!, dados));
       this.salvo.emit();
     } catch {
