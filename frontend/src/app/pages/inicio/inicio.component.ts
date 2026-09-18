@@ -577,6 +577,7 @@ export class InicioComponent implements OnInit {
       telefone: negociacao.telefone || null,
       enquadramento_fiscal: negociacao.enquadramento_fiscal || null,
       observacoes: negociacao.observacoes || null,
+      categoria_id: negociacao.categoria_id ?? null,
     };
 
     this.convertendoNegociacao.set(true);

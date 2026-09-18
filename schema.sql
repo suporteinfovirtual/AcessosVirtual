@@ -238,6 +238,7 @@ CREATE TABLE IF NOT EXISTS clientes_negociacao (
   telefone TEXT,
   email TEXT, -- só coletado quando sistema = zeta (usado no login do cliente)
   aliquota TEXT, -- só coletado quando sistema = zeta (usado na configuração do sistema)
+  categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL, -- ramo da empresa, vai pro cliente na conversão
   enquadramento_fiscal TEXT,
   observacoes TEXT,
   status TEXT NOT NULL DEFAULT 'em_negociacao',

@@ -94,6 +94,12 @@
                         ? 'flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 sm:border-l sm:border-zinc-800 sm:pl-5'
                         : 'mt-3 space-y-1 border-t border-zinc-800 pt-3'"
                     >
+                      @if (cliente.categoria_nome) {
+                        <div class="min-w-0">
+                          <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Categoria</span>
+                          <span class="block truncate text-sm text-zinc-300">{{ cliente.categoria_nome }}</span>
+                        </div>
+                      }
                       @if (cliente.enquadramento_fiscal) {
                         <div class="min-w-0">
                           <span class="block text-[11px] uppercase tracking-wide text-zinc-500">Enquadramento fiscal</span>

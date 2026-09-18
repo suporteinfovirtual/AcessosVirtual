@@ -16,18 +16,22 @@ export async function onRequestGet(context: EventContext<Env, string, unknown>) 
   const binds: string[] = [];
 
   if (busca) {
-    condicoes.push('(nome LIKE ? OR cnpj LIKE ?)');
+    condicoes.push('(n.nome LIKE ? OR n.cnpj LIKE ?)');
     binds.push(`%${busca}%`, `%${busca}%`);
   }
   if (status) {
-    condicoes.push('status = ?');
+    condicoes.push('n.status = ?');
     binds.push(status);
   }
 
   const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
 
   const { results } = await env.DB
-    .prepare(`SELECT * FROM clientes_negociacao ${where} ORDER BY nome`)
+    .prepare(
+      `SELECT n.*, categorias.nome AS categoria_nome
+       FROM clientes_negociacao n LEFT JOIN categorias ON categorias.id = n.categoria_id
+       ${where} ORDER BY n.nome`
+    )
     .bind(...binds)
     .all();
 
@@ -48,6 +52,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
     observacoes?: string;
     sistema?: string;
     precisa_migrar_base?: boolean;
+    categoria_id?: number | null;
   };
   try {
     body = await request.json();
@@ -65,7 +70,7 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
 
   const resultado = await env.DB
     .prepare(
-      'INSERT INTO clientes_negociacao (nome, cnpj, telefone, email, aliquota, enquadramento_fiscal, observacoes, sistema, precisa_migrar_base) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO clientes_negociacao (nome, cnpj, telefone, email, aliquota, enquadramento_fiscal, observacoes, sistema, precisa_migrar_base, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
     .bind(
       body.nome.trim(),
@@ -76,7 +81,8 @@ export async function onRequestPost(context: EventContext<Env, string, unknown>)
       body.enquadramento_fiscal?.trim() || null,
       body.observacoes?.trim() || null,
       body.sistema || null,
-      body.precisa_migrar_base ? 1 : 0
+      body.precisa_migrar_base ? 1 : 0,
+      body.categoria_id || null
     )
     .run();
 

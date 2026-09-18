@@ -1,19 +1,22 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { ClienteNegociacao, ENQUADRAMENTOS_FISCAIS, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
+import { Categoria, ClienteNegociacao, ENQUADRAMENTOS_FISCAIS, SISTEMAS, STATUS_NEGOCIACAO, Sistema, StatusNegociacao } from '../../../../core/models';
 import { NegociacaoService } from '../../../../core/negociacao.service';
 import { ConfirmService } from '../../../../shared/confirm.service';
+import { CategoriasService } from '../../../../core/categorias.service';
+import { SelectCadastroComponent } from '../../../../shared/select-cadastro.component';
 import { formatarTelefone, somenteDigitos } from '../../../../core/texto.util';
 
 @Component({
   selector: 'app-negociacao-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, SelectCadastroComponent],
   templateUrl: './negociacao-modal.component.html',
 })
 export class NegociacaoModalComponent implements OnInit {
   private negociacaoService = inject(NegociacaoService);
   private confirmService = inject(ConfirmService);
+  private categoriasService = inject(CategoriasService);
 
   cliente = input<ClienteNegociacao | null>(null);
   fechar = output<void>();
@@ -29,6 +32,9 @@ export class NegociacaoModalComponent implements OnInit {
   observacoes = signal('');
   status = signal<StatusNegociacao>('em_negociacao');
   sistema = signal<Sistema | null>(null);
+  // ramo da empresa; vai pro cliente quando ele é enviado pra Instalação
+  categoriaId = signal<number | null>(null);
+  categorias = signal<Categoria[]>([]);
   precisaMigrarBase = signal(false);
   motivoDesistencia = signal('');
 
@@ -48,6 +54,8 @@ export class NegociacaoModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    firstValueFrom(this.categoriasService.listar()).then((lista) => this.categorias.set(lista));
+
     const cliente = this.cliente();
     if (cliente) {
       this.nome.set(cliente.nome);
@@ -59,6 +67,7 @@ export class NegociacaoModalComponent implements OnInit {
       this.observacoes.set(cliente.observacoes || '');
       this.status.set(cliente.status || 'em_negociacao');
       this.sistema.set(cliente.sistema || null);
+      this.categoriaId.set(cliente.categoria_id ?? null);
       this.precisaMigrarBase.set(!!cliente.precisa_migrar_base);
       this.motivoDesistencia.set(cliente.motivo_desistencia || '');
     }
@@ -80,6 +89,7 @@ export class NegociacaoModalComponent implements OnInit {
       observacoes: this.observacoes().trim() || null,
       sistema: this.sistema(),
       precisa_migrar_base: this.precisaMigrarBase(),
+      categoria_id: this.categoriaId(),
     };
 
     try {

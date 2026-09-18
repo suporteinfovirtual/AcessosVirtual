@@ -138,6 +138,8 @@ export interface ClienteNegociacao {
   sistema?: Sistema | null;
   precisa_migrar_base?: boolean | number;
   motivo_desistencia?: string | null;
+  categoria_id?: number | null;
+  categoria_nome?: string | null; // só leitura, vem do JOIN na listagem
   convertido_em?: string | null;
   atualizado_em?: string | null;
   criado_em?: string;

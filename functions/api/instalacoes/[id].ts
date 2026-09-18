@@ -2,13 +2,14 @@ interface Env {
   DB: D1Database;
 }
 
-// PUT /api/instalacoes/:id -> atualiza a instalação (WhatsApp, e-mail, técnico, data, marcar instalado, observações)
+// PUT /api/instalacoes/:id -> atualiza a instalação (WhatsApp, e-mail, alíquota, técnico, data, marcar instalado, observações)
 export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
   const { request, env, params } = context;
 
   let body: {
     telefone?: string | null;
     email?: string | null;
+    aliquota?: string | null;
     tecnico_id?: number | null;
     data_instalacao?: string | null;
     instalado?: boolean;
@@ -28,6 +29,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
       `UPDATE instalacoes
        SET telefone = ?,
            email = ?,
+           aliquota = ?,
            tecnico_id = ?,
            observacoes = ?,
            instalado = ?,
@@ -38,6 +40,7 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
     .bind(
       body.telefone?.toString().trim() || null,
       body.email?.toString().trim() || null,
+      body.aliquota?.toString().trim() || null,
       body.tecnico_id || null,
       body.observacoes?.toString().trim() || null,
       instalado,

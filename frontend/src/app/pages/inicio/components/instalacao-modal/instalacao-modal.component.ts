@@ -45,6 +45,7 @@ export class InstalacaoModalComponent implements OnInit {
 
   telefone = signal('');
   email = signal('');
+  aliquota = signal('');
   tecnicoId = signal<number | null>(null);
   dataInstalacao = signal('');
   observacoes = signal('');
@@ -103,6 +104,7 @@ export class InstalacaoModalComponent implements OnInit {
     const item = this.instalacao();
     this.telefone.set(item.telefone || '');
     this.email.set(item.email || '');
+    this.aliquota.set(item.aliquota || '');
     this.tecnicoId.set(item.tecnico_id || null);
     this.dataInstalacao.set(item.data_instalacao || '');
     this.observacoes.set(item.observacoes || '');
@@ -196,6 +198,7 @@ export class InstalacaoModalComponent implements OnInit {
     const dados = {
       telefone: this.telefone().trim() || null,
       email: this.email().trim() || null,
+      aliquota: this.aliquota().trim() || null,
       tecnico_id: this.tecnicoId(),
       data_instalacao: this.dataInstalacao() || null,
       observacoes: this.observacoes().trim() || null,
