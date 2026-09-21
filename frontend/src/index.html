@@ -9,6 +9,24 @@
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body class="bg-zinc-950">
+  <!-- Fundo animado. Fica fora do <app-root> de propósito: começa a carregar junto com o
+       HTML, não reinicia ao trocar de rota (login -> painel) e não passa pelo change
+       detection do Angular. Sem som, sem controles e fora da navegação por teclado.
+       Se o arquivo faltar ou o navegador bloquear o autoplay, o elemento fica vazio e
+       aparece a imagem de fundo do body, que continua sendo o padrão. -->
+  <video
+    id="fundo-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    disablepictureinpicture
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <source src="fundo-painel.mp4" type="video/mp4" />
+  </video>
   <app-root></app-root>
 </body>
 </html>
