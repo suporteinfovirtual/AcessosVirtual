@@ -19,7 +19,7 @@
     }
 
     <!-- Cabeçalho -->
-    <header class="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <header class="mb-8 flex flex-wrap items-end justify-between gap-4" [appRevelar]="0">
       <div>
         <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-accent">Centro de controle</p>
         <h2 class="text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">{{ saudacao() }}, equipe Virtual.</h2>
@@ -31,6 +31,7 @@
     <!-- Painel principal: tamanho da base + movimento recente -->
     <section
       class="relative grid grid-cols-1 gap-8 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-lg shadow-black/30 backdrop-blur-md sm:p-8 lg:grid-cols-[1fr_1.2fr]"
+      [appRevelar]="1"
     >
       <!-- filete de luz no rodapé, só decorativo -->
       <span class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent"></span>
@@ -117,7 +118,7 @@
     </section>
 
     <!-- Acompanhamento operacional -->
-    <div class="mb-4 mt-10 flex flex-wrap items-baseline justify-between gap-2">
+    <div class="mb-4 mt-10 flex flex-wrap items-baseline justify-between gap-2" [appRevelar]="0">
       <h3 class="text-base font-semibold tracking-tight text-zinc-100">Acompanhamento operacional</h3>
       <span class="text-xs text-zinc-500">O que merece sua atenção</span>
     </div>
@@ -128,6 +129,7 @@
           <button
             type="button"
             class="grid w-full grid-cols-[38px_1fr_auto] items-center gap-4 border-b border-white/10 px-1 py-4 text-left transition hover:bg-white/[0.03] sm:grid-cols-[38px_1fr_auto_auto]"
+            [appRevelar]="$index"
             (click)="irPara.emit(linha.secao)"
           >
             <span
@@ -159,9 +161,10 @@
               <span class="mt-1 block truncate text-[10px] text-zinc-500">{{ linha.descricao }}</span>
             </span>
 
-            <span [class]="linha.destaque ? 'text-2xl tracking-tight text-accent' : 'text-2xl tracking-tight text-zinc-100'">
-              {{ linha.valor }}
-            </span>
+            <span
+              [class]="linha.destaque ? 'text-2xl tracking-tight text-accent' : 'text-2xl tracking-tight text-zinc-100'"
+              [appContador]="linha.valor"
+            ></span>
 
             <span class="hidden text-[10px] text-zinc-500 sm:block">{{ linha.acao }} →</span>
           </button>
@@ -169,7 +172,7 @@
       </div>
 
       <aside class="flex flex-col gap-4">
-        <div class="rounded-xl border border-white/10 bg-zinc-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur-md">
+        <div class="rounded-xl border border-white/10 bg-zinc-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur-md" [appRevelar]="1">
           <p class="flex items-center gap-2 text-xs font-semibold text-zinc-100">
             <span
               [class]="implantacoesAtrasadas().length > 0
@@ -185,7 +188,7 @@
             </p>
           } @else {
             <p class="mt-4 text-[11px] leading-relaxed text-zinc-400">
-              {{ implantacoesAtrasadas().length }}
+              <span [appContador]="implantacoesAtrasadas().length"></span>
               {{ implantacoesAtrasadas().length === 1 ? 'implantação passou da data' : 'implantações passaram da data' }}
               e ainda não foram concluídas.
             </p>
@@ -209,14 +212,14 @@
         </div>
 
         @if (temAtencaoCertificados()) {
-          <div class="rounded-xl border border-red-500/25 bg-red-500/[0.07] p-5 backdrop-blur-md">
+          <div class="rounded-xl border border-red-500/25 bg-red-500/[0.07] p-5 backdrop-blur-md" [appRevelar]="2">
             <p class="flex items-center gap-2 text-xs font-semibold text-red-300">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               Certificados vencendo
             </p>
             @if (certificadosVencendoProximos7Dias() > 0) {
               <p class="mt-1 text-[10px] text-zinc-500">
-                {{ certificadosVencendoProximos7Dias() }} vence(m) nos próximos 7 dias
+                <span [appContador]="certificadosVencendoProximos7Dias()"></span> vence(m) nos próximos 7 dias
               </p>
             }
             <ul class="mt-3 flex flex-col gap-1.5">
@@ -235,20 +238,20 @@
     </section>
 
     <!-- Distribuição da base -->
-    <div class="mb-4 mt-10 flex flex-wrap items-baseline justify-between gap-2">
+    <div class="mb-4 mt-10 flex flex-wrap items-baseline justify-between gap-2" [appRevelar]="0">
       <h3 class="text-base font-semibold tracking-tight text-zinc-100">Distribuição da base</h3>
       <span class="text-xs text-zinc-500">Clientes por sistema e por contabilidade</span>
     </div>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[0.85fr_1.15fr]">
-      <article class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-md">
+      <article class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-md" [appRevelar]="0">
         <div class="mb-6 flex items-start justify-between gap-4">
           <div>
             <h4 class="text-sm font-semibold text-zinc-100">Clientes por sistema</h4>
             <p class="mt-1 text-[10px] text-zinc-500">Onde sua base está operando</p>
           </div>
           <p class="shrink-0 text-right text-base text-zinc-100">
-            {{ donutTotal() }}
+            <span [appContador]="donutTotal()"></span>
             <span class="mt-0.5 block text-[9px] uppercase tracking-wide text-zinc-500">clientes</span>
           </p>
         </div>
@@ -257,13 +260,32 @@
           <p class="text-sm text-zinc-600">Nenhum cliente cadastrado ainda.</p>
         } @else {
           <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-            <div class="donut-container relative shrink-0" [style.width.px]="donutTamanho" [style.height.px]="donutTamanho">
+            <div
+              class="donut-container donut-palco relative shrink-0"
+              [style.width.px]="donutTamanho"
+              [style.height.px]="donutTamanho"
+              [appRevelar]="0"
+              [repetir]="true"
+              medir=".donut-mascara"
+            >
               <svg
                 [attr.viewBox]="'0 0 ' + donutTamanho + ' ' + donutTamanho"
                 [attr.width]="donutTamanho"
                 [attr.height]="donutTamanho"
                 class="-rotate-90"
               >
+                <!-- anel branco que revela os segmentos conforme se desenha -->
+                <mask id="mascaraDonut">
+                  <circle
+                    class="donut-mascara"
+                    [attr.cx]="donutTamanho / 2"
+                    [attr.cy]="donutTamanho / 2"
+                    [attr.r]="donutRaio"
+                    fill="none"
+                    stroke="#fff"
+                    [attr.stroke-width]="donutEspessura"
+                  />
+                </mask>
                 <circle
                   [attr.cx]="donutTamanho / 2"
                   [attr.cy]="donutTamanho / 2"
@@ -273,6 +295,7 @@
                   class="text-zinc-800"
                   [attr.stroke-width]="donutEspessura"
                 />
+                <g mask="url(#mascaraDonut)">
                 @for (seg of donutSegments(); track seg.sistema) {
                   <circle
                     [attr.cx]="donutTamanho / 2"
@@ -289,9 +312,10 @@
                     (mouseleave)="aoSairMouseSegmento()"
                   />
                 }
+                </g>
               </svg>
               <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span class="text-xl font-semibold text-zinc-100">{{ donutTotal() }}</span>
+                <span class="text-xl font-semibold text-zinc-100" [appContador]="donutTotal()"></span>
                 <span class="text-[10px] uppercase tracking-wide text-zinc-500">clientes</span>
               </div>
               @if (donutTooltip(); as tip) {
@@ -315,7 +339,7 @@
                 >
                   <span class="h-1.5 w-1.5 shrink-0 rounded-full" [style.background-color]="seg.cor"></span>
                   {{ seg.rotulo }}
-                  <b class="ml-auto text-[11px] font-medium text-zinc-100">{{ seg.valor }}</b>
+                  <b class="ml-auto text-[11px] font-medium text-zinc-100" [appContador]="seg.valor"></b>
                 </button>
               }
             </div>
@@ -323,14 +347,14 @@
         }
       </article>
 
-      <article class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-md">
+      <article class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-md" [appRevelar]="1">
         <div class="mb-6 flex items-start justify-between gap-4">
           <div>
             <h4 class="text-sm font-semibold text-zinc-100">Clientes por contabilidade</h4>
             <p class="mt-1 text-[10px] text-zinc-500">Distribuição dos clientes ativos</p>
           </div>
           <p class="shrink-0 text-right text-base text-zinc-100">
-            {{ donutContabilidadeTotal() }}
+            <span [appContador]="donutContabilidadeTotal()"></span>
             <span class="mt-0.5 block text-[9px] uppercase tracking-wide text-zinc-500">clientes</span>
           </p>
         </div>
@@ -338,14 +362,14 @@
         @if (donutContabilidadeTotal() === 0) {
           <p class="text-sm text-zinc-600">Nenhum cliente cadastrado ainda.</p>
         } @else {
-          <div class="grid gap-3">
+          <div class="grid gap-3 barras-palco" [appRevelar]="0" [repetir]="true">
             @for (barra of barrasContabilidade(); track barra.nome) {
               <div class="grid grid-cols-[6.5rem_1fr_1.75rem] items-center gap-3 text-[10px] text-zinc-400 sm:grid-cols-[8.5rem_1fr_1.75rem]">
                 <span class="truncate" [title]="barra.nome">{{ barra.nome }}</span>
                 <span class="h-[7px] overflow-hidden rounded-full bg-zinc-800">
-                  <span class="block h-full rounded-full" [style.width.%]="barra.largura" [style.background-color]="barra.cor"></span>
+                  <span class="barra-crescer block h-full rounded-full" [style.width.%]="barra.largura" [style.background-color]="barra.cor"></span>
                 </span>
-                <b class="text-right text-[10px] font-medium text-zinc-100">{{ barra.valor }}</b>
+                <b class="text-right text-[10px] font-medium text-zinc-100" [appContador]="barra.valor"></b>
               </div>
             }
           </div>

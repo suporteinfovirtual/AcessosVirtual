@@ -252,3 +252,101 @@ aside::-webkit-scrollbar {
     transform: none;
   }
 }
+
+/* Entrada dos blocos. Igual ao gráfico: o estado inicial (invisível, deslocado) só vale
+   depois que a diretiva marca .revelar-pronto — sem JavaScript a página aparece inteira. */
+.revelar-pronto {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.revelar-pronto.revelado {
+  animation: revelar 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--atraso-revelar, 0ms) forwards;
+}
+
+@keyframes revelar {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Rosca: uma máscara em forma de anel cresce por cima dos segmentos. A máscara é um
+   elemento só, nosso, então não disputa o stroke-dasharray que o Angular escreve em cada
+   segmento — animar os segmentos direto significaria dois donos pro mesmo atributo.
+
+   O palco é próprio (.donut-palco), e não o card que envolve tudo: o card revela uma vez
+   só e fica revelado pra sempre, então a regra dele continuaria valendo e a rosca nunca
+   voltaria ao início pra reanimar. */
+.donut-palco.revelar-pronto .donut-mascara {
+  stroke-dasharray: var(--medida);
+  stroke-dashoffset: var(--medida);
+}
+
+.donut-palco.revelar-pronto.revelado .donut-mascara {
+  animation: girar-donut 1.2s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+@keyframes girar-donut {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Barras: crescem por scaleX em vez de width, pra não disputar o [style.width.%] que o
+   Angular escreve na mesma barra. Palco próprio pelo mesmo motivo da rosca. */
+.barras-palco.revelar-pronto .barra-crescer {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.barras-palco.revelar-pronto.revelado .barra-crescer {
+  animation: crescer-barra 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.barras-palco.revelado > *:nth-child(2) .barra-crescer {
+  animation-delay: 60ms;
+}
+
+.barras-palco.revelado > *:nth-child(3) .barra-crescer {
+  animation-delay: 120ms;
+}
+
+.barras-palco.revelado > *:nth-child(4) .barra-crescer {
+  animation-delay: 180ms;
+}
+
+.barras-palco.revelado > *:nth-child(5) .barra-crescer {
+  animation-delay: 240ms;
+}
+
+.barras-palco.revelado > *:nth-child(6) .barra-crescer {
+  animation-delay: 300ms;
+}
+
+.barras-palco.revelado > *:nth-child(7) .barra-crescer {
+  animation-delay: 360ms;
+}
+
+.barras-palco.revelado > *:nth-child(8) .barra-crescer {
+  animation-delay: 420ms;
+}
+
+@keyframes crescer-barra {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revelar-pronto,
+  .donut-palco.revelar-pronto .donut-mascara,
+  .barras-palco.revelar-pronto .barra-crescer,
+  .barras-palco.revelado > * .barra-crescer {
+    animation: none;
+    animation-delay: 0ms;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+}

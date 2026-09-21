@@ -22,6 +22,7 @@ import { statusCertificado } from '../../../../core/certificado.util';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { ContadorAnimadoDirective } from '../../../../shared/contador-animado.directive';
 import { GraficoAnimadoDirective } from '../../../../shared/grafico-animado.directive';
+import { RevelarDirective } from '../../../../shared/revelar.directive';
 import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 function formatarDataIso(data: Date): string {
@@ -143,7 +144,7 @@ const DONUT_ESPACO = 4;
 
 @Component({
   selector: 'app-resumo-panel',
-  imports: [SkeletonComponent, ContadorAnimadoDirective, GraficoAnimadoDirective],
+  imports: [SkeletonComponent, ContadorAnimadoDirective, GraficoAnimadoDirective, RevelarDirective],
   templateUrl: './resumo-panel.component.html',
 })
 export class ResumoPanelComponent implements OnInit {
