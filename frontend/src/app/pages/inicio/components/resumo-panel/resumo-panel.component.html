@@ -41,11 +41,11 @@
             <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_theme(colors.emerald.400)]"></span>
             Clientes ativos
           </p>
-          <p class="mt-5 text-6xl font-semibold leading-none tracking-tighter text-zinc-50 sm:text-7xl">{{ donutTotal() }}</p>
+          <p class="mt-5 text-6xl font-semibold leading-none tracking-tighter text-zinc-50 sm:text-7xl" [appContador]="donutTotal()"></p>
           <p class="mt-3 text-xs text-zinc-500">Base total de clientes cadastrados</p>
           <p class="mt-4 inline-flex items-center gap-2 text-xs text-emerald-400">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5 19.5 4.5m0 0h-9m9 0v9" /></svg>
-            <strong class="font-semibold">{{ novosClientes30Dias() }}</strong>
+            <strong class="font-semibold" [appContador]="novosClientes30Dias()"></strong>
             <span class="text-zinc-500">{{ novosClientes30Dias() === 1 ? 'novo cliente' : 'novos clientes' }} nos últimos 30 dias</span>
           </p>
         </div>
@@ -54,7 +54,7 @@
           @for (tipo of tiposAcesso; track tipo.valor) {
             <button type="button" class="text-left" (click)="irParaAba.emit(tipo.valor)">
               <span class="block text-[10px] uppercase tracking-wide text-zinc-500">{{ tipo.rotulo }}</span>
-              <span class="mt-1 block text-lg font-medium text-zinc-100">{{ contagemPorTipoAcesso()[tipo.valor] }}</span>
+              <span class="mt-1 block text-lg font-medium text-zinc-100" [appContador]="contagemPorTipoAcesso()[tipo.valor]"></span>
             </button>
           }
         </div>
@@ -69,6 +69,7 @@
         } @else {
           <svg
             class="w-full overflow-visible"
+            [appGraficoAnimado]="graficoNovosClientes().linha"
             [attr.viewBox]="'0 0 620 150'"
             preserveAspectRatio="none"
             height="150"
@@ -84,8 +85,9 @@
             <line x1="0" y1="25" x2="620" y2="25" class="stroke-white/[0.07]" stroke-width="1" />
             <line x1="0" y1="75" x2="620" y2="75" class="stroke-white/[0.07]" stroke-width="1" />
             <line x1="0" y1="125" x2="620" y2="125" class="stroke-white/[0.07]" stroke-width="1" />
-            <path [attr.d]="graficoNovosClientes().area" fill="url(#areaNovosClientes)" />
+            <path class="grafico-area" [attr.d]="graficoNovosClientes().area" fill="url(#areaNovosClientes)" />
             <path
+              class="grafico-linha"
               [attr.d]="graficoNovosClientes().linha"
               fill="none"
               stroke="#ffad63"
@@ -95,6 +97,7 @@
               vector-effect="non-scaling-stroke"
             />
             <circle
+              class="grafico-ponta"
               [attr.cx]="graficoNovosClientes().pontoFinalX"
               [attr.cy]="graficoNovosClientes().pontoFinalY"
               r="4"

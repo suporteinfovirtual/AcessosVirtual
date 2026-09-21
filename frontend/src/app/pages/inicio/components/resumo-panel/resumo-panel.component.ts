@@ -20,6 +20,8 @@ import { FaturamentoService } from '../../../../core/faturamento.service';
 import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { statusCertificado } from '../../../../core/certificado.util';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
+import { ContadorAnimadoDirective } from '../../../../shared/contador-animado.directive';
+import { GraficoAnimadoDirective } from '../../../../shared/grafico-animado.directive';
 import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 function formatarDataIso(data: Date): string {
@@ -141,7 +143,7 @@ const DONUT_ESPACO = 4;
 
 @Component({
   selector: 'app-resumo-panel',
-  imports: [SkeletonComponent],
+  imports: [SkeletonComponent, ContadorAnimadoDirective, GraficoAnimadoDirective],
   templateUrl: './resumo-panel.component.html',
 })
 export class ResumoPanelComponent implements OnInit {
