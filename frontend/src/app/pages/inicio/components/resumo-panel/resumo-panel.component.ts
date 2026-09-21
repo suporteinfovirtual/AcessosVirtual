@@ -121,6 +121,8 @@ export class ResumoPanelComponent implements OnInit {
   readonly donutEspessura = DONUT_ESPESSURA;
 
   carregando = signal(true);
+  // quantas das consultas do resumo não responderam na última carga
+  consultasComFalha = signal(0);
 
   clientes = signal<Cliente[]>([]);
   negociacoes = signal<ClienteNegociacao[]>([]);
@@ -386,12 +388,15 @@ export class ResumoPanelComponent implements OnInit {
     return `${dia}/${mes}/${ano}`;
   }
 
+  // O resumo junta 8 consultas independentes. Com Promise.all, uma falhando derrubava as
+  // outras sete e a tela mostrava zero em tudo, sem avisar — igualzinho a um banco vazio.
+  // Com allSettled cada número que chegou é exibido, e o que faltou vira aviso na tela.
   async carregar(silencioso = false) {
     if (!silencioso) this.carregando.set(true);
     try {
       const hoje = new Date();
       const [clientes, negociacoes, implantacoes, instalacoes, pendentesFaturamento, statusEnviosContabilidade, clientesUniplus, clientesSgbr] =
-        await Promise.all([
+        await Promise.allSettled([
           firstValueFrom(this.clientesService.listar()),
           firstValueFrom(this.negociacaoService.listar()),
           firstValueFrom(this.implantacoesService.listar()),
@@ -401,14 +406,29 @@ export class ResumoPanelComponent implements OnInit {
           firstValueFrom(this.clientesSistemasService.listar('uniplus')),
           firstValueFrom(this.clientesSistemasService.listar('sgbr')),
         ]);
-      this.clientes.set(clientes);
-      this.negociacoes.set(negociacoes);
-      this.implantacoes.set(implantacoes);
-      this.instalacoes.set(instalacoes);
-      this.pendentesFaturamento.set(pendentesFaturamento);
-      this.statusEnviosContabilidadeMes.set(new Map(statusEnviosContabilidade.map((s) => [s.acesso_id, !!s.enviado])));
-      this.totalClientesUniplus.set(clientesUniplus.length);
-      this.totalClientesSgbr.set(clientesSgbr.length);
+
+      if (clientes.status === 'fulfilled') this.clientes.set(clientes.value);
+      if (negociacoes.status === 'fulfilled') this.negociacoes.set(negociacoes.value);
+      if (implantacoes.status === 'fulfilled') this.implantacoes.set(implantacoes.value);
+      if (instalacoes.status === 'fulfilled') this.instalacoes.set(instalacoes.value);
+      if (pendentesFaturamento.status === 'fulfilled') this.pendentesFaturamento.set(pendentesFaturamento.value);
+      if (statusEnviosContabilidade.status === 'fulfilled') {
+        this.statusEnviosContabilidadeMes.set(new Map(statusEnviosContabilidade.value.map((s) => [s.acesso_id, !!s.enviado])));
+      }
+      if (clientesUniplus.status === 'fulfilled') this.totalClientesUniplus.set(clientesUniplus.value.length);
+      if (clientesSgbr.status === 'fulfilled') this.totalClientesSgbr.set(clientesSgbr.value.length);
+
+      const falharam = [
+        clientes,
+        negociacoes,
+        implantacoes,
+        instalacoes,
+        pendentesFaturamento,
+        statusEnviosContabilidade,
+        clientesUniplus,
+        clientesSgbr,
+      ].filter((r) => r.status === 'rejected').length;
+      this.consultasComFalha.set(falharam);
     } finally {
       this.carregando.set(false);
     }
