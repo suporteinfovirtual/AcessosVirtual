@@ -1,40 +1,28 @@
-interface Env {
-  DB: D1Database;
-}
+import type { Contexto } from '../_lib/env';
+import { conflito, criado, json } from '../_lib/http';
+import { Contabilidade } from '../_lib/schemas';
+import { lerCorpo } from '../_lib/validacao';
+
+const NOME_REPETIDO = 'Já existe uma contabilidade com esse nome';
 
 // GET /api/contabilidades -> lista todas as contabilidades
-export async function onRequestGet(context: EventContext<Env, string, unknown>) {
-  const { env } = context;
+export async function onRequestGet({ env }: Contexto) {
   const { results } = await env.DB.prepare('SELECT * FROM contabilidades ORDER BY nome').all();
-  return new Response(JSON.stringify(results), { headers: { 'Content-Type': 'application/json' } });
+  return json(results);
 }
 
 // POST /api/contabilidades -> cria uma contabilidade nova
-export async function onRequestPost(context: EventContext<Env, string, unknown>) {
-  const { request, env } = context;
-
-  let body: { nome?: string; email?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
-
-  const nome = body.nome?.trim();
-  if (!nome) {
-    return new Response(JSON.stringify({ erro: 'Nome é obrigatório' }), { status: 400 });
-  }
+export async function onRequestPost({ request, env }: Contexto) {
+  const { dados, erro } = await lerCorpo(request, Contabilidade);
+  if (erro) return erro;
 
   try {
-    const resultado = await env.DB
-      .prepare('INSERT INTO contabilidades (nome, email) VALUES (?, ?)')
-      .bind(nome, body.email?.trim() || null)
+    const resultado = await env.DB.prepare('INSERT INTO contabilidades (nome, email) VALUES (?, ?)')
+      .bind(dados.nome, dados.email)
       .run();
-    return new Response(JSON.stringify({ id: resultado.meta.last_row_id, nome, email: body.email?.trim() || null }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Já existe uma contabilidade com esse nome' }), { status: 409 });
+    return criado({ id: resultado.meta.last_row_id, nome: dados.nome, email: dados.email });
+  } catch (e) {
+    if (e instanceof Error && /UNIQUE/i.test(e.message)) return conflito(NOME_REPETIDO);
+    throw e;
   }
 }

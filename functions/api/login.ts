@@ -1,37 +1,26 @@
-import { assinar } from './_middleware';
+import { z } from 'zod';
+import type { Contexto } from './_lib/env';
+import { erro, json } from './_lib/http';
+import { cookieDeSessao } from './_lib/sessao';
+import { lerCorpo, textoObrigatorio } from './_lib/validacao';
 
-interface Env {
-  SENHA_PAINEL: string;
-  SEGREDO_SESSAO: string;
-}
+const Login = z.object({
+  senha: textoObrigatorio('Senha é obrigatória'),
+});
 
-export async function onRequestPost(context: EventContext<Env, string, unknown>) {
+// POST /api/login -> confere a senha única e grava o cookie de sessão assinado
+export async function onRequestPost(context: Contexto) {
   const { request, env } = context;
 
-  let body: { senha?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
+  const { dados, erro: erroCorpo } = await lerCorpo(request, Login);
+  if (erroCorpo) return erroCorpo;
+
+  if (dados.senha !== env.SENHA_PAINEL) {
+    return erro('Senha incorreta', 401);
   }
 
-  if (!body.senha || body.senha !== env.SENHA_PAINEL) {
-    return new Response(JSON.stringify({ erro: 'Senha incorreta' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const dado = 'painel-autenticado';
-  const assinatura = await assinar(dado, env.SEGREDO_SESSAO);
-  const token = `${dado}.${assinatura}`;
-
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      // 30 dias — pra ninguém precisar digitar a senha toda hora
-      'Set-Cookie': `sessao=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000`,
-    },
-  });
+  return json(
+    { ok: true },
+    { headers: { 'Set-Cookie': await cookieDeSessao(env.SEGREDO_SESSAO) } },
+  );
 }

@@ -2,12 +2,18 @@
   "name": "acessosvirtual",
   "private": true,
   "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:frontend": "npm --prefix frontend install --no-audit --no-fund && npm --prefix frontend run build",
     "build:worker": "wrangler pages functions build functions --outdir dist/worker --compatibility-date 2026-07-29",
-    "build": "npm run build:frontend && npm run build:worker",
+    "build": "npm run typecheck && npm run build:frontend && npm run build:worker",
     "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260921.1",
+    "typescript": "~5.9",
     "wrangler": "^4.115.0"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
   }
 }

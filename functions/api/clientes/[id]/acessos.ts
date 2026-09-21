@@ -1,52 +1,32 @@
-interface Env {
-  DB: D1Database;
-}
+import type { ContextoComId } from '../../_lib/env';
+import { criado } from '../../_lib/http';
+import { AcessoCompleto } from '../../_lib/schemas';
+import { idDaRota, lerCorpo } from '../../_lib/validacao';
 
 // POST /api/clientes/:id/acessos -> adiciona um novo acesso (anydesk/acesso_web/acesso_zeta) a um cliente existente
-export async function onRequestPost(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPost({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    tipo?: 'anydesk' | 'acesso_web' | 'acesso_zeta';
-    identificador?: string;
-    usuario?: string;
-    senha?: string;
-    link?: string;
-    servidor?: string;
-    contabilidade_id?: number | null;
-    enviar_contabilidade?: boolean;
-    observacoes?: string;
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, AcessoCompleto);
+  if (erro) return erro;
 
-  if (!body.tipo || !['anydesk', 'acesso_web', 'acesso_zeta'].includes(body.tipo)) {
-    return new Response(JSON.stringify({ erro: 'Tipo de acesso inválido' }), { status: 400 });
-  }
-
-  const resultado = await env.DB
-    .prepare(
-      'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade_id, enviar_contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    )
+  const resultado = await env.DB.prepare(
+    'INSERT INTO acessos (cliente_id, tipo, identificador, usuario, senha, link, servidor, contabilidade_id, enviar_contabilidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  )
     .bind(
-      params.id,
-      body.tipo,
-      body.identificador || null,
-      body.usuario || null,
-      body.senha || null,
-      body.link || null,
-      body.servidor || null,
-      body.contabilidade_id || null,
-      body.enviar_contabilidade ? 1 : 0,
-      body.observacoes || null
+      id,
+      dados.tipo,
+      dados.identificador,
+      dados.usuario,
+      dados.senha,
+      dados.link,
+      dados.servidor,
+      dados.contabilidade_id,
+      dados.enviar_contabilidade,
+      dados.observacoes,
     )
     .run();
 
-  return new Response(JSON.stringify({ id: resultado.meta.last_row_id }), {
-    status: 201,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return criado({ id: resultado.meta.last_row_id });
 }

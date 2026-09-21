@@ -1,33 +1,28 @@
-interface Env {
-  DB: D1Database;
-}
+import type { ContextoComId } from '../../_lib/env';
+import { embutido, naoEncontrado, ok } from '../../_lib/http';
+import { idDaRota } from '../../_lib/validacao';
 
 // GET /api/wiki/imagens/:id -> mostra uma imagem (print) anexada a um artigo da wiki
-export async function onRequestGet(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestGet({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  const registro = await env.DB
-    .prepare('SELECT imagem, imagem_tipo FROM wiki_artigo_imagens WHERE id = ?')
-    .bind(params.id)
+  const registro = await env.DB.prepare(
+    'SELECT imagem, imagem_tipo FROM wiki_artigo_imagens WHERE id = ?',
+  )
+    .bind(id)
     .first<{ imagem: ArrayBuffer | null; imagem_tipo: string | null }>();
 
-  if (!registro?.imagem) {
-    return new Response(JSON.stringify({ erro: 'Imagem não encontrada' }), { status: 404 });
-  }
+  if (!registro?.imagem) return naoEncontrado('Imagem não encontrada');
 
-  return new Response(new Uint8Array(registro.imagem), {
-    headers: {
-      'Content-Type': registro.imagem_tipo || 'application/octet-stream',
-      'Content-Length': String(registro.imagem.byteLength),
-    },
-  });
+  return embutido(registro.imagem, registro.imagem_tipo);
 }
 
 // DELETE /api/wiki/imagens/:id -> remove uma imagem específica do artigo
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM wiki_artigo_imagens WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM wiki_artigo_imagens WHERE id = ?').bind(id).run();
+  return ok();
 }

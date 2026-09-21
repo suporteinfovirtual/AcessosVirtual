@@ -1,32 +1,35 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import type { ContextoComId } from '../_lib/env';
+import { ok } from '../_lib/http';
+import {
+  dataIsoOpcional,
+  flag,
+  idDaRota,
+  idOpcional,
+  lerCorpo,
+  textoOpcional,
+} from '../_lib/validacao';
+
+const Instalacao = z.object({
+  telefone: textoOpcional,
+  email: textoOpcional,
+  aliquota: textoOpcional,
+  tecnico_id: idOpcional('Técnico inválido'),
+  data_instalacao: dataIsoOpcional('Data da instalação deve estar no formato AAAA-MM-DD'),
+  instalado: flag,
+  observacoes: textoOpcional,
+});
 
 // PUT /api/instalacoes/:id -> atualiza a instalação (WhatsApp, e-mail, alíquota, técnico, data, marcar instalado, observações)
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    telefone?: string | null;
-    email?: string | null;
-    aliquota?: string | null;
-    tecnico_id?: number | null;
-    data_instalacao?: string | null;
-    instalado?: boolean;
-    observacoes?: string | null;
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, Instalacao);
+  if (erro) return erro;
 
-  const instalado = body.instalado ? 1 : 0;
-  const dataInformada = body.data_instalacao?.toString().trim() || null;
-
-  await env.DB
-    .prepare(
-      `UPDATE instalacoes
+  await env.DB.prepare(
+    `UPDATE instalacoes
        SET telefone = ?,
            email = ?,
            aliquota = ?,
@@ -35,47 +38,45 @@ export async function onRequestPut(context: EventContext<Env, { id: string }, un
            instalado = ?,
            data_instalacao = CASE WHEN ? = 1 THEN COALESCE(?, data_instalacao, date('now')) ELSE ? END,
            atualizado_em = datetime('now')
-       WHERE id = ?`
-    )
+       WHERE id = ?`,
+  )
     .bind(
-      body.telefone?.toString().trim() || null,
-      body.email?.toString().trim() || null,
-      body.aliquota?.toString().trim() || null,
-      body.tecnico_id || null,
-      body.observacoes?.toString().trim() || null,
-      instalado,
-      instalado,
-      dataInformada,
-      dataInformada,
-      params.id
+      dados.telefone,
+      dados.email,
+      dados.aliquota,
+      dados.tecnico_id,
+      dados.observacoes,
+      dados.instalado,
+      dados.instalado,
+      dados.data_instalacao,
+      dados.data_instalacao,
+      id,
     )
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/instalacoes/:id -> remove a instalação e devolve a negociação de origem
 // pro status "em negociação" (sem perder nome, cnpj, telefone etc já preenchidos nela)
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  const instalacao = await env.DB
-    .prepare('SELECT negociacao_id FROM instalacoes WHERE id = ?')
-    .bind(params.id)
+  const instalacao = await env.DB.prepare('SELECT negociacao_id FROM instalacoes WHERE id = ?')
+    .bind(id)
     .first<{ negociacao_id: number | null }>();
 
   if (instalacao?.negociacao_id) {
-    await env.DB
-      .prepare(
-        `UPDATE clientes_negociacao
+    await env.DB.prepare(
+      `UPDATE clientes_negociacao
          SET status = 'em_negociacao', convertido_em = NULL, atualizado_em = datetime('now')
-         WHERE id = ?`
-      )
+         WHERE id = ?`,
+    )
       .bind(instalacao.negociacao_id)
       .run();
   }
 
-  await env.DB.prepare('DELETE FROM instalacoes WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM instalacoes WHERE id = ?').bind(id).run();
+  return ok();
 }

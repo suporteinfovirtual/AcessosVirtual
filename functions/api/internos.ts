@@ -1,36 +1,24 @@
-interface Env {
-  DB: D1Database;
-}
+import type { Contexto } from './_lib/env';
+import { criado, json } from './_lib/http';
+import { ContaInterna } from './_lib/schemas';
+import { lerCorpo } from './_lib/validacao';
 
 // GET /api/internos -> lista as contas/serviços internos da empresa
-export async function onRequestGet(context: EventContext<Env, string, unknown>) {
-  const { env } = context;
+export async function onRequestGet({ env }: Contexto) {
   const { results } = await env.DB.prepare('SELECT * FROM contas_internas ORDER BY servico').all();
-  return new Response(JSON.stringify(results), { headers: { 'Content-Type': 'application/json' } });
+  return json(results);
 }
 
 // POST /api/internos -> cria uma nova conta/serviço interno
-export async function onRequestPost(context: EventContext<Env, string, unknown>) {
-  const { request, env } = context;
+export async function onRequestPost({ request, env }: Contexto) {
+  const { dados, erro } = await lerCorpo(request, ContaInterna);
+  if (erro) return erro;
 
-  let body: { servico?: string; usuario?: string; senha?: string; observacoes?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
-
-  if (!body.servico?.trim()) {
-    return new Response(JSON.stringify({ erro: 'Nome do serviço é obrigatório' }), { status: 400 });
-  }
-
-  const resultado = await env.DB
-    .prepare('INSERT INTO contas_internas (servico, usuario, senha, observacoes) VALUES (?, ?, ?, ?)')
-    .bind(body.servico.trim(), body.usuario || null, body.senha || null, body.observacoes || null)
+  const resultado = await env.DB.prepare(
+    'INSERT INTO contas_internas (servico, usuario, senha, observacoes) VALUES (?, ?, ?, ?)',
+  )
+    .bind(dados.servico, dados.usuario, dados.senha, dados.observacoes)
     .run();
 
-  return new Response(JSON.stringify({ id: resultado.meta.last_row_id }), {
-    status: 201,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return criado({ id: resultado.meta.last_row_id });
 }

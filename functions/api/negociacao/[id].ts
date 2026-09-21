@@ -1,84 +1,61 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import { STATUS_NEGOCIACAO } from '../_lib/dominio';
+import type { ContextoComId } from '../_lib/env';
+import { ok } from '../_lib/http';
+import { camposDeNegociacao } from '../_lib/schemas';
+import { flag, idDaRota, lerCorpo, opcaoDe, textoOpcional } from '../_lib/validacao';
 
-const STATUS_VALIDOS = ['em_negociacao', 'desistiu', 'fechou'];
-const SISTEMAS_VALIDOS = ['uniplus', 'uniplus_web', 'sgbr', 'zeta'];
+const Negociacao = z.object({
+  ...camposDeNegociacao,
+  status: opcaoDe(STATUS_NEGOCIACAO, 'Status inválido').nullish(),
+  motivo_desistencia: textoOpcional,
+  convertido: flag,
+});
 
 // PUT /api/negociacao/:id -> atualiza um cliente em negociação (status, sistema e conversão)
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    nome?: string;
-    cnpj?: string;
-    telefone?: string;
-    email?: string;
-    aliquota?: string;
-    enquadramento_fiscal?: string;
-    observacoes?: string;
-    status?: string;
-    sistema?: string;
-    precisa_migrar_base?: boolean;
-    motivo_desistencia?: string;
-    convertido?: boolean;
-    categoria_id?: number | null;
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
-
-  if (!body.nome?.trim()) {
-    return new Response(JSON.stringify({ erro: 'Nome é obrigatório' }), { status: 400 });
-  }
-
-  if (body.status && !STATUS_VALIDOS.includes(body.status)) {
-    return new Response(JSON.stringify({ erro: 'Status inválido' }), { status: 400 });
-  }
-
-  if (body.sistema && !SISTEMAS_VALIDOS.includes(body.sistema)) {
-    return new Response(JSON.stringify({ erro: 'Sistema inválido' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, Negociacao);
+  if (erro) return erro;
 
   // convertido_em só é escrito quando convertido=true vem no corpo (marca "agora" no
   // servidor); nos demais salvamentos o valor que já estava gravado é preservado.
-  await env.DB
-    .prepare(
-      `UPDATE clientes_negociacao
+  await env.DB.prepare(
+    `UPDATE clientes_negociacao
        SET nome = ?, cnpj = ?, telefone = ?, email = ?, aliquota = ?, enquadramento_fiscal = ?, observacoes = ?,
            precisa_migrar_base = ?, motivo_desistencia = ?, categoria_id = ?, status = COALESCE(?, status), sistema = COALESCE(?, sistema),
            convertido_em = CASE WHEN ? = 1 THEN datetime('now') ELSE convertido_em END,
            atualizado_em = datetime('now')
-       WHERE id = ?`
-    )
+       WHERE id = ?`,
+  )
     .bind(
-      body.nome.trim(),
-      body.cnpj?.trim() || null,
-      body.telefone?.trim() || null,
-      body.email?.trim() || null,
-      body.aliquota?.trim() || null,
-      body.enquadramento_fiscal?.trim() || null,
-      body.observacoes?.trim() || null,
-      body.precisa_migrar_base ? 1 : 0,
-      body.motivo_desistencia?.trim() || null,
-      body.categoria_id || null,
-      body.status || null,
-      body.sistema || null,
-      body.convertido ? 1 : 0,
-      params.id
+      dados.nome,
+      dados.cnpj,
+      dados.telefone,
+      dados.email,
+      dados.aliquota,
+      dados.enquadramento_fiscal,
+      dados.observacoes,
+      dados.precisa_migrar_base,
+      dados.motivo_desistencia,
+      dados.categoria_id,
+      dados.status ?? null,
+      dados.sistema ?? null,
+      dados.convertido,
+      id,
     )
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/negociacao/:id -> remove um cliente em negociação
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM clientes_negociacao WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM clientes_negociacao WHERE id = ?').bind(id).run();
+  return ok();
 }

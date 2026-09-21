@@ -1,25 +1,22 @@
-interface Env {
-  DB: D1Database;
-}
+import type { ContextoComId } from '../../_lib/env';
+import { download, naoEncontrado } from '../../_lib/http';
+import { idDaRota } from '../../_lib/validacao';
 
 // GET /api/passos/:id/arquivo -> baixa o arquivo anexado ao passo
-export async function onRequestGet(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestGet({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  const registro = await env.DB
-    .prepare('SELECT arquivo, arquivo_nome FROM manual_passos WHERE id = ?')
-    .bind(params.id)
+  const registro = await env.DB.prepare(
+    'SELECT arquivo, arquivo_nome FROM manual_passos WHERE id = ?',
+  )
+    .bind(id)
     .first<{ arquivo: ArrayBuffer | null; arquivo_nome: string | null }>();
 
-  if (!registro?.arquivo) {
-    return new Response(JSON.stringify({ erro: 'Arquivo não encontrado' }), { status: 404 });
-  }
+  if (!registro?.arquivo) return naoEncontrado('Arquivo não encontrado');
 
-  return new Response(new Uint8Array(registro.arquivo), {
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${registro.arquivo_nome || 'arquivo'}"`,
-      'Content-Length': String(registro.arquivo.byteLength),
-    },
+  return download(registro.arquivo, {
+    nome: registro.arquivo_nome || 'arquivo',
+    tamanho: registro.arquivo.byteLength,
   });
 }

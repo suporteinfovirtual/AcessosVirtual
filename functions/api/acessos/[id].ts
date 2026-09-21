@@ -1,52 +1,43 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import type { ContextoComId } from '../_lib/env';
+import { ok } from '../_lib/http';
+import { camposDeAcesso } from '../_lib/schemas';
+import { idDaRota, lerCorpo } from '../_lib/validacao';
+
+const AcessoEdicao = z.object(camposDeAcesso);
 
 // PUT /api/acessos/:id -> atualiza um acesso específico
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    identificador?: string;
-    usuario?: string;
-    senha?: string;
-    link?: string;
-    servidor?: string;
-    contabilidade_id?: number | null;
-    enviar_contabilidade?: boolean;
-    observacoes?: string;
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, AcessoEdicao);
+  if (erro) return erro;
 
-  await env.DB
-    .prepare(
-      'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, servidor = ?, contabilidade_id = ?, enviar_contabilidade = ?, observacoes = ? WHERE id = ?'
-    )
+  await env.DB.prepare(
+    'UPDATE acessos SET identificador = ?, usuario = ?, senha = ?, link = ?, servidor = ?, contabilidade_id = ?, enviar_contabilidade = ?, observacoes = ? WHERE id = ?',
+  )
     .bind(
-      body.identificador || null,
-      body.usuario || null,
-      body.senha || null,
-      body.link || null,
-      body.servidor || null,
-      body.contabilidade_id || null,
-      body.enviar_contabilidade ? 1 : 0,
-      body.observacoes || null,
-      params.id
+      dados.identificador,
+      dados.usuario,
+      dados.senha,
+      dados.link,
+      dados.servidor,
+      dados.contabilidade_id,
+      dados.enviar_contabilidade,
+      dados.observacoes,
+      id,
     )
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/acessos/:id -> remove um acesso específico
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM acessos WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM acessos WHERE id = ?').bind(id).run();
+  return ok();
 }

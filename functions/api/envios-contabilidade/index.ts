@@ -1,50 +1,55 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import type { Contexto } from '../_lib/env';
+import { json, ok } from '../_lib/http';
+import { flag, idObrigatorio, lerConsulta, lerCorpo } from '../_lib/validacao';
+
+const PERIODO_INVALIDO = 'Parâmetros ano/mes inválidos';
+
+const ano = z.coerce
+  .number({ error: PERIODO_INVALIDO })
+  .int({ error: PERIODO_INVALIDO })
+  .positive({ error: PERIODO_INVALIDO });
+const mes = z.coerce
+  .number({ error: PERIODO_INVALIDO })
+  .int({ error: PERIODO_INVALIDO })
+  .min(1, { error: PERIODO_INVALIDO })
+  .max(12, { error: PERIODO_INVALIDO });
+
+const Periodo = z.object({ ano, mes });
+
+const Marcacao = z.object({
+  acesso_id: idObrigatorio('Parâmetros inválidos'),
+  ano,
+  mes,
+  enviado: flag,
+});
 
 // GET /api/envios-contabilidade?ano=2026&mes=8 -> status de envio de cada acesso naquele mes
-export async function onRequestGet(context: EventContext<Env, string, unknown>) {
-  const { request, env } = context;
-  const url = new URL(request.url);
-  const ano = Number(url.searchParams.get('ano'));
-  const mes = Number(url.searchParams.get('mes'));
+export async function onRequestGet({ request, env }: Contexto) {
+  const { dados, erro } = lerConsulta(request, Periodo);
+  if (erro) return erro;
 
-  if (!ano || !mes || mes < 1 || mes > 12) {
-    return new Response(JSON.stringify({ erro: 'Parâmetros ano/mes inválidos' }), { status: 400 });
-  }
-
-  const { results } = await env.DB
-    .prepare('SELECT acesso_id, enviado FROM envios_contabilidade_mensal WHERE ano = ? AND mes = ?')
-    .bind(ano, mes)
+  const { results } = await env.DB.prepare(
+    'SELECT acesso_id, enviado FROM envios_contabilidade_mensal WHERE ano = ? AND mes = ?',
+  )
+    .bind(dados.ano, dados.mes)
     .all();
 
-  return new Response(JSON.stringify(results), { headers: { 'Content-Type': 'application/json' } });
+  return json(results);
 }
 
 // PUT /api/envios-contabilidade -> marca/desmarca o envio de um acesso num mes/ano
-export async function onRequestPut(context: EventContext<Env, string, unknown>) {
-  const { request, env } = context;
+export async function onRequestPut({ request, env }: Contexto) {
+  const { dados, erro } = await lerCorpo(request, Marcacao);
+  if (erro) return erro;
 
-  let body: { acesso_id?: number; ano?: number; mes?: number; enviado?: boolean };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
-
-  const { acesso_id, ano, mes, enviado } = body;
-  if (!acesso_id || !ano || !mes || mes < 1 || mes > 12) {
-    return new Response(JSON.stringify({ erro: 'Parâmetros inválidos' }), { status: 400 });
-  }
-
-  await env.DB
-    .prepare(
-      `INSERT INTO envios_contabilidade_mensal (acesso_id, ano, mes, enviado, atualizado_em)
+  await env.DB.prepare(
+    `INSERT INTO envios_contabilidade_mensal (acesso_id, ano, mes, enviado, atualizado_em)
        VALUES (?, ?, ?, ?, datetime('now'))
-       ON CONFLICT (acesso_id, ano, mes) DO UPDATE SET enviado = excluded.enviado, atualizado_em = excluded.atualizado_em`
-    )
-    .bind(acesso_id, ano, mes, enviado ? 1 : 0)
+       ON CONFLICT (acesso_id, ano, mes) DO UPDATE SET enviado = excluded.enviado, atualizado_em = excluded.atualizado_em`,
+  )
+    .bind(dados.acesso_id, dados.ano, dados.mes, dados.enviado)
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }

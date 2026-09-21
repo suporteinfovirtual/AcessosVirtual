@@ -1,109 +1,97 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import type { ContextoComId } from '../_lib/env';
+import { json, naoEncontrado, ok } from '../_lib/http';
+import { camposDeClienteSistema } from '../_lib/schemas';
+import { idDaRota, lerCorpo } from '../_lib/validacao';
+
+const ClienteSistema = z.object(camposDeClienteSistema);
 
 // GET /api/clientes-sistemas/:id -> um cliente específico
-export async function onRequestGet(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestGet({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  const cliente = await env.DB
-    .prepare(
-      `SELECT clientes_sistemas.*, categorias.nome AS categoria_nome
+  const cliente = await env.DB.prepare(
+    `SELECT clientes_sistemas.*, categorias.nome AS categoria_nome
        FROM clientes_sistemas LEFT JOIN categorias ON categorias.id = clientes_sistemas.categoria_id
-       WHERE clientes_sistemas.id = ?`
-    )
-    .bind(params.id)
+       WHERE clientes_sistemas.id = ?`,
+  )
+    .bind(id)
     .first();
-  if (!cliente) {
-    return new Response(JSON.stringify({ erro: 'Cliente não encontrado' }), { status: 404 });
-  }
 
-  const { results: licencasSelecionadas } = await env.DB
-    .prepare(
-      `SELECT licencas.id, licencas.nome FROM clientes_sistemas_licencas
+  if (!cliente) return naoEncontrado('Cliente não encontrado');
+
+  const { results: licencasSelecionadas } = await env.DB.prepare(
+    `SELECT licencas.id, licencas.nome FROM clientes_sistemas_licencas
        JOIN licencas ON licencas.id = clientes_sistemas_licencas.licenca_id
-       WHERE clientes_sistemas_licencas.cliente_sistema_id = ?`
-    )
-    .bind(params.id)
+       WHERE clientes_sistemas_licencas.cliente_sistema_id = ?`,
+  )
+    .bind(id)
     .all();
 
-  const certificado = await env.DB
-    .prepare('SELECT nome_arquivo, senha, validade, atualizado_em FROM certificados_sistemas WHERE cliente_sistema_id = ?')
-    .bind(params.id)
+  const certificado = await env.DB.prepare(
+    'SELECT nome_arquivo, senha, validade, atualizado_em FROM certificados_sistemas WHERE cliente_sistema_id = ?',
+  )
+    .bind(id)
     .first();
 
-  return new Response(
-    JSON.stringify({ ...cliente, licencas_selecionadas: licencasSelecionadas, certificado: certificado || null }),
-    { headers: { 'Content-Type': 'application/json' } }
-  );
+  return json({
+    ...cliente,
+    licencas_selecionadas: licencasSelecionadas,
+    certificado: certificado || null,
+  });
 }
 
 // PUT /api/clientes-sistemas/:id -> atualiza os dados do cliente
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    nome?: string;
-    cnpj?: string;
-    telefone?: string;
-    licencas?: string;
-    enquadramento_fiscal?: string;
-    versao_build?: string;
-    observacoes?: string;
-    custo_mensalidade?: number | null;
-    valor_mensalidade?: number | null;
-    categoria_id?: number | null;
-    licenca_ids?: number[];
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, ClienteSistema);
+  if (erro) return erro;
 
-  if (!body.nome?.trim()) {
-    return new Response(JSON.stringify({ erro: 'Nome é obrigatório' }), { status: 400 });
-  }
-
-  await env.DB
-    .prepare(
-      `UPDATE clientes_sistemas
+  await env.DB.prepare(
+    `UPDATE clientes_sistemas
        SET nome = ?, cnpj = ?, telefone = ?, licencas = ?, enquadramento_fiscal = ?, versao_build = ?, observacoes = ?, custo_mensalidade = ?, valor_mensalidade = ?, categoria_id = ?
-       WHERE id = ?`
-    )
+       WHERE id = ?`,
+  )
     .bind(
-      body.nome.trim(),
-      body.cnpj?.trim() || null,
-      body.telefone?.trim() || null,
-      body.licencas?.trim() || null,
-      body.enquadramento_fiscal?.trim() || null,
-      body.versao_build?.trim() || null,
-      body.observacoes?.trim() || null,
-      body.custo_mensalidade ?? null,
-      body.valor_mensalidade ?? null,
-      body.categoria_id || null,
-      params.id
+      dados.nome,
+      dados.cnpj,
+      dados.telefone,
+      dados.licencas,
+      dados.enquadramento_fiscal,
+      dados.versao_build,
+      dados.observacoes,
+      dados.custo_mensalidade,
+      dados.valor_mensalidade,
+      dados.categoria_id,
+      id,
     )
     .run();
 
-  if (Array.isArray(body.licenca_ids)) {
-    await env.DB.prepare('DELETE FROM clientes_sistemas_licencas WHERE cliente_sistema_id = ?').bind(params.id).run();
-    for (const licencaId of body.licenca_ids) {
-      await env.DB
-        .prepare('INSERT INTO clientes_sistemas_licencas (cliente_sistema_id, licenca_id) VALUES (?, ?)')
-        .bind(params.id, licencaId)
+  // licenca_ids ausente = a tela não mexeu nas licenças; presente = troca a lista inteira
+  if (dados.licenca_ids) {
+    await env.DB.prepare('DELETE FROM clientes_sistemas_licencas WHERE cliente_sistema_id = ?')
+      .bind(id)
+      .run();
+    for (const licencaId of dados.licenca_ids) {
+      await env.DB.prepare(
+        'INSERT INTO clientes_sistemas_licencas (cliente_sistema_id, licenca_id) VALUES (?, ?)',
+      )
+        .bind(id, licencaId)
         .run();
     }
   }
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/clientes-sistemas/:id -> remove o cliente
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM clientes_sistemas WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM clientes_sistemas WHERE id = ?').bind(id).run();
+  return ok();
 }

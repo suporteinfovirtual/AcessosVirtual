@@ -1,35 +1,30 @@
-interface Env {
-  DB: D1Database;
-}
+import type { ContextoComId } from '../_lib/env';
+import { ok } from '../_lib/http';
+import { ContaInterna } from '../_lib/schemas';
+import { idDaRota, lerCorpo } from '../_lib/validacao';
 
 // PUT /api/internos/:id -> atualiza uma conta/serviço interno
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: { servico?: string; usuario?: string; senha?: string; observacoes?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, ContaInterna);
+  if (erro) return erro;
 
-  if (!body.servico?.trim()) {
-    return new Response(JSON.stringify({ erro: 'Nome do serviço é obrigatório' }), { status: 400 });
-  }
-
-  await env.DB
-    .prepare('UPDATE contas_internas SET servico = ?, usuario = ?, senha = ?, observacoes = ? WHERE id = ?')
-    .bind(body.servico.trim(), body.usuario || null, body.senha || null, body.observacoes || null, params.id)
+  await env.DB.prepare(
+    'UPDATE contas_internas SET servico = ?, usuario = ?, senha = ?, observacoes = ? WHERE id = ?',
+  )
+    .bind(dados.servico, dados.usuario, dados.senha, dados.observacoes, id)
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/internos/:id -> remove uma conta/serviço interno
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM contas_internas WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM contas_internas WHERE id = ?').bind(id).run();
+  return ok();
 }

@@ -1,37 +1,34 @@
-interface Env {
-  DB: D1Database;
-}
+import type { ContextoComId } from '../_lib/env';
+import { conflito, ok } from '../_lib/http';
+import { Contabilidade } from '../_lib/schemas';
+import { idDaRota, lerCorpo } from '../_lib/validacao';
 
 // PUT /api/contabilidades/:id -> atualiza nome e/ou e-mail
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: { nome?: string; email?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
-
-  const nome = body.nome?.trim();
-  if (!nome) {
-    return new Response(JSON.stringify({ erro: 'Nome é obrigatório' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, Contabilidade);
+  if (erro) return erro;
 
   try {
-    await env.DB
-      .prepare('UPDATE contabilidades SET nome = ?, email = ? WHERE id = ?')
-      .bind(nome, body.email?.trim() || null, params.id)
+    await env.DB.prepare('UPDATE contabilidades SET nome = ?, email = ? WHERE id = ?')
+      .bind(dados.nome, dados.email, id)
       .run();
-    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Já existe uma contabilidade com esse nome' }), { status: 409 });
+    return ok();
+  } catch (e) {
+    if (e instanceof Error && /UNIQUE/i.test(e.message)) {
+      return conflito('Já existe uma contabilidade com esse nome');
+    }
+    throw e;
   }
 }
 
 // DELETE /api/contabilidades/:id -> remove a contabilidade (acessos ligados a ela ficam sem contabilidade)
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
-  await env.DB.prepare('DELETE FROM contabilidades WHERE id = ?').bind(params.id).run();
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
+
+  await env.DB.prepare('DELETE FROM contabilidades WHERE id = ?').bind(id).run();
+  return ok();
 }

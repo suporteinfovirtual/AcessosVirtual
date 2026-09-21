@@ -1,59 +1,46 @@
-interface Env {
-  DB: D1Database;
-}
+import { z } from 'zod';
+import type { ContextoComId } from '../_lib/env';
+import { ok } from '../_lib/http';
+import { camposDeImplantacao } from '../_lib/schemas';
+import { flag, idDaRota, lerCorpo } from '../_lib/validacao';
+
+const Implantacao = z.object({
+  ...camposDeImplantacao,
+  concluida_manual: flag,
+});
 
 // PUT /api/implantacoes/:id -> reagenda (cliente, data ou hora) uma implantação
-export async function onRequestPut(context: EventContext<Env, { id: string }, unknown>) {
-  const { request, env, params } = context;
+export async function onRequestPut({ request, env, params }: ContextoComId) {
+  const { id, erro: erroId } = idDaRota(params);
+  if (erroId) return erroId;
 
-  let body: {
-    cliente_nome?: string;
-    cliente_sistema?: string;
-    cliente_ref_id?: number;
-    data?: string;
-    hora?: string;
-    observacoes?: string;
-    concluida_manual?: boolean;
-    tecnico_id?: number | null;
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ erro: 'Requisição inválida' }), { status: 400 });
-  }
+  const { dados, erro } = await lerCorpo(request, Implantacao);
+  if (erro) return erro;
 
-  if (!body.cliente_nome?.trim() || !body.cliente_sistema || !body.cliente_ref_id) {
-    return new Response(JSON.stringify({ erro: 'Cliente é obrigatório' }), { status: 400 });
-  }
-  if (!body.data?.trim() || !body.hora?.trim()) {
-    return new Response(JSON.stringify({ erro: 'Data e hora são obrigatórias' }), { status: 400 });
-  }
-
-  await env.DB
-    .prepare(
-      'UPDATE implantacoes SET cliente_nome = ?, cliente_sistema = ?, cliente_ref_id = ?, data = ?, hora = ?, observacoes = ?, concluida_manual = ?, tecnico_id = ? WHERE id = ?'
-    )
+  await env.DB.prepare(
+    'UPDATE implantacoes SET cliente_nome = ?, cliente_sistema = ?, cliente_ref_id = ?, data = ?, hora = ?, observacoes = ?, concluida_manual = ?, tecnico_id = ? WHERE id = ?',
+  )
     .bind(
-      body.cliente_nome.trim(),
-      body.cliente_sistema,
-      body.cliente_ref_id,
-      body.data.trim(),
-      body.hora.trim(),
-      body.observacoes?.trim() || null,
-      body.concluida_manual ? 1 : 0,
-      body.tecnico_id || null,
-      params.id
+      dados.cliente_nome,
+      dados.cliente_sistema,
+      dados.cliente_ref_id,
+      dados.data,
+      dados.hora,
+      dados.observacoes,
+      dados.concluida_manual,
+      dados.tecnico_id,
+      id,
     )
     .run();
 
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  return ok();
 }
 
 // DELETE /api/implantacoes/:id -> cancela a implantação agendada
-export async function onRequestDelete(context: EventContext<Env, { id: string }, unknown>) {
-  const { env, params } = context;
+export async function onRequestDelete({ env, params }: ContextoComId) {
+  const { id, erro } = idDaRota(params);
+  if (erro) return erro;
 
-  await env.DB.prepare('DELETE FROM implantacoes WHERE id = ?').bind(params.id).run();
-
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  await env.DB.prepare('DELETE FROM implantacoes WHERE id = ?').bind(id).run();
+  return ok();
 }
