@@ -297,6 +297,7 @@ CREATE TABLE IF NOT EXISTS instalacoes (
   aliquota TEXT, -- alíquota do Zeta, snapshot do que foi lançado na negociação
   enquadramento_fiscal TEXT,
   precisa_migrar_base INTEGER NOT NULL DEFAULT 0,
+  precisa_treinamento INTEGER NOT NULL DEFAULT 0, -- sem treinamento a instalação pula a agenda de implantação e vai direto pro faturamento
   negociacao_id INTEGER REFERENCES clientes_negociacao(id) ON DELETE SET NULL,
   instalado INTEGER NOT NULL DEFAULT 0,
   data_instalacao TEXT, -- YYYY-MM-DD, preenchido ao marcar como instalado

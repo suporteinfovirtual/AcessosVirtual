@@ -32,6 +32,7 @@ const Instalacao = z.object({
   aliquota: textoOpcional,
   enquadramento_fiscal: textoOpcional,
   precisa_migrar_base: flag,
+  precisa_treinamento: flag,
   negociacao_id: idOpcional('Negociação inválida'),
   observacoes: textoOpcional,
 });
@@ -51,6 +52,8 @@ export async function onRequestGet({ request, env }: Contexto) {
 
   if (dados.pendente_agendamento) {
     condicoes.push('instalacoes.instalado = 1');
+    // quem não contratou treinamento não entra na agenda
+    condicoes.push('instalacoes.precisa_treinamento = 1');
     condicoes.push(
       `NOT EXISTS (
          SELECT 1 FROM implantacoes
@@ -79,8 +82,8 @@ export async function onRequestPost({ request, env }: Contexto) {
 
   const resultado = await env.DB.prepare(
     `INSERT INTO instalacoes
-         (cliente_sistema, cliente_ref_id, cliente_nome, cnpj, telefone, email, aliquota, enquadramento_fiscal, precisa_migrar_base, negociacao_id, observacoes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (cliente_sistema, cliente_ref_id, cliente_nome, cnpj, telefone, email, aliquota, enquadramento_fiscal, precisa_migrar_base, precisa_treinamento, negociacao_id, observacoes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       dados.cliente_sistema,
@@ -92,6 +95,7 @@ export async function onRequestPost({ request, env }: Contexto) {
       dados.aliquota,
       dados.enquadramento_fiscal,
       dados.precisa_migrar_base,
+      dados.precisa_treinamento,
       dados.negociacao_id,
       dados.observacoes,
     )

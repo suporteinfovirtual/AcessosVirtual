@@ -100,6 +100,7 @@ export interface Instalacao {
   aliquota?: string | null;
   enquadramento_fiscal?: string | null;
   precisa_migrar_base?: boolean | number;
+  precisa_treinamento?: boolean | number;
   negociacao_id?: number | null;
   instalado?: boolean | number;
   data_instalacao?: string | null;

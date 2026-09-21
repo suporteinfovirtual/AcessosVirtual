@@ -67,6 +67,9 @@
                   @if (item.precisa_migrar_base) {
                     <p class="truncate text-xs font-medium text-amber-500">⚠ precisa migrar base</p>
                   }
+                  @if (item.precisa_treinamento) {
+                    <p class="truncate text-xs font-medium text-sky-400">• precisa de treinamento</p>
+                  }
                 </div>
 
                 <!-- a parte de baixo (com a linha divisória) só aparece quando tem algo nela -->

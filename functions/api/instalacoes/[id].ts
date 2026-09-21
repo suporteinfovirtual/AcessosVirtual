@@ -17,6 +17,7 @@ const Instalacao = z.object({
   tecnico_id: idOpcional('Técnico inválido'),
   data_instalacao: dataIsoOpcional('Data da instalação deve estar no formato AAAA-MM-DD'),
   instalado: flag,
+  precisa_treinamento: flag,
   observacoes: textoOpcional,
 });
 
@@ -36,6 +37,7 @@ export async function onRequestPut({ request, env, params }: ContextoComId) {
            tecnico_id = ?,
            observacoes = ?,
            instalado = ?,
+           precisa_treinamento = ?,
            data_instalacao = CASE WHEN ? = 1 THEN COALESCE(?, data_instalacao, date('now')) ELSE ? END,
            atualizado_em = datetime('now')
        WHERE id = ?`,
@@ -47,6 +49,7 @@ export async function onRequestPut({ request, env, params }: ContextoComId) {
       dados.tecnico_id,
       dados.observacoes,
       dados.instalado,
+      dados.precisa_treinamento,
       dados.instalado,
       dados.data_instalacao,
       dados.data_instalacao,

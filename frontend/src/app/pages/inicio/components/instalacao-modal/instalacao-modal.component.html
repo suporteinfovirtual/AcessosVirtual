@@ -296,7 +296,7 @@
             </div>
         </div>
 
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 space-y-2">
           <label class="flex items-center gap-2 text-sm text-zinc-300">
             <input
               type="checkbox"
@@ -306,6 +306,21 @@
             />
             Marcar como instalado
           </label>
+
+          <label class="flex items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              [(ngModel)]="precisaTreinamento"
+              name="precisaTreinamento"
+              class="h-4 w-4 rounded border-zinc-700 bg-zinc-950 text-accent focus:ring-accent-soft"
+            />
+            Precisa de treinamento
+          </label>
+          <p class="text-xs text-zinc-500">
+            {{ precisaTreinamento()
+              ? 'Depois de instalado, entra na agenda de Implantação.'
+              : 'Sem treinamento: ao marcar como instalado, já vai direto pro Faturamento.' }}
+          </p>
         </div>
       </div>
 

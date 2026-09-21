@@ -61,6 +61,7 @@ export class InstalacaoModalComponent implements OnInit {
   dataInstalacao = signal('');
   observacoes = signal('');
   instalado = signal(false);
+  precisaTreinamento = signal(false);
   tecnicos = signal<Tecnico[]>([]);
 
   // --- acesso ao sistema (Acesso Zeta / Acesso Web): o técnico cadastra o cliente no sistema
@@ -119,6 +120,7 @@ export class InstalacaoModalComponent implements OnInit {
     this.aliquota.set(item.aliquota || '');
     this.tecnicoId.set(item.tecnico_id || null);
     this.dataInstalacao.set(item.data_instalacao || '');
+    this.precisaTreinamento.set(!!item.precisa_treinamento);
     this.observacoes.set(item.observacoes || '');
     this.instalado.set(!!item.instalado);
 
@@ -240,6 +242,7 @@ export class InstalacaoModalComponent implements OnInit {
       data_instalacao: this.dataInstalacao() || null,
       observacoes: this.observacoes().trim() || null,
       instalado: this.instalado(),
+      precisa_treinamento: this.precisaTreinamento(),
     };
 
     try {
