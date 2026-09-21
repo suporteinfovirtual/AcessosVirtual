@@ -63,11 +63,11 @@ export interface ItemLista {
         [style.width.px]="posicao().width"
       >
         <ul class="max-h-60 overflow-y-auto py-1 text-sm">
-          <li [class]="classeLinha(valor() === null)">
+          <li [class]="classeLinha(null)">
             <button type="button" [class]="classeOpcao(valor() === null)" (click)="escolher(null)">{{ textoVazio() }}</button>
           </li>
           @for (item of itens(); track item.id) {
-            <li [class]="classeLinha(valor() === item.id && idEmEdicao() !== item.id)">
+            <li [class]="classeLinha(item)">
               @if (idEmEdicao() === item.id) {
                 <div class="flex w-full flex-col gap-1 px-1 py-1">
                   <input
@@ -126,27 +126,29 @@ export interface ItemLista {
       </div>
     }
 
+    <!-- compacto de propósito: o nome não se repete aqui porque a linha clicada fica
+         destacada atrás, e o nome ainda aparece na confirmação de exclusão -->
     @if (menu(); as m) {
       <div
-        class="fixed z-[56] max-w-xs rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl shadow-black/40"
+        class="fixed z-[56] w-36 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl shadow-black/50"
         [style.top.px]="m.y"
         [style.left.px]="m.x"
       >
         <button
           type="button"
-          class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-zinc-200 hover:bg-zinc-800"
+          class="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm text-zinc-200 hover:bg-zinc-800"
           (click)="iniciarEdicao(m.item)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
-          <span class="truncate">Editar "{{ m.item.nome }}"</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0 text-zinc-500"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+          Editar
         </button>
         <button
           type="button"
-          class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-red-400 hover:bg-zinc-800"
+          class="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm text-red-400 hover:bg-red-500/10"
           (click)="excluir(m.item)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-          <span class="truncate">Excluir "{{ m.item.nome }}"</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+          Excluir
         </button>
       </div>
     }
@@ -201,9 +203,15 @@ export class SelectCadastroComponent {
     return 'campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft';
   });
 
-  // o realce fica na linha, não no botão: senão ele pararia antes da coluna do lápis
-  classeLinha(selecionada: boolean) {
-    return selecionada ? 'flex items-center bg-accent/15' : 'flex items-center hover:bg-zinc-800';
+  // o realce fica na linha, não no botão, pra ir de ponta a ponta. A linha com o menu de
+  // contexto aberto fica destacada: é o que diz a qual item o "Editar"/"Excluir" se refere,
+  // já que o menu não repete o nome.
+  classeLinha(item: ItemLista | null) {
+    const base = 'flex items-center';
+    if (item && this.idEmEdicao() === item.id) return base;
+    if (item && this.menu()?.item.id === item.id) return `${base} bg-zinc-800`;
+    const selecionada = item ? this.valor() === item.id : this.valor() === null;
+    return selecionada ? `${base} bg-accent/15` : `${base} hover:bg-zinc-800`;
   }
 
   classeOpcao(selecionada: boolean) {
@@ -231,10 +239,16 @@ export class SelectCadastroComponent {
     this.fecharTudo();
   }
 
+  // o menu tem tamanho fixo (w-36 e duas linhas), então dá pra manter ele dentro da tela
+  // sem medir: perto da borda, abre pro outro lado em vez de vazar
   abrirMenu(evento: MouseEvent, item: ItemLista, origem: HTMLElement) {
     evento.preventDefault();
     const o = origem.getBoundingClientRect();
-    this.menu.set({ x: evento.clientX - o.left, y: evento.clientY - o.top, item });
+    const largura = 144;
+    const altura = 76;
+    const x = Math.max(8, Math.min(evento.clientX, window.innerWidth - largura - 8));
+    const y = Math.max(8, Math.min(evento.clientY, window.innerHeight - altura - 8));
+    this.menu.set({ x: x - o.left, y: y - o.top, item });
   }
 
   fecharTudo = () => {
