@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, HostListener, computed, inject, input, model, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, HostListener, computed, inject, input, model, output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CategoriasService } from '../core/categorias.service';
 import { ContabilidadesService } from '../core/contabilidades.service';
@@ -13,10 +13,12 @@ export interface ItemLista {
   email?: string | null;
 }
 
-// Select de contabilidade/categoria feito à mão (o <select> nativo não deixa usar o botão
-// direito nas opções): "+" dentro do campo cadastra um item novo e já seleciona; botão
-// direito numa opção abre o menu com "Excluir". A lista (`itens`) e o valor são two-way,
-// então quem usa recebe na hora o item criado/excluído.
+// Select de contabilidade/categoria feito à mão (o <select> nativo não deixa nem usar o
+// botão direito nas opções nem pôr um botão dentro delas): "+" dentro do campo cadastra um
+// item novo e já seleciona; o lápis em cada opção renomeia ali mesmo; botão direito abre o
+// menu com "Excluir". A lista (`itens`) e o valor são two-way, então quem usa recebe na
+// hora o item criado/renomeado/excluído, e `(alterado)` avisa quem precisa recarregar o que
+// mostra esses nomes (os cartões de cliente trazem categoria_nome do servidor).
 @Component({
   selector: 'app-select-cadastro',
   imports: [CadastroRapidoComponent],
@@ -32,7 +34,9 @@ export interface ItemLista {
         <span class="block truncate" [class.text-zinc-500]="valor() === undefined">{{ rotuloSelecionado() }}</span>
       </button>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
-      <app-cadastro-rapido [tipo]="tipo()" (criado)="aoCriar($event)"></app-cadastro-rapido>
+      @if (permiteCriar()) {
+        <app-cadastro-rapido [tipo]="tipo()" (criado)="aoCriar($event)"></app-cadastro-rapido>
+      }
     </div>
 
     <!-- marca onde fica o (0,0) do "fixed" aqui dentro: modais com transform/backdrop-filter
@@ -48,23 +52,58 @@ export interface ItemLista {
         [style.width.px]="posicao().width"
       >
         <ul class="max-h-60 overflow-y-auto py-1 text-sm">
-          <li>
+          <li [class]="classeLinha(valor() === null)">
             <button type="button" [class]="classeOpcao(valor() === null)" (click)="escolher(null)">{{ textoVazio() }}</button>
           </li>
           @for (item of itens(); track item.id) {
-            <li>
-              <button
-                type="button"
-                [class]="classeOpcao(valor() === item.id)"
-                (click)="escolher(item.id!)"
-                (contextmenu)="abrirMenu($event, item, origem)"
-              >
-                {{ item.nome }}
-              </button>
+            <li [class]="classeLinha(valor() === item.id && idEmEdicao() !== item.id)">
+              @if (idEmEdicao() === item.id) {
+                <input
+                  #campoNome
+                  [value]="nomeEdicao()"
+                  (input)="nomeEdicao.set(campoNome.value)"
+                  (keydown.enter)="$event.preventDefault(); salvarEdicao(item)"
+                  (keydown.escape)="$event.preventDefault(); cancelarEdicao()"
+                  class="mx-1 min-w-0 flex-1 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-zinc-100 outline-none focus:border-accent"
+                />
+                <button
+                  type="button"
+                  class="shrink-0 px-1.5 py-1.5 text-xs font-medium text-accent hover:text-accent-hover disabled:opacity-50"
+                  [disabled]="!nomeEdicao().trim() || salvandoEdicao()"
+                  (click)="salvarEdicao(item)"
+                >
+                  Salvar
+                </button>
+                <button
+                  type="button"
+                  class="shrink-0 pr-2 text-xs font-medium text-zinc-500 hover:text-zinc-300"
+                  (click)="cancelarEdicao()"
+                >
+                  Cancelar
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  [class]="classeOpcao(valor() === item.id)"
+                  [title]="item.nome"
+                  (click)="escolher(item.id!)"
+                  (contextmenu)="abrirMenu($event, item, origem)"
+                >
+                  {{ item.nome }}
+                </button>
+                <button
+                  type="button"
+                  class="shrink-0 px-2 py-1.5 text-zinc-500 hover:text-zinc-200"
+                  title="Renomear"
+                  (click)="iniciarEdicao(item)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+                </button>
+              }
             </li>
           }
         </ul>
-        <p class="border-t border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-500">Botão direito numa opção para excluir</p>
+        <p class="border-t border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-500">Lápis renomeia · botão direito exclui</p>
       </div>
     }
 
@@ -99,11 +138,19 @@ export class SelectCadastroComponent {
   itens = model<ItemLista[]>([]);
   textoVazio = input('');
   placeholder = input('Selecione…');
-  tamanho = input<'md' | 'sm'>('md');
+  tamanho = input<'md' | 'sm' | 'filtro'>('md');
+  // no filtro da barra o "+" fica de fora: criar por ali selecionaria na hora um item novo
+  // (e ainda sem clientes), deixando a lista vazia como se fosse bug
+  permiteCriar = input(true);
+  // renomeou ou excluiu algo: quem usa pode recarregar o que mostra esses nomes
+  alterado = output<void>();
 
   aberto = signal(false);
   posicao = signal({ top: 0, left: 0, width: 0 });
   menu = signal<{ x: number; y: number; item: ItemLista } | null>(null);
+  idEmEdicao = signal<number | null>(null);
+  nomeEdicao = signal('');
+  salvandoEdicao = signal(false);
 
   rotuloSelecionado = computed(() => {
     const valor = this.valor();
@@ -112,16 +159,27 @@ export class SelectCadastroComponent {
     return this.itens().find((i) => i.id === valor)?.nome ?? this.textoVazio();
   });
 
-  classeCampo = computed(() =>
-    this.tamanho() === 'sm'
-      ? 'campo-select w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent'
-      : 'campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft'
-  );
+  classeCampo = computed(() => {
+    // espaço à direita pro chevron e, quando existe, pro "+"
+    const direita = this.permiteCriar() ? 'pr-14' : 'pr-9';
+    if (this.tamanho() === 'sm') {
+      return `campo-select w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 ${direita} text-left text-sm text-zinc-100 outline-none focus:border-accent`;
+    }
+    if (this.tamanho() === 'filtro') {
+      return `campo-select w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-3 ${direita} text-left text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft`;
+    }
+    return `campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 ${direita} text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft`;
+  });
+
+  // o realce fica na linha, não no botão: senão ele pararia antes da coluna do lápis
+  classeLinha(selecionada: boolean) {
+    return selecionada ? 'flex items-center bg-accent/15' : 'flex items-center hover:bg-zinc-800';
+  }
 
   classeOpcao(selecionada: boolean) {
     return selecionada
-      ? 'block w-full truncate bg-accent/15 px-3 py-1.5 text-left text-accent'
-      : 'block w-full truncate px-3 py-1.5 text-left text-zinc-200 hover:bg-zinc-800';
+      ? 'min-w-0 flex-1 truncate px-3 py-1.5 text-left text-accent'
+      : 'min-w-0 flex-1 truncate px-3 py-1.5 text-left text-zinc-200';
   }
 
   alternar(gatilho: HTMLElement, origem: HTMLElement) {
@@ -152,12 +210,59 @@ export class SelectCadastroComponent {
   fecharTudo = () => {
     this.aberto.set(false);
     this.menu.set(null);
+    this.cancelarEdicao();
   };
 
   aoCriar(item: ItemCadastrado) {
     this.itens.update((lista) => incluirOrdenado(lista, item));
     this.valor.set(item.id);
   }
+
+  // --- renomear ---
+
+  iniciarEdicao(item: ItemLista) {
+    if (!item.id) return;
+    this.menu.set(null);
+    this.nomeEdicao.set(item.nome);
+    this.idEmEdicao.set(item.id);
+  }
+
+  cancelarEdicao() {
+    this.idEmEdicao.set(null);
+    this.nomeEdicao.set('');
+    this.salvandoEdicao.set(false);
+  }
+
+  async salvarEdicao(item: ItemLista) {
+    const nome = this.nomeEdicao().trim();
+    if (!item.id || !nome || this.salvandoEdicao()) return;
+    if (nome === item.nome) {
+      this.cancelarEdicao();
+      return;
+    }
+
+    const id = item.id;
+    this.salvandoEdicao.set(true);
+    try {
+      await firstValueFrom(
+        this.tipo() === 'contabilidade'
+          ? // o PUT regrava a linha inteira: sem mandar o e-mail atual junto ele seria apagado
+            this.contabilidadesService.atualizar(id, { nome, email: item.email ?? null })
+          : this.categoriasService.atualizar(id, { nome })
+      );
+      // a lista vem ordenada da API; renomear pode mudar o lugar do item
+      this.itens.update((lista) => incluirOrdenado(lista.filter((i) => i.id !== id), { ...item, nome }));
+      this.cancelarEdicao();
+      this.toast.sucesso(this.tipo() === 'contabilidade' ? 'Contabilidade renomeada.' : 'Categoria renomeada.');
+      this.alterado.emit();
+    } catch (e) {
+      // ex.: 409 "Já existe uma categoria com esse nome"
+      this.toast.erro((e as { error?: { erro?: string } })?.error?.erro || 'Não foi possível renomear.');
+      this.salvandoEdicao.set(false);
+    }
+  }
+
+  // --- excluir ---
 
   async excluir(item: ItemLista) {
     this.fecharTudo();
@@ -176,6 +281,7 @@ export class SelectCadastroComponent {
       this.itens.update((lista) => lista.filter((i) => i.id !== id));
       if (this.valor() === id) this.valor.set(null);
       this.toast.sucesso(this.tipo() === 'contabilidade' ? 'Contabilidade excluída.' : 'Categoria excluída.');
+      this.alterado.emit();
     } catch {
       this.toast.erro('Não foi possível excluir.');
     }

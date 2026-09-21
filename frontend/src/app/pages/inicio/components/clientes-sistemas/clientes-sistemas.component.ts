@@ -9,6 +9,7 @@ import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-s
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 import { LicencasModalComponent } from '../licencas-modal/licencas-modal.component';
 import { CategoriasModalComponent } from '../categorias-modal/categorias-modal.component';
+import { SelectCadastroComponent } from '../../../../shared/select-cadastro.component';
 import { RelatorioLucroModalComponent } from '../relatorio-lucro-modal/relatorio-lucro-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
 import { ViewModeToggleComponent } from '../../../../shared/view-mode-toggle.component';
@@ -34,6 +35,7 @@ const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
     LicencasModalComponent,
     CategoriasModalComponent,
     RelatorioLucroModalComponent,
+    SelectCadastroComponent,
     ViewModeToggleComponent,
     SkeletonComponent,
   ],
@@ -186,6 +188,13 @@ export class ClientesSistemasComponent implements OnInit {
     this.categorias.set(categorias);
     await this.carregar();
     this.toast.sucesso('Categorias atualizadas.');
+  }
+
+  // renomear/excluir direto no select do filtro: ele já atualiza a própria lista e já
+  // mostra o toast, aqui só recarrega os clientes, que trazem categoria_nome pronto do
+  // servidor e ficariam com o nome antigo
+  async aoRenomearOuExcluirCategoria() {
+    await this.carregar(true);
   }
 
   abrirRelatorio() {

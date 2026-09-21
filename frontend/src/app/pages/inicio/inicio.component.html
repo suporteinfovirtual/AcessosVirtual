@@ -333,15 +333,18 @@
                 </select>
               }
               @if (abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-                <select
-                  [(ngModel)]="contabilidadeFiltro"
-                  class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-                >
-                  <option [ngValue]="null">Todas as contabilidades</option>
-                  @for (contabilidade of contabilidades(); track contabilidade.id) {
-                    <option [ngValue]="contabilidade.id">{{ contabilidade.nome }}</option>
-                  }
-                </select>
+                <app-select-cadastro
+                  class="block w-60"
+                  tipo="contabilidade"
+                  tamanho="filtro"
+                  textoVazio="Todas as contabilidades"
+                  [permiteCriar]="false"
+                  [valor]="contabilidadeFiltro()"
+                  (valorChange)="contabilidadeFiltro.set($event ?? null)"
+                  [itens]="contabilidades()"
+                  (itensChange)="contabilidades.set($event)"
+                  (alterado)="aoRenomearOuExcluirCadastro()"
+                ></app-select-cadastro>
                 <button
                   type="button"
                   class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -352,15 +355,18 @@
                 </button>
               }
               @if (abaAtiva() === 'anydesk' || abaAtiva() === 'acesso_web' || abaAtiva() === 'acesso_zeta') {
-                <select
-                  [(ngModel)]="categoriaFiltro"
-                  class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
-                >
-                  <option [ngValue]="null">Todas as categorias</option>
-                  @for (categoria of categorias(); track categoria.id) {
-                    <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-                  }
-                </select>
+                <app-select-cadastro
+                  class="block w-60"
+                  tipo="categoria"
+                  tamanho="filtro"
+                  textoVazio="Todas as categorias"
+                  [permiteCriar]="false"
+                  [valor]="categoriaFiltro()"
+                  (valorChange)="categoriaFiltro.set($event ?? null)"
+                  [itens]="categorias()"
+                  (itensChange)="categorias.set($event)"
+                  (alterado)="aoRenomearOuExcluirCadastro()"
+                ></app-select-cadastro>
                 <button
                   type="button"
                   class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"

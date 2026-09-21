@@ -349,6 +349,13 @@ export class InicioComponent implements OnInit {
     this.toast.sucesso('Contabilidades atualizadas.');
   }
 
+  // renomear/excluir direto no select do filtro: ele já atualiza a própria lista e já
+  // mostra o toast, aqui só recarrega os clientes, que trazem categoria_nome e
+  // contabilidade_nome prontos do servidor e ficariam com o nome antigo
+  async aoRenomearOuExcluirCadastro() {
+    await this.carregarClientes(true);
+  }
+
   // as seções de Gestão (Clientes, Envios, Negociação, Implantação, Faturamento) e as
   // abas normais (Acessos/Ferramentas) são mutuamente exclusivas — sempre fecha todas
   // as seções de Gestão antes de trocar pra outra área, senão fica mais de uma "ativa"
