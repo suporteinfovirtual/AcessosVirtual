@@ -20,7 +20,6 @@ import { FaturamentoService } from '../../../../core/faturamento.service';
 import { EnviosContabilidadeService } from '../../../../core/envios-contabilidade.service';
 import { statusCertificado } from '../../../../core/certificado.util';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
-import { CardComponent } from '../../../../shared/card.component';
 import { aoSincronizar } from '../../../../core/sincronizacao.service';
 
 function formatarDataIso(data: Date): string {
@@ -62,10 +61,31 @@ interface SegmentoContabilidade {
   dashoffset: number;
 }
 
-interface TooltipDonutContabilidade {
-  seg: SegmentoContabilidade;
-  x: number;
-  y: number;
+interface GraficoNovosClientes {
+  linha: string;
+  area: string;
+  pontoFinalX: number;
+  pontoFinalY: number;
+  total: number;
+  pico: number;
+  rotulos: { texto: string; x: number }[];
+}
+
+export type ChaveOperacional = 'contabilidade' | 'faturamento' | 'implantacao' | 'negociacao' | 'instalacao';
+
+interface LinhaOperacional {
+  chave: ChaveOperacional;
+  rotulo: string;
+  descricao: string;
+  valor: number;
+  // destaque só pra pendência que trava o mês; "em negociação" é fluxo normal, não alerta
+  destaque: boolean;
+  secao: SecaoGestao;
+  acao: string;
+}
+
+interface BarraContabilidade extends SegmentoContabilidade {
+  largura: number;
 }
 
 const LIMITE_LISTA = 5;
@@ -90,6 +110,29 @@ const CORES_SISTEMA: Record<Sistema, string> = {
 const CORES_CONTABILIDADE = ['#ff7a1a', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46'];
 const COR_NAO_INFORMADO = '#3f3f46';
 
+// O gráfico do topo mostra NOVOS clientes por dia, não o total acumulado: 311 dos 321
+// clientes entraram juntos na carga inicial, então uma linha acumulada seria reta e um
+// "% vs mês anterior" daria -96%, que é artefato da importação e não movimento real.
+const DIAS_GRAFICO = 30;
+const GRAFICO_LARGURA = 620;
+const GRAFICO_ALTURA = 150;
+
+const MESES_LONGOS = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+const MESES_CURTOS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
 const DONUT_TAMANHO = 140;
 const DONUT_ESPESSURA = 18;
 const DONUT_RAIO = (DONUT_TAMANHO - DONUT_ESPESSURA) / 2;
@@ -98,7 +141,7 @@ const DONUT_ESPACO = 4;
 
 @Component({
   selector: 'app-resumo-panel',
-  imports: [SkeletonComponent, CardComponent],
+  imports: [SkeletonComponent],
   templateUrl: './resumo-panel.component.html',
 })
 export class ResumoPanelComponent implements OnInit {
@@ -336,10 +379,127 @@ export class ResumoPanelComponent implements OnInit {
     });
   });
 
+  // --- topo: total da base e movimento recente ---
+
+  saudacao = computed(() => {
+    const hora = new Date().getHours();
+    if (hora < 12) return 'Bom dia';
+    return hora < 18 ? 'Boa tarde' : 'Boa noite';
+  });
+
+  dataPorExtenso = computed(() => {
+    const hoje = new Date();
+    return `${hoje.getDate()} de ${MESES_LONGOS[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+  });
+
+  // Novos clientes por dia nos últimos 30 dias. A escala do eixo Y vai de 0 até o pico do
+  // período, pra um dia de 3 cadastros não parecer um pico enorme só por ser o maior.
+  graficoNovosClientes = computed<GraficoNovosClientes>(() => {
+    const hoje = new Date();
+    const dias: { iso: string; data: Date; total: number }[] = [];
+    for (let i = DIAS_GRAFICO - 1; i >= 0; i--) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - i);
+      dias.push({ iso: formatarDataIso(data), data, total: 0 });
+    }
+
+    const indicePorIso = new Map(dias.map((dia, indice) => [dia.iso, indice]));
+    for (const cliente of this.clientes()) {
+      // criado_em vem como "2026-09-18 13:32:18"; só a data interessa aqui
+      const iso = cliente.criado_em?.slice(0, 10);
+      const indice = iso === undefined ? undefined : indicePorIso.get(iso);
+      if (indice !== undefined) dias[indice].total++;
+    }
+
+    const pico = Math.max(1, ...dias.map((dia) => dia.total));
+    const pontos = dias.map((dia, indice) => ({
+      x: (indice / (DIAS_GRAFICO - 1)) * GRAFICO_LARGURA,
+      y: GRAFICO_ALTURA - (dia.total / pico) * GRAFICO_ALTURA,
+    }));
+
+    const linha = pontos.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const ultimo = pontos[pontos.length - 1];
+
+    const rotulos = [0, 10, 20, DIAS_GRAFICO - 1].map((indice) => ({
+      texto: `${dias[indice].data.getDate()} ${MESES_CURTOS[dias[indice].data.getMonth()]}`,
+      x: pontos[indice].x,
+    }));
+
+    return {
+      linha,
+      area: `${linha} L${GRAFICO_LARGURA},${GRAFICO_ALTURA} L0,${GRAFICO_ALTURA} Z`,
+      pontoFinalX: ultimo.x,
+      pontoFinalY: ultimo.y,
+      total: dias.reduce((soma, dia) => soma + dia.total, 0),
+      pico,
+      rotulos,
+    };
+  });
+
+  novosClientes30Dias = computed(() => this.graficoNovosClientes().total);
+
+  // --- lista "Acompanhamento operacional" ---
+
+  linhasOperacionais = computed<LinhaOperacional[]>(() => [
+    {
+      chave: 'contabilidade',
+      rotulo: 'Pendentes de contabilidade',
+      descricao: 'Clientes aguardando envio no mês',
+      valor: this.pendentesEnvioContabilidade(),
+      destaque: this.pendentesEnvioContabilidade() > 0,
+      secao: 'enviosContabilidade',
+      acao: 'Revisar',
+    },
+    {
+      chave: 'faturamento',
+      rotulo: 'Prontos para faturar',
+      descricao: 'Liberados para o próximo ciclo',
+      valor: this.prontosParaFaturar(),
+      destaque: false,
+      secao: 'faturamento',
+      acao: 'Abrir',
+    },
+    {
+      chave: 'implantacao',
+      rotulo: 'Implantações esta semana',
+      descricao: `${this.implantacoesSemanaAgendadasRecentemente()} agendada(s) nos últimos 7 dias`,
+      valor: this.implantacoesSemana(),
+      destaque: false,
+      secao: 'implantacao',
+      acao: 'Agenda',
+    },
+    {
+      chave: 'instalacao',
+      rotulo: 'Prontos para instalar',
+      descricao: `${this.instalacoesNovasSemana()} nova(s) essa semana`,
+      valor: this.prontosParaInstalar(),
+      destaque: false,
+      secao: 'instalacao',
+      acao: 'Instalar',
+    },
+    {
+      chave: 'negociacao',
+      rotulo: 'Em negociação',
+      descricao: `${this.negociacoesNovasSemana()} nova(s) essa semana`,
+      valor: this.emNegociacao(),
+      destaque: false,
+      secao: 'negociacao',
+      acao: 'Ver',
+    },
+  ]);
+
+  // --- barras "Clientes por contabilidade" ---
+
+  // barra proporcional à MAIOR contabilidade, não ao total: com "Não informado" levando
+  // metade da base, tudo o mais viraria um risco de 2px se a escala fosse o total
+  barrasContabilidade = computed<BarraContabilidade[]>(() => {
+    const segmentos = this.donutContabilidadeSegments();
+    const maior = Math.max(1, ...segmentos.map((seg) => seg.valor));
+    return segmentos.map((seg) => ({ ...seg, largura: Math.round((seg.valor / maior) * 100) }));
+  });
+
   // tooltip do donut: SVG puro, sem lib de gráfico, então a posição é calculada à mão
   // em relação ao container (não ao <svg>, que tem a rotação -90° só de exibição)
   donutTooltip = signal<TooltipDonut | null>(null);
-  donutContabilidadeTooltip = signal<TooltipDonutContabilidade | null>(null);
 
   aoPassarMouseSegmento(event: MouseEvent, seg: SegmentoSistema) {
     const container = (event.currentTarget as SVGElement).closest('.donut-container') as HTMLElement | null;
@@ -352,16 +512,6 @@ export class ResumoPanelComponent implements OnInit {
     this.donutTooltip.set(null);
   }
 
-  aoPassarMouseSegmentoContabilidade(event: MouseEvent, seg: SegmentoContabilidade) {
-    const container = (event.currentTarget as SVGElement).closest('.donut-contabilidade-container') as HTMLElement | null;
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    this.donutContabilidadeTooltip.set({ seg, x: event.clientX - rect.left, y: event.clientY - rect.top });
-  }
-
-  aoSairMouseSegmentoContabilidade() {
-    this.donutContabilidadeTooltip.set(null);
-  }
 
   rotuloDiasCertificado(dias: number): string {
     if (dias < 0) {
