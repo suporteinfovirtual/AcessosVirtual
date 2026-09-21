@@ -38,7 +38,7 @@
         tipo="categoria"
         tamanho="filtro"
         textoVazio="Todas as categorias"
-        [permiteCriar]="false"
+        [selecionaAoCriar]="false"
         [valor]="categoriaFiltro()"
         (valorChange)="categoriaFiltro.set($event ?? null)"
         [itens]="categorias()"

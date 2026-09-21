@@ -47,9 +47,7 @@ export interface ItemLista {
         <span class="block truncate" [class.text-zinc-500]="valor() === undefined">{{ rotuloSelecionado() }}</span>
       </button>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
-      @if (permiteCriar()) {
-        <app-cadastro-rapido [tipo]="tipo()" (criado)="aoCriar($event)"></app-cadastro-rapido>
-      }
+      <app-cadastro-rapido [tipo]="tipo()" (criado)="aoCriar($event)"></app-cadastro-rapido>
     </div>
 
     <!-- marca onde fica o (0,0) do "fixed" aqui dentro: modais com transform/backdrop-filter
@@ -151,9 +149,10 @@ export class SelectCadastroComponent {
   textoVazio = input('');
   placeholder = input('Selecione…');
   tamanho = input<'md' | 'sm' | 'filtro'>('md');
-  // no filtro da barra o "+" fica de fora: criar por ali selecionaria na hora um item novo
-  // (e ainda sem clientes), deixando a lista vazia como se fosse bug
-  permiteCriar = input(true);
+  // num formulário, criar já escolhe o item — é o que se quer. Num filtro, não: passaria a
+  // filtrar por uma categoria recém-criada, ainda sem nenhum cliente, e a lista ficaria
+  // vazia como se fosse bug.
+  selecionaAoCriar = input(true);
   // renomeou ou excluiu algo: quem usa pode recarregar o que mostra esses nomes
   alterado = output<void>();
 
@@ -173,16 +172,15 @@ export class SelectCadastroComponent {
     return this.itens().find((i) => i.id === valor)?.nome ?? this.textoVazio();
   });
 
+  // pr-14 deixa o espaço à direita pro chevron e pro "+"
   classeCampo = computed(() => {
-    // espaço à direita pro chevron e, quando existe, pro "+"
-    const direita = this.permiteCriar() ? 'pr-14' : 'pr-9';
     if (this.tamanho() === 'sm') {
-      return `campo-select w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 ${direita} text-left text-sm text-zinc-100 outline-none focus:border-accent`;
+      return 'campo-select w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 pl-2.5 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent';
     }
     if (this.tamanho() === 'filtro') {
-      return `campo-select w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-3 ${direita} text-left text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft`;
+      return 'campo-select w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pl-3 pr-14 text-left text-sm text-zinc-300 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft';
     }
-    return `campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 ${direita} text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft`;
+    return 'campo-select w-full rounded-lg border border-zinc-700 bg-zinc-950 py-2 pl-3 pr-14 text-left text-sm text-zinc-100 outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft';
   });
 
   // o realce fica na linha, não no botão: senão ele pararia antes da coluna do lápis
@@ -227,9 +225,11 @@ export class SelectCadastroComponent {
     this.cancelarEdicao();
   };
 
+  // sem `alterado` aqui: item recém-criado ainda não está em nenhum cliente, então não há
+  // nome desatualizado nos cartões pra recarregar
   aoCriar(item: ItemCadastrado) {
     this.itens.update((lista) => incluirOrdenado(lista, item));
-    this.valor.set(item.id);
+    if (this.selecionaAoCriar()) this.valor.set(item.id);
   }
 
   // --- renomear ---
