@@ -25,6 +25,10 @@
     aria-hidden="true"
     tabindex="-1"
   >
+    <!-- WebM/VP9 primeiro: o navegador usa o primeiro formato que reconhece, e o VP9
+         segura degradê escuro muito melhor que H.264 no mesmo tamanho de arquivo.
+         O MP4 fica para o Safari, que não toca VP9. -->
+    <source src="fundo-painel.webm" type="video/webm" />
     <source src="fundo-painel.mp4" type="video/mp4" />
   </video>
   <app-root></app-root>
