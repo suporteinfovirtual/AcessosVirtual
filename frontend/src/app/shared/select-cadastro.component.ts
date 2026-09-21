@@ -69,29 +69,46 @@ export interface ItemLista {
           @for (item of itens(); track item.id) {
             <li [class]="classeLinha(valor() === item.id && idEmEdicao() !== item.id)">
               @if (idEmEdicao() === item.id) {
-                <input
-                  #campoNome
-                  [value]="nomeEdicao()"
-                  (input)="nomeEdicao.set(campoNome.value)"
-                  (keydown.enter)="$event.preventDefault(); salvarEdicao(item)"
-                  (keydown.escape)="$event.preventDefault(); cancelarEdicao()"
-                  class="mx-1 min-w-0 flex-1 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-zinc-100 outline-none focus:border-accent"
-                />
-                <button
-                  type="button"
-                  class="shrink-0 px-1.5 py-1.5 text-xs font-medium text-accent hover:text-accent-hover disabled:opacity-50"
-                  [disabled]="!nomeEdicao().trim() || salvandoEdicao()"
-                  (click)="salvarEdicao(item)"
-                >
-                  Salvar
-                </button>
-                <button
-                  type="button"
-                  class="shrink-0 pr-2 text-xs font-medium text-zinc-500 hover:text-zinc-300"
-                  (click)="cancelarEdicao()"
-                >
-                  Cancelar
-                </button>
+                <div class="flex w-full flex-col gap-1 px-1 py-1">
+                  <input
+                    #campoNome
+                    [value]="nomeEdicao()"
+                    (input)="nomeEdicao.set(campoNome.value)"
+                    (keydown.enter)="$event.preventDefault(); salvarEdicao(item)"
+                    (keydown.escape)="$event.preventDefault(); cancelarEdicao()"
+                    placeholder="Nome"
+                    class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent"
+                  />
+                  @if (tipo() === 'contabilidade') {
+                    <input
+                      #campoEmail
+                      type="email"
+                      [value]="emailEdicao()"
+                      (input)="emailEdicao.set(campoEmail.value)"
+                      (keydown.enter)="$event.preventDefault(); salvarEdicao(item)"
+                      (keydown.escape)="$event.preventDefault(); cancelarEdicao()"
+                      placeholder="E-mail"
+                      class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent"
+                    />
+                  }
+                  <div class="flex justify-end gap-3 pt-0.5">
+                    <button
+                      type="button"
+                      class="text-xs font-medium text-zinc-500 hover:text-zinc-300"
+                      (click)="cancelarEdicao()"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      class="text-xs font-medium text-accent hover:text-accent-hover disabled:opacity-50"
+                      [disabled]="!nomeEdicao().trim() || salvandoEdicao()"
+                      (click)="salvarEdicao(item)"
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                </div>
               } @else {
                 <button
                   type="button"
@@ -161,6 +178,7 @@ export class SelectCadastroComponent {
   menu = signal<{ x: number; y: number; item: ItemLista } | null>(null);
   idEmEdicao = signal<number | null>(null);
   nomeEdicao = signal('');
+  emailEdicao = signal('');
   salvandoEdicao = signal(false);
 
   private campoEdicao = viewChild<ElementRef<HTMLInputElement>>('campoNome');
@@ -238,19 +256,22 @@ export class SelectCadastroComponent {
     if (!item.id) return;
     this.menu.set(null);
     this.nomeEdicao.set(item.nome);
+    this.emailEdicao.set(item.email ?? '');
     this.idEmEdicao.set(item.id);
   }
 
   cancelarEdicao() {
     this.idEmEdicao.set(null);
     this.nomeEdicao.set('');
+    this.emailEdicao.set('');
     this.salvandoEdicao.set(false);
   }
 
   async salvarEdicao(item: ItemLista) {
     const nome = this.nomeEdicao().trim();
+    const email = this.emailEdicao().trim() || null;
     if (!item.id || !nome || this.salvandoEdicao()) return;
-    if (nome === item.nome) {
+    if (nome === item.nome && (this.tipo() !== 'contabilidade' || email === (item.email ?? null))) {
       this.cancelarEdicao();
       return;
     }
@@ -260,18 +281,20 @@ export class SelectCadastroComponent {
     try {
       await firstValueFrom(
         this.tipo() === 'contabilidade'
-          ? // o PUT regrava a linha inteira: sem mandar o e-mail atual junto ele seria apagado
-            this.contabilidadesService.atualizar(id, { nome, email: item.email ?? null })
+          ? // o PUT regrava a linha inteira, então o e-mail vai junto sempre: sem ele a rota
+            // apagaria o que já estava gravado
+            this.contabilidadesService.atualizar(id, { nome, email })
           : this.categoriasService.atualizar(id, { nome })
       );
       // a lista vem ordenada da API; renomear pode mudar o lugar do item
-      this.itens.update((lista) => incluirOrdenado(lista.filter((i) => i.id !== id), { ...item, nome }));
+      const atualizado = this.tipo() === 'contabilidade' ? { ...item, nome, email } : { ...item, nome };
+      this.itens.update((lista) => incluirOrdenado(lista.filter((i) => i.id !== id), atualizado));
       this.cancelarEdicao();
-      this.toast.sucesso(this.tipo() === 'contabilidade' ? 'Contabilidade renomeada.' : 'Categoria renomeada.');
+      this.toast.sucesso(this.tipo() === 'contabilidade' ? 'Contabilidade salva.' : 'Categoria salva.');
       this.alterado.emit();
     } catch (e) {
       // ex.: 409 "Já existe uma categoria com esse nome"
-      this.toast.erro((e as { error?: { erro?: string } })?.error?.erro || 'Não foi possível renomear.');
+      this.toast.erro((e as { error?: { erro?: string } })?.error?.erro || 'Não foi possível salvar.');
       this.salvandoEdicao.set(false);
     }
   }

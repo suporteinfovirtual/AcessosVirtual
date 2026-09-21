@@ -45,14 +45,6 @@
         (itensChange)="categorias.set($event)"
         (alterado)="aoRenomearOuExcluirCategoria()"
       ></app-select-cadastro>
-      <button
-        type="button"
-        class="whitespace-nowrap rounded-lg border border-zinc-800 px-3 py-2.5 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-        (click)="abrirCategorias()"
-        title="Gerenciar categorias"
-      >
-        Categorias
-      </button>
       @if (usaListaDeLicencas()) {
         <button
           type="button"
@@ -261,13 +253,6 @@
     (fechar)="licencasModalAberto.set(false)"
     (alterado)="aoAlterarLicencas()"
   ></app-licencas-modal>
-}
-
-@if (categoriasModalAberto()) {
-  <app-categorias-modal
-    (fechar)="categoriasModalAberto.set(false)"
-    (alterado)="aoAlterarCategorias()"
-  ></app-categorias-modal>
 }
 
 @if (relatorioModalAberto()) {

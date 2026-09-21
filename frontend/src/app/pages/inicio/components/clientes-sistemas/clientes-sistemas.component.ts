@@ -8,7 +8,6 @@ import { CategoriasService } from '../../../../core/categorias.service';
 import { ClienteSistemaModalComponent } from '../cliente-sistema-modal/cliente-sistema-modal.component';
 import { ClienteModalComponent } from '../cliente-modal/cliente-modal.component';
 import { LicencasModalComponent } from '../licencas-modal/licencas-modal.component';
-import { CategoriasModalComponent } from '../categorias-modal/categorias-modal.component';
 import { SelectCadastroComponent } from '../../../../shared/select-cadastro.component';
 import { RelatorioLucroModalComponent } from '../relatorio-lucro-modal/relatorio-lucro-modal.component';
 import { ToastService } from '../../../../shared/toast.service';
@@ -33,7 +32,6 @@ const SISTEMAS_COM_LISTA_DE_LICENCAS: Sistema[] = ['uniplus', 'uniplus_web'];
     ClienteSistemaModalComponent,
     ClienteModalComponent,
     LicencasModalComponent,
-    CategoriasModalComponent,
     RelatorioLucroModalComponent,
     SelectCadastroComponent,
     ViewModeToggleComponent,
@@ -69,7 +67,6 @@ export class ClientesSistemasComponent implements OnInit {
   clienteUnificadoEmEdicao = signal<Cliente | null>(null);
 
   licencasModalAberto = signal(false);
-  categoriasModalAberto = signal(false);
   relatorioModalAberto = signal(false);
 
   tipoUnificado = computed<TipoAcesso | null>(() => TIPO_POR_SISTEMA_UNIFICADO[this.sistemaAtivo()] ?? null);
@@ -177,17 +174,6 @@ export class ClientesSistemasComponent implements OnInit {
 
   abrirLicencas() {
     this.licencasModalAberto.set(true);
-  }
-
-  abrirCategorias() {
-    this.categoriasModalAberto.set(true);
-  }
-
-  async aoAlterarCategorias() {
-    const categorias = await firstValueFrom(this.categoriasService.listar());
-    this.categorias.set(categorias);
-    await this.carregar();
-    this.toast.sucesso('Categorias atualizadas.');
   }
 
   // renomear/excluir direto no select do filtro: ele já atualiza a própria lista e já

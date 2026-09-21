@@ -34,8 +34,6 @@ import { SkeletonComponent } from '../../shared/skeleton.component';
 import { LinkModalComponent } from './components/link-modal/link-modal.component';
 import { ClienteModalComponent } from './components/cliente-modal/cliente-modal.component';
 import { InternosPanelComponent } from './components/internos-panel/internos-panel.component';
-import { CategoriasModalComponent } from './components/categorias-modal/categorias-modal.component';
-import { ContabilidadesModalComponent } from './components/contabilidades-modal/contabilidades-modal.component';
 import { ManuaisPanelComponent } from './components/manuais-panel/manuais-panel.component';
 import { WikiPanelComponent } from './components/wiki-panel/wiki-panel.component';
 import { ArquivosPanelComponent } from './components/arquivos-panel/arquivos-panel.component';
@@ -66,8 +64,6 @@ const TIPO_POR_SISTEMA_UNIFICADO: Partial<Record<Sistema, TipoAcesso>> = {
     LinkModalComponent,
     ClienteModalComponent,
     InternosPanelComponent,
-    CategoriasModalComponent,
-    ContabilidadesModalComponent,
     ManuaisPanelComponent,
     WikiPanelComponent,
     ArquivosPanelComponent,
@@ -158,8 +154,6 @@ export class InicioComponent implements OnInit {
 
   clienteModalAberto = signal(false);
   clienteEmEdicao = signal<Cliente | null>(null);
-  categoriasModalAberto = signal(false);
-  contabilidadesModalAberto = signal(false);
 
   // --- seleção múltipla / edição em lote (abas de Acessos) ---
   readonly enquadramentosFiscais = ENQUADRAMENTOS_FISCAIS;
@@ -324,29 +318,9 @@ export class InicioComponent implements OnInit {
     this.categorias.set(categorias);
   }
 
-  abrirCategorias() {
-    this.categoriasModalAberto.set(true);
-  }
-
-  async aoAlterarCategorias() {
-    await this.carregarCategorias();
-    await this.carregarClientes();
-    this.toast.sucesso('Categorias atualizadas.');
-  }
-
   async carregarContabilidades() {
     const contabilidades = await firstValueFrom(this.contabilidadesService.listar());
     this.contabilidades.set(contabilidades);
-  }
-
-  abrirContabilidades() {
-    this.contabilidadesModalAberto.set(true);
-  }
-
-  async aoAlterarContabilidades() {
-    await this.carregarContabilidades();
-    await this.carregarClientes();
-    this.toast.sucesso('Contabilidades atualizadas.');
   }
 
   // renomear/excluir direto no select do filtro: ele já atualiza a própria lista e já
