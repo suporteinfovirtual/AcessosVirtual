@@ -61,53 +61,99 @@
         </div>
       </div>
 
-      <!-- Novos clientes por dia. Não é o total acumulado: quase toda a base entrou junta
-           na carga inicial, então acumulado seria uma reta e a variação % seria artefato. -->
+      <!-- Novos clientes acumulados no período (começa do zero). Não é o total da base:
+           quase toda a base entrou junta na carga inicial, então a linha seria uma reta. -->
       <div class="relative flex min-h-56 flex-col justify-end">
         <p class="absolute right-0 top-0 text-[10px] text-zinc-500">Novos clientes · últimos 30 dias</p>
         @if (graficoNovosClientes().total === 0) {
           <p class="pb-10 text-sm text-zinc-600">Nenhum cliente novo nos últimos 30 dias.</p>
         } @else {
-          <svg
-            class="w-full overflow-visible"
-            [appGraficoAnimado]="graficoNovosClientes().linha"
-            [attr.viewBox]="'0 0 620 150'"
-            preserveAspectRatio="none"
-            height="150"
-            role="img"
-            [attr.aria-label]="'Novos clientes por dia nos últimos 30 dias, pico de ' + graficoNovosClientes().pico"
+          <div
+            class="relative cursor-crosshair"
+            [appGraficoAnimado]="graficoNovosClientes().pontos"
+            [larguraViewBox]="graficoLargura"
+            [alturaViewBox]="graficoAltura"
+            (mousemove)="aoPassarMouseGrafico($event)"
+            (mouseleave)="aoSairMouseGrafico()"
           >
-            <defs>
-              <linearGradient id="areaNovosClientes" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="#ff7a1a" stop-opacity=".3" />
-                <stop offset="1" stop-color="#ff7a1a" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <line x1="0" y1="25" x2="620" y2="25" class="stroke-white/[0.07]" stroke-width="1" />
-            <line x1="0" y1="75" x2="620" y2="75" class="stroke-white/[0.07]" stroke-width="1" />
-            <line x1="0" y1="125" x2="620" y2="125" class="stroke-white/[0.07]" stroke-width="1" />
-            <path class="grafico-area" [attr.d]="graficoNovosClientes().area" fill="url(#areaNovosClientes)" />
-            <path
-              class="grafico-linha"
-              [attr.d]="graficoNovosClientes().linha"
-              fill="none"
-              stroke="#ffad63"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              vector-effect="non-scaling-stroke"
-            />
-            <circle
-              class="grafico-ponta"
-              [attr.cx]="graficoNovosClientes().pontoFinalX"
-              [attr.cy]="graficoNovosClientes().pontoFinalY"
-              r="4"
-              fill="#ffad63"
-              stroke="#18181b"
-              stroke-width="3"
-              vector-effect="non-scaling-stroke"
-            />
-          </svg>
+            <svg
+              class="block w-full overflow-visible"
+              [attr.viewBox]="'0 0 ' + graficoLargura + ' ' + graficoAltura"
+              preserveAspectRatio="none"
+              [attr.height]="graficoAltura"
+              role="img"
+              [attr.aria-label]="graficoNovosClientes().total + ' novos clientes acumulados nos últimos 30 dias'"
+            >
+              <defs>
+                <linearGradient id="areaNovosClientes" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ff7a1a" stop-opacity=".3" />
+                  <stop offset="1" stop-color="#ff7a1a" stop-opacity="0" />
+                </linearGradient>
+                <!-- a diretiva anima a largura desse rect pra revelar o gráfico da esquerda
+                     pra direita; a largura cheia aqui é o fallback sem JavaScript -->
+                <clipPath id="revelarNovosClientes">
+                  <rect class="grafico-revelar" x="-10" y="-20" [attr.width]="graficoLargura" [attr.height]="graficoAltura + 40" />
+                </clipPath>
+              </defs>
+              <line x1="0" y1="25" x2="620" y2="25" class="stroke-white/[0.07]" stroke-width="1" />
+              <line x1="0" y1="75" x2="620" y2="75" class="stroke-white/[0.07]" stroke-width="1" />
+              <line x1="0" y1="125" x2="620" y2="125" class="stroke-white/[0.07]" stroke-width="1" />
+              <g clip-path="url(#revelarNovosClientes)">
+                <path [attr.d]="graficoNovosClientes().area" fill="url(#areaNovosClientes)" />
+                <path
+                  [attr.d]="graficoNovosClientes().linha"
+                  fill="none"
+                  stroke="#ffad63"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  vector-effect="non-scaling-stroke"
+                />
+              </g>
+              @if (diaEmFoco(); as dia) {
+                <line
+                  [attr.x1]="dia.x"
+                  [attr.x2]="dia.x"
+                  y1="0"
+                  [attr.y2]="graficoAltura"
+                  class="stroke-white/20"
+                  stroke-width="1"
+                  stroke-dasharray="3 3"
+                  vector-effect="non-scaling-stroke"
+                />
+              }
+            </svg>
+
+            <!-- seta que sobe pela ponta da linha enquanto o gráfico se desenha -->
+            <span class="grafico-seta pointer-events-none absolute left-0 top-0 text-[#ffad63] opacity-0 drop-shadow-[0_0_6px_rgba(255,122,26,0.8)]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="M15 8 3 14l2.5-6L3 2Z" /></svg>
+            </span>
+
+            @if (diaEmFoco(); as dia) {
+              <span
+                class="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-900 bg-[#ffad63]"
+                [style.left.%]="(dia.x / graficoLargura) * 100"
+                [style.top.px]="dia.y"
+              ></span>
+              <div
+                class="pointer-events-none absolute z-10 w-max -translate-y-full rounded-lg border border-white/10 bg-zinc-900/95 px-3 py-2 text-xs shadow-lg shadow-black/40 backdrop-blur"
+                [class.-translate-x-1/2]="dia.x > graficoLargura * 0.15 && dia.x < graficoLargura * 0.85"
+                [class.-translate-x-full]="dia.x >= graficoLargura * 0.85"
+                [style.left.%]="(dia.x / graficoLargura) * 100"
+                [style.top.px]="dia.y - 12"
+              >
+                <p class="text-zinc-400">{{ dia.dataPorExtenso }}</p>
+                <p class="mt-0.5 font-semibold" [class.text-emerald-400]="dia.novos > 0" [class.text-zinc-500]="dia.novos === 0">
+                  @if (dia.novos === 0) {
+                    Nenhum cliente novo
+                  } @else {
+                    +{{ dia.novos }} {{ dia.novos === 1 ? 'novo cliente' : 'novos clientes' }}
+                  }
+                </p>
+                <p class="mt-0.5 text-zinc-500">{{ dia.acumulado }} no período até aqui</p>
+              </div>
+            }
+          </div>
           <div class="mt-2 flex justify-between text-[9px] text-zinc-600">
             @for (rotulo of graficoNovosClientes().rotulos; track rotulo.x) {
               <span>{{ rotulo.texto }}</span>

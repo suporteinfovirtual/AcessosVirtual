@@ -64,13 +64,19 @@ interface SegmentoContabilidade {
   dashoffset: number;
 }
 
+interface DiaGrafico {
+  x: number;
+  y: number;
+  dataPorExtenso: string;
+  novos: number;
+  acumulado: number;
+}
+
 interface GraficoNovosClientes {
   linha: string;
   area: string;
-  pontoFinalX: number;
-  pontoFinalY: number;
+  pontos: DiaGrafico[];
   total: number;
-  pico: number;
   rotulos: { texto: string; x: number }[];
 }
 
@@ -113,12 +119,15 @@ const CORES_SISTEMA: Record<Sistema, string> = {
 const CORES_CONTABILIDADE = ['#ff7a1a', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46'];
 const COR_NAO_INFORMADO = '#3f3f46';
 
-// O gráfico do topo mostra NOVOS clientes por dia, não o total acumulado: 311 dos 321
-// clientes entraram juntos na carga inicial, então uma linha acumulada seria reta e um
-// "% vs mês anterior" daria -96%, que é artefato da importação e não movimento real.
+// O gráfico do topo acumula os NOVOS clientes do período, começando do zero no primeiro
+// dia — não o total da base: 311 dos 321 clientes entraram juntos na carga inicial, então
+// o total da base daria uma reta quase sem variação, e um "% vs mês anterior" daria -96%,
+// que é artefato da importação e não movimento real.
 const DIAS_GRAFICO = 30;
 const GRAFICO_LARGURA = 620;
 const GRAFICO_ALTURA = 150;
+// respiro no topo pra seta não encostar na borda quando a linha chega no máximo
+const GRAFICO_MARGEM_TOPO = 14;
 
 const MESES_LONGOS = [
   'janeiro',
@@ -395,8 +404,11 @@ export class ResumoPanelComponent implements OnInit {
     return `${hoje.getDate()} de ${MESES_LONGOS[hoje.getMonth()]} de ${hoje.getFullYear()}`;
   });
 
-  // Novos clientes por dia nos últimos 30 dias. A escala do eixo Y vai de 0 até o pico do
-  // período, pra um dia de 3 cadastros não parecer um pico enorme só por ser o maior.
+  readonly graficoLargura = GRAFICO_LARGURA;
+  readonly graficoAltura = GRAFICO_ALTURA;
+
+  // Novos clientes acumulados nos últimos 30 dias: a linha só sobe, um degrau a cada dia
+  // com cadastro. A escala do eixo Y vai de 0 até o total do período.
   graficoNovosClientes = computed<GraficoNovosClientes>(() => {
     const hoje = new Date();
     const dias: { iso: string; data: Date; total: number }[] = [];
@@ -413,14 +425,21 @@ export class ResumoPanelComponent implements OnInit {
       if (indice !== undefined) dias[indice].total++;
     }
 
-    const pico = Math.max(1, ...dias.map((dia) => dia.total));
-    const pontos = dias.map((dia, indice) => ({
-      x: (indice / (DIAS_GRAFICO - 1)) * GRAFICO_LARGURA,
-      y: GRAFICO_ALTURA - (dia.total / pico) * GRAFICO_ALTURA,
-    }));
+    const total = dias.reduce((soma, dia) => soma + dia.total, 0);
+    const escala = Math.max(1, total);
+    let acumulado = 0;
+    const pontos: DiaGrafico[] = dias.map((dia, indice) => {
+      acumulado += dia.total;
+      return {
+        x: (indice / (DIAS_GRAFICO - 1)) * GRAFICO_LARGURA,
+        y: GRAFICO_ALTURA - (acumulado / escala) * (GRAFICO_ALTURA - GRAFICO_MARGEM_TOPO),
+        dataPorExtenso: `${dia.data.getDate()} de ${MESES_LONGOS[dia.data.getMonth()]}`,
+        novos: dia.total,
+        acumulado,
+      };
+    });
 
     const linha = pontos.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const ultimo = pontos[pontos.length - 1];
 
     const rotulos = [0, 10, 20, DIAS_GRAFICO - 1].map((indice) => ({
       texto: `${dias[indice].data.getDate()} ${MESES_CURTOS[dias[indice].data.getMonth()]}`,
@@ -430,15 +449,28 @@ export class ResumoPanelComponent implements OnInit {
     return {
       linha,
       area: `${linha} L${GRAFICO_LARGURA},${GRAFICO_ALTURA} L0,${GRAFICO_ALTURA} Z`,
-      pontoFinalX: ultimo.x,
-      pontoFinalY: ultimo.y,
-      total: dias.reduce((soma, dia) => soma + dia.total, 0),
-      pico,
+      pontos,
+      total,
       rotulos,
     };
   });
 
   novosClientes30Dias = computed(() => this.graficoNovosClientes().total);
+
+  // dia sob o mouse no gráfico do topo; o tooltip mostra a data e quantos entraram
+  diaEmFoco = signal<DiaGrafico | null>(null);
+
+  aoPassarMouseGrafico(event: MouseEvent) {
+    const alvo = event.currentTarget as HTMLElement;
+    const rect = alvo.getBoundingClientRect();
+    const fracao = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const pontos = this.graficoNovosClientes().pontos;
+    this.diaEmFoco.set(pontos[Math.round(fracao * (pontos.length - 1))]);
+  }
+
+  aoSairMouseGrafico() {
+    this.diaEmFoco.set(null);
+  }
 
   // --- lista "Acompanhamento operacional" ---
 
