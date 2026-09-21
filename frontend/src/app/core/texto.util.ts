@@ -2,6 +2,16 @@ export function somenteDigitos(valor: string): string {
   return valor.replace(/\D/g, '');
 }
 
+// tira acentos e caixa pra comparar o que foi digitado com o que está cadastrado:
+// os nomes vêm em CAIXA ALTA e com acento, e ninguém digita acento pra filtrar
+export function normalizarBusca(valor: string): string {
+  return valor
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 // formata progressivamente enquanto o usuário digita: (47) 9 3333-6633
 export function formatarTelefone(valor: string): string {
   const digitos = somenteDigitos(valor).slice(0, 11);

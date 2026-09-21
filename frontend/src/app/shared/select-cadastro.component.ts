@@ -15,6 +15,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { CategoriasService } from '../core/categorias.service';
 import { ContabilidadesService } from '../core/contabilidades.service';
+import { normalizarBusca } from '../core/texto.util';
 import { ConfirmService } from './confirm.service';
 import { ToastService } from './toast.service';
 import { CadastroRapidoComponent, ItemCadastrado, incluirOrdenado } from './cadastro-rapido.component';
@@ -27,11 +28,12 @@ export interface ItemLista {
 }
 
 // Select de contabilidade/categoria feito à mão (o <select> nativo não deixa usar o botão
-// direito nas opções): "+" dentro do campo cadastra um item novo e já seleciona; botão
-// direito numa opção abre o menu com "Editar" (renomeia ali mesmo, sem sair da lista) e
-// "Excluir". A lista (`itens`) e o valor são two-way, então quem usa recebe na hora o item
-// criado/renomeado/excluído, e `(alterado)` avisa quem precisa recarregar o que mostra
-// esses nomes (os cartões de cliente trazem categoria_nome do servidor).
+// direito nas opções nem filtrar por pedaço do nome). Ao abrir, o foco já vai pro campo de
+// filtro: digitar reduz a lista e Enter escolhe a primeira. O "+" dentro do campo cadastra
+// um item novo; botão direito numa opção abre o menu com "Editar" (renomeia ali mesmo, sem
+// sair da lista) e "Excluir". A lista (`itens`) e o valor são two-way, então quem usa
+// recebe na hora o item criado/renomeado/excluído, e `(alterado)` avisa quem precisa
+// recarregar o que mostra esses nomes (os cartões trazem categoria_nome do servidor).
 @Component({
   selector: 'app-select-cadastro',
   imports: [CadastroRapidoComponent],
@@ -62,11 +64,28 @@ export interface ItemLista {
         [style.left.px]="posicao().left"
         [style.width.px]="posicao().width"
       >
+        <div class="border-b border-zinc-800 p-1.5">
+          <input
+            #campoBusca
+            [value]="busca()"
+            (input)="busca.set(campoBusca.value)"
+            (keydown.enter)="$event.preventDefault(); escolherPrimeiro()"
+            (keydown.escape)="$event.preventDefault(); fecharTudo()"
+            placeholder="Digite para filtrar…"
+            class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-accent"
+          />
+        </div>
+
         <ul class="max-h-60 overflow-y-auto py-1 text-sm">
-          <li [class]="classeLinha(null)">
-            <button type="button" [class]="classeOpcao(valor() === null)" (click)="escolher(null)">{{ textoVazio() }}</button>
-          </li>
-          @for (item of itens(); track item.id) {
+          @if (!busca()) {
+            <li [class]="classeLinha(null)">
+              <button type="button" [class]="classeOpcao(valor() === null)" (click)="escolher(null)">{{ textoVazio() }}</button>
+            </li>
+          }
+          @if (busca() && itensFiltrados().length === 0) {
+            <li class="px-3 py-2 text-zinc-500">Nenhum resultado</li>
+          }
+          @for (item of itensFiltrados(); track item.id) {
             <li [class]="classeLinha(item)">
               @if (idEmEdicao() === item.id) {
                 <div class="flex w-full flex-col gap-1 px-1 py-1">
@@ -176,6 +195,7 @@ export class SelectCadastroComponent {
   alterado = output<void>();
 
   aberto = signal(false);
+  busca = signal('');
   posicao = signal({ top: 0, left: 0, width: 0 });
   menu = signal<{ x: number; y: number; item: ItemLista } | null>(null);
   idEmEdicao = signal<number | null>(null);
@@ -184,6 +204,15 @@ export class SelectCadastroComponent {
   salvandoEdicao = signal(false);
 
   private campoEdicao = viewChild<ElementRef<HTMLInputElement>>('campoNome');
+  private campoBusca = viewChild<ElementRef<HTMLInputElement>>('campoBusca');
+
+  // filtro por pedaço do nome, sem caixa nem acento: os nomes são longos e nem sempre a
+  // pessoa lembra pelo começo ("indaial" acha "CONTABILIDADE INDAIAL")
+  itensFiltrados = computed(() => {
+    const termo = normalizarBusca(this.busca());
+    if (!termo) return this.itens();
+    return this.itens().filter((item) => normalizarBusca(item.nome).includes(termo));
+  });
 
   rotuloSelecionado = computed(() => {
     const valor = this.valor();
@@ -227,8 +256,8 @@ export class SelectCadastroComponent {
     }
     const r = gatilho.getBoundingClientRect();
     const o = origem.getBoundingClientRect();
-    // abre pra cima se não couber embaixo (a lista tem no máximo 15rem + o respiro da borda)
-    const altura = 250;
+    // abre pra cima se não couber embaixo (15rem de lista + o campo de filtro em cima)
+    const altura = 300;
     const top = r.bottom + altura > window.innerHeight ? Math.max(8, r.top - altura - 4) : r.bottom + 4;
     this.posicao.set({ top: top - o.top, left: r.left - o.left, width: r.width });
     this.aberto.set(true);
@@ -253,13 +282,21 @@ export class SelectCadastroComponent {
 
   fecharTudo = () => {
     this.aberto.set(false);
+    this.busca.set('');
     this.menu.set(null);
     this.cancelarEdicao();
   };
 
+  // Enter no filtro pega a primeira opção da lista: digitar "cone" + Enter já escolhe
+  escolherPrimeiro() {
+    const primeiro = this.itensFiltrados()[0];
+    if (primeiro?.id) this.escolher(primeiro.id);
+  }
+
   // sem `alterado` aqui: item recém-criado ainda não está em nenhum cliente, então não há
   // nome desatualizado nos cartões pra recarregar
   aoCriar(item: ItemCadastrado) {
+    this.busca.set('');
     this.itens.update((lista) => incluirOrdenado(lista, item));
     if (this.selecionaAoCriar()) this.valor.set(item.id);
   }
@@ -352,6 +389,12 @@ export class SelectCadastroComponent {
     effect(() => {
       const campo = this.campoEdicao();
       if (campo) campo.nativeElement.select();
+    });
+
+    // abriu a lista: o foco já vai pro filtro, pra sair digitando direto
+    effect(() => {
+      const campo = this.campoBusca();
+      if (campo) campo.nativeElement.focus();
     });
 
     const aoRolar = (evento: Event) => {
