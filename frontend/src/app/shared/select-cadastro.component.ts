@@ -1,4 +1,17 @@
-import { Component, DestroyRef, ElementRef, HostListener, computed, inject, input, model, output, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CategoriasService } from '../core/categorias.service';
 import { ContabilidadesService } from '../core/contabilidades.service';
@@ -13,12 +26,12 @@ export interface ItemLista {
   email?: string | null;
 }
 
-// Select de contabilidade/categoria feito à mão (o <select> nativo não deixa nem usar o
-// botão direito nas opções nem pôr um botão dentro delas): "+" dentro do campo cadastra um
-// item novo e já seleciona; o lápis em cada opção renomeia ali mesmo; botão direito abre o
-// menu com "Excluir". A lista (`itens`) e o valor são two-way, então quem usa recebe na
-// hora o item criado/renomeado/excluído, e `(alterado)` avisa quem precisa recarregar o que
-// mostra esses nomes (os cartões de cliente trazem categoria_nome do servidor).
+// Select de contabilidade/categoria feito à mão (o <select> nativo não deixa usar o botão
+// direito nas opções): "+" dentro do campo cadastra um item novo e já seleciona; botão
+// direito numa opção abre o menu com "Editar" (renomeia ali mesmo, sem sair da lista) e
+// "Excluir". A lista (`itens`) e o valor são two-way, então quem usa recebe na hora o item
+// criado/renomeado/excluído, e `(alterado)` avisa quem precisa recarregar o que mostra
+// esses nomes (os cartões de cliente trazem categoria_nome do servidor).
 @Component({
   selector: 'app-select-cadastro',
   imports: [CadastroRapidoComponent],
@@ -91,19 +104,11 @@ export interface ItemLista {
                 >
                   {{ item.nome }}
                 </button>
-                <button
-                  type="button"
-                  class="shrink-0 px-2 py-1.5 text-zinc-500 hover:text-zinc-200"
-                  title="Renomear"
-                  (click)="iniciarEdicao(item)"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
-                </button>
               }
             </li>
           }
         </ul>
-        <p class="border-t border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-500">Lápis renomeia · botão direito exclui</p>
+        <p class="border-t border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-500">Botão direito numa opção para editar ou excluir</p>
       </div>
     }
 
@@ -113,6 +118,14 @@ export interface ItemLista {
         [style.top.px]="m.y"
         [style.left.px]="m.x"
       >
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-zinc-200 hover:bg-zinc-800"
+          (click)="iniciarEdicao(m.item)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+          <span class="truncate">Editar "{{ m.item.nome }}"</span>
+        </button>
         <button
           type="button"
           class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-red-400 hover:bg-zinc-800"
@@ -151,6 +164,8 @@ export class SelectCadastroComponent {
   idEmEdicao = signal<number | null>(null);
   nomeEdicao = signal('');
   salvandoEdicao = signal(false);
+
+  private campoEdicao = viewChild<ElementRef<HTMLInputElement>>('campoNome');
 
   rotuloSelecionado = computed(() => {
     const valor = this.valor();
@@ -296,6 +311,13 @@ export class SelectCadastroComponent {
   // a lista é fixed: se a página ou o modal rolar, fecha em vez de ficar descolada do campo.
   // scroll não borbulha, então escuta na fase de captura (ignorando a rolagem da própria lista)
   constructor() {
+    // "Editar" vem do menu de contexto, longe do campo: já deixa o nome selecionado
+    // pra poder digitar por cima na hora
+    effect(() => {
+      const campo = this.campoEdicao();
+      if (campo) campo.nativeElement.select();
+    });
+
     const aoRolar = (evento: Event) => {
       if (!this.aberto() || this.host.nativeElement.contains(evento.target as Node)) return;
       this.fecharTudo();
