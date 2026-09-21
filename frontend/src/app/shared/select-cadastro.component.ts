@@ -108,7 +108,6 @@ export interface ItemLista {
             </li>
           }
         </ul>
-        <p class="border-t border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-500">Botão direito numa opção para editar ou excluir</p>
       </div>
     }
 
@@ -204,8 +203,8 @@ export class SelectCadastroComponent {
     }
     const r = gatilho.getBoundingClientRect();
     const o = origem.getBoundingClientRect();
-    // abre pra cima se não couber embaixo (lista tem no máximo ~15rem + rodapé)
-    const altura = 280;
+    // abre pra cima se não couber embaixo (a lista tem no máximo 15rem + o respiro da borda)
+    const altura = 250;
     const top = r.bottom + altura > window.innerHeight ? Math.max(8, r.top - altura - 4) : r.bottom + 4;
     this.posicao.set({ top: top - o.top, left: r.left - o.left, width: r.width });
     this.aberto.set(true);
