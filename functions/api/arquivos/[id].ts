@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ContextoComId } from '../_lib/env';
 import { download, grandeDemais, naoEncontrado, ok } from '../_lib/http';
+import type { CorpoBinario } from '../_lib/http';
 import { ERRO_ACIMA_DO_LIMITE, LIMITE_UPLOAD_BYTES } from '../_lib/dominio';
 import {
   arquivoObrigatorio,
@@ -13,7 +14,7 @@ import {
 interface Registro {
   nome_arquivo: string;
   tipo: string | null;
-  arquivo: ArrayBuffer | null;
+  arquivo: CorpoBinario | null;
   r2_key: string | null;
 }
 
@@ -50,11 +51,9 @@ export async function onRequestGet({ env, params }: ContextoComId) {
     });
   }
 
-  const bytes = registro.arquivo ?? new ArrayBuffer(0);
-  return download(bytes, {
+  return download(registro.arquivo ?? new ArrayBuffer(0), {
     nome: registro.nome_arquivo,
     tipo: registro.tipo,
-    tamanho: bytes.byteLength,
   });
 }
 

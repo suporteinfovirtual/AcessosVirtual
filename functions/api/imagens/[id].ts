@@ -1,5 +1,6 @@
 import type { ContextoComId } from '../_lib/env';
 import { embutido, naoEncontrado, ok } from '../_lib/http';
+import type { CorpoBinario } from '../_lib/http';
 import { idDaRota } from '../_lib/validacao';
 
 // GET /api/imagens/:id -> mostra uma imagem (print) de um passo do manual
@@ -11,7 +12,7 @@ export async function onRequestGet({ env, params }: ContextoComId) {
     'SELECT imagem, imagem_tipo FROM manual_passo_imagens WHERE id = ?',
   )
     .bind(id)
-    .first<{ imagem: ArrayBuffer | null; imagem_tipo: string | null }>();
+    .first<{ imagem: CorpoBinario | null; imagem_tipo: string | null }>();
 
   if (!registro?.imagem) return naoEncontrado('Imagem não encontrada');
 

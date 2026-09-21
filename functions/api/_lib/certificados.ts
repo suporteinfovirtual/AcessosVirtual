@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ContextoComId } from './env';
 import { download, naoEncontrado, ok } from './http';
+import type { CorpoBinario } from './http';
 import {
   arquivoObrigatorio,
   dataIsoOpcional,
@@ -35,14 +36,13 @@ export function rotasDeCertificado({ tabela, coluna }: Destino) {
         `SELECT nome_arquivo, arquivo FROM ${tabela} WHERE ${coluna} = ?`,
       )
         .bind(id)
-        .first<{ nome_arquivo: string; arquivo: ArrayBuffer }>();
+        .first<{ nome_arquivo: string; arquivo: CorpoBinario }>();
 
       if (!registro) return naoEncontrado('Certificado não encontrado');
 
       return download(registro.arquivo, {
         nome: registro.nome_arquivo,
         tipo: 'application/x-pkcs12',
-        tamanho: registro.arquivo.byteLength,
       });
     },
 

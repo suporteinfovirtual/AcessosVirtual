@@ -38,26 +38,47 @@ function nomeSeguro(nome: string): string {
   return Array.from(nome, (c) => (c === '"' || c === '\r' || c === '\n' ? '_' : c)).join('');
 }
 
+// O D1 devolve BLOB como array comum de números, NÃO como ArrayBuffer — mesmo quando a
+// tipagem da consulta diz ArrayBuffer, porque `.first<T>()` é só um cast. O Response
+// recusa um array desses ("This ReadableStream did not return bytes") e o download sai
+// com 0 bytes. Por isso todo corpo binário passa por aqui antes de virar resposta.
+export type CorpoBinario = ArrayBuffer | ArrayBufferView | number[];
+
+function paraBytes(corpo: CorpoBinario): Uint8Array {
+  if (corpo instanceof ArrayBuffer) return new Uint8Array(corpo);
+  if (ArrayBuffer.isView(corpo)) {
+    return new Uint8Array(corpo.buffer, corpo.byteOffset, corpo.byteLength);
+  }
+  return new Uint8Array(corpo);
+}
+
 // Arquivo que o navegador deve baixar (certificados, anexos, arquivos da aba Ferramentas).
+// O tamanho só é informado pra stream (R2, que sabe o próprio size); pra bytes ele é medido
+// aqui, porque pedir isso a quem chama era justamente o que produzia Content-Length inválido.
 export function download(
-  corpo: ArrayBuffer | ReadableStream | null,
-  opcoes: { nome: string; tipo?: string | null; tamanho: number },
+  corpo: CorpoBinario | ReadableStream | null,
+  opcoes: { nome: string; tipo?: string | null; tamanho?: number },
 ): Response {
-  return new Response(corpo instanceof ArrayBuffer ? new Uint8Array(corpo) : corpo, {
-    headers: {
-      'Content-Type': opcoes.tipo || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${nomeSeguro(opcoes.nome)}"`,
-      'Content-Length': String(opcoes.tamanho),
-    },
-  });
+  const ehStream = corpo === null || corpo instanceof ReadableStream;
+  const corpoFinal = ehStream ? (corpo as ReadableStream | null) : paraBytes(corpo as CorpoBinario);
+  const tamanho = ehStream ? opcoes.tamanho : (corpoFinal as Uint8Array).byteLength;
+
+  const headers: Record<string, string> = {
+    'Content-Type': opcoes.tipo || 'application/octet-stream',
+    'Content-Disposition': `attachment; filename="${nomeSeguro(opcoes.nome)}"`,
+  };
+  if (tamanho !== undefined) headers['Content-Length'] = String(tamanho);
+
+  return new Response(corpoFinal, { headers });
 }
 
 // Conteúdo exibido na própria página (prints dos manuais e da wiki), sem Content-Disposition.
-export function embutido(bytes: ArrayBuffer, tipo: string | null): Response {
-  return new Response(new Uint8Array(bytes), {
+export function embutido(bytes: CorpoBinario, tipo: string | null): Response {
+  const dados = paraBytes(bytes);
+  return new Response(dados, {
     headers: {
       'Content-Type': tipo || 'application/octet-stream',
-      'Content-Length': String(bytes.byteLength),
+      'Content-Length': String(dados.byteLength),
     },
   });
 }
