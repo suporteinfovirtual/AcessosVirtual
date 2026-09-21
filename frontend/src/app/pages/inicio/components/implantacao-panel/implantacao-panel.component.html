@@ -12,7 +12,7 @@
       </button>
       <button
         type="button"
-        class="rounded-lg border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-950 bg-accent hover:bg-accent-hover"
+        class="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-accent-hover"
         (click)="abrirNovo()"
       >
         Nova implantação
@@ -49,7 +49,7 @@
     </div>
   }
 
-  <div class="mt-5 flex items-center justify-between">
+  <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-1">
       <button
         type="button"
@@ -59,7 +59,7 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
       </button>
-      <h3 class="w-44 text-center text-sm font-medium text-zinc-200">{{ rotuloMes() }}</h3>
+      <h3 class="w-48 text-center text-base font-semibold text-zinc-100">{{ rotuloMes() }}</h3>
       <button
         type="button"
         class="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
@@ -94,40 +94,30 @@
     @if (carregando()) {
       <app-skeleton variante="linhas"></app-skeleton>
     } @else {
-      <div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-zinc-800 bg-zinc-800">
+      <!-- gap-px: o fundo do container vira as linhas da grade. Em zinc-900 elas ficam a um
+           tom do fundo das células, desenhando a grade sem competir com o conteúdo -->
+      <div class="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
         @for (nomeDia of nomesDiaSemana; track nomeDia) {
-          <div class="bg-zinc-900 px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          <div class="bg-zinc-900 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-zinc-500">
             {{ nomeDia }}
           </div>
         }
 
         @for (dia of diasDaGrade(); track dia.dataIso) {
-          <button
-            type="button"
-            class="flex min-h-24 flex-col gap-1 bg-zinc-950 p-1.5 text-left align-top transition hover:bg-zinc-900 sm:min-h-28"
-            [class.opacity-40]="!dia.dentroDoMes"
-            (click)="abrirNovo(dia.dataIso)"
-          >
-            <span
-              class="flex h-5 w-5 items-center justify-center rounded-full text-xs"
-              [class.bg-accent]="dia.hoje"
-              [class.text-zinc-950]="dia.hoje"
-              [class.font-semibold]="dia.hoje"
-              [class.text-zinc-400]="!dia.hoje"
-            >
-              {{ dia.dia }}
-            </span>
+          <button type="button" [class]="classeCelula(dia)" (click)="abrirNovo(dia.dataIso)">
+            <span [class]="classeNumeroDia(dia)">{{ dia.dia }}</span>
 
-            <div class="flex flex-col gap-1">
+            <div class="flex w-full min-w-0 flex-col gap-1">
               @for (item of implantacoesNoDia(dia.dataIso); track item.id) {
                 <span
-                  [class]="concluida(item)
-                    ? 'truncate rounded bg-zinc-800 px-1.5 py-0.5 text-[11px] text-zinc-500 line-through hover:bg-zinc-700'
-                    : 'truncate rounded bg-accent-soft px-1.5 py-0.5 text-[11px] text-accent hover:bg-accent/25'"
-                  [title]="item.tecnico_nome ? item.hora + ' · ' + item.cliente_nome + ' · técnico: ' + item.tecnico_nome : item.hora + ' · ' + item.cliente_nome"
+                  [class]="classeChip(item)"
+                  [title]="tituloChip(item)"
                   (click)="$event.stopPropagation(); abrirEdicao(item)"
                 >
-                  {{ item.hora }} · {{ item.cliente_nome }}{{ item.tecnico_nome ? ' · ' + item.tecnico_nome : '' }}
+                  <span class="block text-[10px] leading-tight opacity-70">{{ item.hora }}</span>
+                  <span class="block truncate text-[11px] font-medium leading-tight" [class.line-through]="concluida(item)">
+                    {{ item.cliente_nome }}
+                  </span>
                 </span>
               }
             </div>

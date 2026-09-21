@@ -24,6 +24,7 @@ interface DiaGrade {
   dia: number;
   dentroDoMes: boolean;
   hoje: boolean;
+  fimDeSemana: boolean;
 }
 
 function formatarDataIso(data: Date): string {
@@ -97,7 +98,15 @@ export class ImplantacaoPanelComponent implements OnInit {
     const dias: DiaGrade[] = [];
     const construirDia = (data: Date, dentroDoMes: boolean): DiaGrade => {
       const dataIso = formatarDataIso(data);
-      return { data, dataIso, dia: data.getDate(), dentroDoMes, hoje: dataIso === hojeIso };
+      const diaSemana = data.getDay();
+      return {
+        data,
+        dataIso,
+        dia: data.getDate(),
+        dentroDoMes,
+        hoje: dataIso === hojeIso,
+        fimDeSemana: diaSemana === 0 || diaSemana === 6,
+      };
     };
 
     for (let i = primeiroDiaSemana; i > 0; i--) {
@@ -153,6 +162,35 @@ export class ImplantacaoPanelComponent implements OnInit {
 
   irParaHoje() {
     this.mesExibido.set(this.primeiroDiaDoMesAtual());
+  }
+
+  // A grade é quase toda espaço vazio, então o peso visual fica só no que tem conteúdo:
+  // dias de outro mês recuam pro fundo e o número do dia é discreto — hoje é o único
+  // destaque forte.
+  classeCelula(dia: DiaGrade): string {
+    const base = 'flex min-h-20 flex-col gap-1 p-1.5 text-left align-top transition sm:min-h-24';
+    return dia.dentroDoMes ? `${base} bg-zinc-950 hover:bg-zinc-900` : `${base} bg-zinc-900/30 hover:bg-zinc-900/50`;
+  }
+
+  classeNumeroDia(dia: DiaGrade): string {
+    const base = 'flex h-5 w-5 items-center justify-center rounded-full text-xs';
+    if (dia.hoje) return `${base} bg-accent font-semibold text-zinc-950`;
+    if (!dia.dentroDoMes) return `${base} text-zinc-700`;
+    return dia.fimDeSemana ? `${base} text-zinc-600` : `${base} text-zinc-400`;
+  }
+
+  classeChip(item: Implantacao): string {
+    const base = 'block rounded border-l-2 px-1.5 py-1 text-left transition';
+    return this.concluida(item)
+      ? `${base} border-zinc-600 bg-zinc-800/60 text-zinc-500 hover:bg-zinc-800`
+      : `${base} border-accent bg-accent-soft text-accent hover:bg-accent/25`;
+  }
+
+  // o técnico sai do chip e fica só no tooltip: numa célula de ~100px ele empurrava o nome
+  // do cliente pras reticências, que era o que mais poluía a grade
+  tituloChip(item: Implantacao): string {
+    const inicio = `${item.hora} · ${item.cliente_nome}`;
+    return item.tecnico_nome ? `${inicio} · técnico: ${item.tecnico_nome}` : inicio;
   }
 
   implantacoesNoDia(dataIso: string): Implantacao[] {
