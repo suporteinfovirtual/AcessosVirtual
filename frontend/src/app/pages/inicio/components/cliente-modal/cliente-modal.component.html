@@ -254,9 +254,9 @@
                       />
                     </div>
                   }
-                  @if (tipo.valor === 'acesso_zeta') {
+                  @if (tipo.valor === 'acesso_zeta' || tipo.valor === 'anydesk') {
                     <div class="col-span-2">
-                      <label class="mb-1 block text-xs text-zinc-500">Senha</label>
+                      <label class="mb-1 block text-xs text-zinc-500">{{ tipo.valor === 'anydesk' ? 'Senha AnyDesk (acesso não supervisionado)' : 'Senha' }}</label>
                       <input
                         [(ngModel)]="acessosPorTipo[tipo.valor].senha"
                         [name]="tipo.valor + '_senha'"
