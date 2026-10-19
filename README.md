@@ -24,9 +24,9 @@ O que já está pronto nesta primeira etapa:
 ## Conectar no AnyDesk já com a senha (teste)
 
 O botão **Auto (teste)** na aba AnyDesk abre um link `acessoanydesk:ID?s=...` que o
-navegador entrega a um ajudante instalado no PC do técnico. O ajudante roda
-`AnyDesk.exe ID --with-password` passando a senha cadastrada, e a conexão abre sem precisar
-digitar nada. Para instalar (uma vez por PC, sem precisar de administrador):
+navegador entrega a um ajudante instalado no PC do técnico. O ajudante abre o AnyDesk no ID e,
+quando a janela de senha aparece, digita a senha cadastrada e aperta Enter. Ele não usa o
+`--with-password` do AnyDesk, que na versão 9.7.13 dá crash. Para instalar (uma vez por PC, sem precisar de administrador):
 
 ```
 powershell -ExecutionPolicy Bypass -File scripts\anydesk-autoconectar\instalar.ps1

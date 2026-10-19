@@ -619,7 +619,7 @@ export class InicioComponent implements OnInit {
   }
 
   // (teste) conecta já com a senha: abre o protocolo acessoanydesk:, tratado pelo ajudante
-  // local em scripts/anydesk-autoconectar, que chama "AnyDesk.exe ID --with-password".
+  // local em scripts/anydesk-autoconectar, que abre o AnyDesk no ID e digita a senha quando ela é pedida.
   // Sem o ajudante instalado no PC o navegador simplesmente não faz nada.
   conectarAnydeskAuto(acesso: Acesso) {
     if (!acesso.identificador || !acesso.senha) return;
