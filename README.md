@@ -21,6 +21,20 @@ O que já está pronto nesta primeira etapa:
   discreta pras contas internas da empresa. Falta só colocar o logo real em
   `frontend/public/logo.png`.
 
+## Conectar no AnyDesk já com a senha (teste)
+
+O botão **Auto (teste)** na aba AnyDesk abre um link `acessoanydesk:ID?s=...` que o
+navegador entrega a um ajudante instalado no PC do técnico. O ajudante roda
+`AnyDesk.exe ID --with-password` passando a senha cadastrada, e a conexão abre sem precisar
+digitar nada. Para instalar (uma vez por PC, sem precisar de administrador):
+
+```
+powershell -ExecutionPolicy Bypass -File scripts\anydesk-autoconectar\instalar.ps1
+```
+
+Para remover, rode o mesmo comando com `-Remover`. Só funciona quando o PC do cliente tem
+senha de acesso não supervisionado configurada no AnyDesk.
+
 ## Como colocar isso no ar (tudo gratuito)
 
 1. **Crie uma conta gratuita na Cloudflare**, se ainda não tiver: https://dash.cloudflare.com/sign-up

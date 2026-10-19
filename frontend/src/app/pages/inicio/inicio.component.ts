@@ -618,6 +618,18 @@ export class InicioComponent implements OnInit {
     }
   }
 
+  // (teste) conecta já com a senha: abre o protocolo acessoanydesk:, tratado pelo ajudante
+  // local em scripts/anydesk-autoconectar, que chama "AnyDesk.exe ID --with-password".
+  // Sem o ajudante instalado no PC o navegador simplesmente não faz nada.
+  conectarAnydeskAuto(acesso: Acesso) {
+    if (!acesso.identificador || !acesso.senha) return;
+    const id = acesso.identificador.replace(/\s+/g, '');
+    // base64url só pra senha sobreviver intacta na URL (não é proteção)
+    const bytes = new TextEncoder().encode(acesso.senha);
+    const senha = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    window.location.href = `acessoanydesk:${encodeURIComponent(id)}?s=${senha}`;
+  }
+
   async copiarSenhaDoDia() {
     try {
       await navigator.clipboard.writeText(this.senhaDoDia());
