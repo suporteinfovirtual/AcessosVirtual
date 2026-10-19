@@ -21,9 +21,9 @@ O que já está pronto nesta primeira etapa:
   discreta pras contas internas da empresa. Falta só colocar o logo real em
   `frontend/public/logo.png`.
 
-## Conectar no AnyDesk já com a senha (teste)
+## Conectar no AnyDesk já com a senha
 
-O botão **Auto (teste)** na aba AnyDesk abre um link `acessoanydesk:ID?s=...` que o
+Quando o acesso tem senha cadastrada, o botão **Conectar** do AnyDesk abre um link `acessoanydesk:ID?s=...` que o
 navegador entrega a um ajudante instalado no PC do técnico. O ajudante abre o AnyDesk no ID e,
 quando a janela de senha aparece, digita a senha cadastrada e aperta Enter. Ele não usa o
 `--with-password` do AnyDesk, que na versão 9.7.13 dá crash. Para instalar (uma vez por PC, sem precisar de administrador):
@@ -33,7 +33,8 @@ powershell -ExecutionPolicy Bypass -File scripts\anydesk-autoconectar\instalar.p
 ```
 
 Para remover, rode o mesmo comando com `-Remover`. Só funciona quando o PC do cliente tem
-senha de acesso não supervisionado configurada no AnyDesk.
+senha de acesso não supervisionado configurada no AnyDesk. Em PC sem o ajudante, o Conectar de
+cliente com senha cadastrada não abre nada.
 
 ## Como colocar isso no ar (tudo gratuito)
 

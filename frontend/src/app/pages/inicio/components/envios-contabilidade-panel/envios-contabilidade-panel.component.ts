@@ -13,6 +13,7 @@ import { ToastService } from '../../../../shared/toast.service';
 import { SkeletonComponent } from '../../../../shared/skeleton.component';
 import { EnvioArquivosComponent } from '../../../../features/envio-arquivos/envio-arquivos.component';
 import { aoSincronizar } from '../../../../core/sincronizacao.service';
+import { conectarAnydesk } from '../../../../core/anydesk.util';
 
 interface Envio {
   cliente: Cliente;
@@ -206,21 +207,7 @@ export class EnviosContabilidadePanelComponent implements OnInit {
     return `${base}#${caminho}?${params}`;
   }
 
-  // abre o AnyDesk instalado já direcionado pro ID (protocolo anydesk:) e deixa a senha
-  // no clipboard pronta pra colar — o app nativo não permite preencher a senha via URI
-  async conectarAnydesk(acesso: Acesso) {
-    if (acesso.senha) {
-      try {
-        await navigator.clipboard.writeText(acesso.senha);
-        this.toast.sucesso('Senha copiada — cole na janela do AnyDesk.');
-      } catch {
-        // clipboard indisponível — segue e abre o AnyDesk mesmo assim
-      }
-    }
-    if (acesso.identificador) {
-      window.location.href = `anydesk:${acesso.identificador}`;
-    }
-  }
+  protected readonly conectarAnydesk = conectarAnydesk;
 
   selecionarContabilidade(id: number) {
     this.contabilidadeSelecionadaId.set(id);

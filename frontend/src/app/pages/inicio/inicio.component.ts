@@ -45,6 +45,7 @@ import { ImplantacaoPanelComponent } from './components/implantacao-panel/implan
 import { FaturamentoPanelComponent } from './components/faturamento-panel/faturamento-panel.component';
 import { ResumoPanelComponent } from './components/resumo-panel/resumo-panel.component';
 import { SelectCadastroComponent } from '../../shared/select-cadastro.component';
+import { conectarAnydesk } from '../../core/anydesk.util';
 
 type Aba = TipoAcesso | 'internos' | 'manuais' | 'wiki' | 'arquivos';
 
@@ -602,33 +603,7 @@ export class InicioComponent implements OnInit {
     await firstValueFrom(this.negociacaoService.atualizar(negociacao.id, { ...negociacao, convertido: true }));
   }
 
-  // abre o AnyDesk instalado já direcionado pro ID (protocolo anydesk:) e deixa a senha
-  // no clipboard pronta pra colar — o app nativo não permite preencher a senha via URI
-  async conectarAnydesk(acesso: Acesso) {
-    if (acesso.senha) {
-      try {
-        await navigator.clipboard.writeText(acesso.senha);
-        this.toast.sucesso('Senha copiada — cole na janela do AnyDesk.');
-      } catch {
-        // clipboard indisponível — segue e abre o AnyDesk mesmo assim
-      }
-    }
-    if (acesso.identificador) {
-      window.location.href = `anydesk:${acesso.identificador}`;
-    }
-  }
-
-  // (teste) conecta já com a senha: abre o protocolo acessoanydesk:, tratado pelo ajudante
-  // local em scripts/anydesk-autoconectar, que abre o AnyDesk no ID e digita a senha quando ela é pedida.
-  // Sem o ajudante instalado no PC o navegador simplesmente não faz nada.
-  conectarAnydeskAuto(acesso: Acesso) {
-    if (!acesso.identificador || !acesso.senha) return;
-    const id = acesso.identificador.replace(/\s+/g, '');
-    // base64url só pra senha sobreviver intacta na URL (não é proteção)
-    const bytes = new TextEncoder().encode(acesso.senha);
-    const senha = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    window.location.href = `acessoanydesk:${encodeURIComponent(id)}?s=${senha}`;
-  }
+  protected readonly conectarAnydesk = conectarAnydesk;
 
   async copiarSenhaDoDia() {
     try {
