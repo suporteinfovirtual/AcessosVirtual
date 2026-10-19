@@ -28,6 +28,9 @@ navegador entrega a um ajudante instalado no PC do técnico. O ajudante abre o A
 quando a janela de senha aparece, digita a senha cadastrada e aperta Enter. Ele não usa o
 `--with-password` do AnyDesk, que na versão 9.7.13 dá crash. Para instalar (uma vez por PC, sem precisar de administrador):
 
+copie a pasta `scripts\anydesk-autoconectar` para o PC e dê dois cliques em `instalar.cmd`.
+Ou, pelo terminal:
+
 ```
 powershell -ExecutionPolicy Bypass -File scripts\anydesk-autoconectar\instalar.ps1
 ```
